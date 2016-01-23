@@ -1,2 +1,0 @@
-pytest>=2,<3
-configparser>=3,<4
