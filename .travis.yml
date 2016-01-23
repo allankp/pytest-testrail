@@ -1,4 +1,7 @@
 language: python
 python:
   - "2.7"
-script: make test
+# command to install dependencies
+install: "pip install -r requirements/testing.txt"
+# command to run tests
+script: py.test
