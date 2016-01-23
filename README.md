@@ -1,6 +1,9 @@
 pytest-testrail
 =================
 
+[![Build Status](https://travis-ci.org/allankilpatrick/pytest-testrail.svg?branch=master)](https://travis-ci.org/allankilpatrick/pytest-testrail)
+
+
 This is a pytest plugin for creating testruns based on pytest markers.
 The results of the collected tests will also be updated against the testrun in TestRail.
 
