@@ -1,0 +1,5 @@
+-r base.txt
+
+freezegun==0.3.2
+mock==1.3.0
+pytest-cov==2.2.0

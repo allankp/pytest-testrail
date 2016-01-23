@@ -1,0 +1,1 @@
+-e . # Install dependencies from setup.py

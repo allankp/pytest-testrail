@@ -1,0 +1,12 @@
+setup.cfg
+setup.py
+pytest_testrail/__init__.py
+pytest_testrail/conftest.py
+pytest_testrail/plugin.py
+pytest_testrail/testrail_api.py
+pytest_testrail.egg-info/PKG-INFO
+pytest_testrail.egg-info/SOURCES.txt
+pytest_testrail.egg-info/dependency_links.txt
+pytest_testrail.egg-info/entry_points.txt
+pytest_testrail.egg-info/requires.txt
+pytest_testrail.egg-info/top_level.txt

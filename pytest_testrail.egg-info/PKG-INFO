@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: pytest-testrail
+Version: 0.0.2
+Summary: pytest plugin for creating TestRail runs and adding results
+Home-page: http://github.com/allankilpatrick/pytest-testrail/
+Author: Allan Kilpatrick
+Author-email: allanklp@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
