@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='pytest-testrail',
     description='pytest plugin for creating TestRail runs and adding results',
-    version='0.0.2',
+    version='0.0.3',
     author='Allan Kilpatrick',
     author_email='allanklp@gmail.com',
     url='http://github.com/allankilpatrick/pytest-testrail/',
