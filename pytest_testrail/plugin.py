@@ -92,14 +92,16 @@ class TestRailPlugin(object):
     def pytest_runtest_makereport(self, item, call):
         outcome = yield
         rep = outcome.get_result()
-        testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
+        if item.get_marker(TESTRAIL_PREFIX):
+            testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
 
-        if rep.when == 'call' and testcaseids:
-            self.add_result(clean_test_ids(testcaseids), get_test_outcome(outcome.result.outcome))
+            if rep.when == 'call' and testcaseids:
+                self.add_result(clean_test_ids(testcaseids), get_test_outcome(outcome.result.outcome))
 
     def pytest_sessionfinish(self, session, exitstatus):
         data = {'results': self.results}
-        self.client.send_post(ADD_RESULTS_URL.format(self.testrun_id), data)
+        if data['results']:
+            self.client.send_post(ADD_RESULTS_URL.format(self.testrun_id), data)
 
     # plugin
 

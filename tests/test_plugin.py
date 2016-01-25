@@ -97,13 +97,13 @@ def pytest_runtest_makereport(pytest_test_items, tr_plugin):
 
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
-    tr_plugin.results = []
+    tr_plugin.results = [1, 2]
     tr_plugin.testrun_id = 10
 
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_uri = plugin.ADD_RESULTS_URL.format(10)
-    expected_data = {'results': []}
+    expected_data = {'results': [1, 2]}
     api_client.send_post.assert_called_once_with(expected_uri, expected_data)
 
 
