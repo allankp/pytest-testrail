@@ -13,7 +13,8 @@ setup(
     package_dir={'pytest_testrail': 'pytest_testrail'},
     install_requires=[
         'pytest>=2,<3',
-        'configparser>=3,<4'
+        'configparser>=3,<4',
+        'requests'
     ],
     include_package_data=True,
     entry_points={'pytest11': ['pytest-testrail = pytest_testrail.conftest']},
