@@ -52,7 +52,7 @@ def test_successful_outcome(tr_plugin):
 
 
 def test_clean_test_ids():
-    assert plugin.clean_test_ids(['C1234', 'C12345']) == [1234, 12345]
+    assert list(plugin.clean_test_ids(['C1234', 'C12345'])) == [1234, 12345]
 
 
 def test_get_testrail_keys(pytest_test_items, testdir):
