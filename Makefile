@@ -44,5 +44,5 @@ coverage:
 test: coverage lint
 
 clean:
-	rm -rf .cache .coverage .tox pytests_py27-test.xml pytest_testrail.egg-info fd_pytest_testrail.egg-info
+	rm -rf .cache .coverage .tox pytests_py*-test.xml pytest_testrail.egg-info fd_pytest_testrail.egg-info
 	find . -name '*.pyc' -delete
