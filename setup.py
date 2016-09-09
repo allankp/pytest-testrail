@@ -1,9 +1,12 @@
 from setuptools import setup
 
+long_description = open("README.rst").read()
+
 setup(
     name='pytest-testrail',
     description='pytest plugin for creating TestRail runs and adding results',
-    version='0.0.5',
+    long_description=long_description,
+    version='0.0.6',
     author='Allan Kilpatrick',
     author_email='allanklp@gmail.com',
     url='http://github.com/allankilpatrick/pytest-testrail/',
