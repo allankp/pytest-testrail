@@ -1,11 +1,10 @@
 from setuptools import setup
-import sys
 
 long_description = "pytest plugin for TestRail"
 try:
     long_description = open("README.rst").read()
 except Exception as e:
-    print '{} {}'.format(e, sys.stderr)
+    print e
 
 setup(
     name='pytest-testrail',
