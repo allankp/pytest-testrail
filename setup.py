@@ -1,10 +1,6 @@
 from setuptools import setup
 
-long_description = "pytest plugin for TestRail"
-try:
-    long_description = open("README.rst").read()
-except Exception as e:
-    print e
+long_description = open("README.rst").read()
 
 setup(
     name='pytest-testrail',
