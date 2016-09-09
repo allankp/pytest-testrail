@@ -27,22 +27,21 @@ all help:
 lint:
 	flake8 pytest_testrail | tee pytest_testrail.txt
 
-
 requirements: .requirements.txt
 
 .requirements.txt: requirements/*.txt
 	pip install -r requirements/base.txt --extra-index-url https://localpypi.east.fdbox.net/simple/
 	pip freeze > $@
 
+README.rst: README.md
+	pandoc --from=markdown --to=rst --output=README.rst README.md
 
-quicktest:
+test: coverage lint
 	tox
 
 coverage:
 	tox -e coverage
 
-test: coverage lint
-
 clean:
-	rm -rf .cache .coverage .tox pytests_py*-test.xml pytest_testrail.egg-info fd_pytest_testrail.egg-info
+	rm -rf .cache .coverage .tox pytests_py*-test.xml pytest_testrail.egg-info
 	find . -name '*.pyc' -delete
