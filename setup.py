@@ -5,7 +5,7 @@ long_description = "pytest plugin for TestRail"
 try:
     long_description = open("README.rst").read()
 except Exception as e:
-    print '{} {}'.format(e, file=sys.stderr)
+    print '{} {}'.format(e, sys.stderr)
 
 setup(
     name='pytest-testrail',
