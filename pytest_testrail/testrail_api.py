@@ -11,6 +11,7 @@
 #
 
 import requests
+import simplejson as json
 
 
 class APIClient:
@@ -69,7 +70,7 @@ class APIClient:
                 url,
                 auth=(self.user, self.password),
                 headers=self.headers,
-                data=data
+                data=json.dumps(data)
             )
             return r.json()
         except requests.RequestException as e:
