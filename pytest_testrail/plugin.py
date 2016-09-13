@@ -100,7 +100,8 @@ class TestRailPlugin(object):
             if rep.when == 'call' and testcaseids:
                 self.add_result(
                     clean_test_ids(testcaseids),
-                    get_test_outcome(outcome.result.outcome))
+                    get_test_outcome(outcome.result.outcome)
+                )
 
     def pytest_sessionfinish(self, session, exitstatus):
         data = {'results': self.results}
