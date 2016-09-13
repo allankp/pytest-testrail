@@ -15,6 +15,7 @@ def pytest_addoption(parser):
         action='store_true',
         default=False,
         required=False,
+        help='Do not check for valid SSL certificate on TestRail host'
     )
 
 
