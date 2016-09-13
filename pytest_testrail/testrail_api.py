@@ -34,19 +34,15 @@ class APIClient:
     # uri                 The API method to call including parameters
     #                     (e.g. get_case/1)
     #
-    def send_get(self, uri):
+    def send_get(self, uri, cert_check):
         url = self.__url + uri
-        e = None
-
-        try:
-            r = requests.get(
-                url,
-                auth=(self.user, self.password),
-                headers=self.headers
-            )
-            return r.json()
-        except requests.RequestException as e:
-            return e.response.text()
+        r = requests.get(
+            url,
+            auth=(self.user, self.password),
+            headers=self.headers,
+            verify=cert_check
+        )
+        return r.json()
 
     #
     # Send POST
@@ -61,17 +57,13 @@ class APIClient:
     # data                The data to submit as part of the request (as
     #                     Python dict, strings must be UTF-8 encoded)
     #
-    def send_post(self, uri, data):
+    def send_post(self, uri, data, cert_check):
         url = self.__url + uri
-        e = None
-
-        try:
-            r = requests.post(
-                url,
-                auth=(self.user, self.password),
-                headers=self.headers,
-                data=json.dumps(data)
-            )
-            return r.json()
-        except requests.RequestException as e:
-            return e.response.text()
+        r = requests.post(
+            url,
+            auth=(self.user, self.password),
+            headers=self.headers,
+            data=json.dumps(data),
+            verify=cert_check
+        )
+        return r.json()

@@ -29,7 +29,7 @@ def api_client():
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID)
+    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True)
 
 
 @pytest.fixture
@@ -48,7 +48,8 @@ def test_failed_outcome(tr_plugin):
 
 
 def test_successful_outcome(tr_plugin):
-    assert plugin.get_test_outcome('passed') == plugin.PYTEST_TO_TESTRAIL_STATUS['passed']
+    passed_outcome = plugin.PYTEST_TO_TESTRAIL_STATUS['passed']
+    assert plugin.get_test_outcome('passed') == passed_outcome
 
 
 def test_clean_test_ids():
@@ -104,7 +105,8 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     expected_uri = plugin.ADD_RESULTS_URL.format(10)
     expected_data = {'results': [1, 2]}
-    api_client.send_post.assert_called_once_with(expected_uri, expected_data)
+    check_cert = True
+    api_client.send_post.assert_called_once_with(expected_uri, expected_data, check_cert)
 
 
 def test_create_test_run(api_client, tr_plugin):
@@ -121,4 +123,5 @@ def test_create_test_run(api_client, tr_plugin):
         'include_all': False,
         'case_ids': expected_tr_keys
     }
-    api_client.send_post.assert_called_once_with(expected_uri, expected_data)
+    check_cert = True
+    api_client.send_post.assert_called_once_with(expected_uri, expected_data, check_cert)

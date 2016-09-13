@@ -34,7 +34,7 @@ def get_test_outcome(outcome):
     :param str outcome: pytest reported test outcome value.
     :returns: int relating to test outcome.
     """
-    return PYTEST_TO_TESTRAIL_STATUS[outcome] if outcome == 'failed' else PYTEST_TO_TESTRAIL_STATUS[outcome]
+    return PYTEST_TO_TESTRAIL_STATUS[outcome]
 
 
 def testrun_name():
@@ -67,14 +67,15 @@ def get_testrail_keys(items):
 
 
 class TestRailPlugin(object):
-
-    def __init__(self, client, assign_user_id, project_id, suite_id):
+    def __init__(
+            self, client, assign_user_id, project_id, suite_id, cert_check):
         self.client = client
         self.assign_user_id = assign_user_id
         self.project_id = project_id
         self.suite_id = suite_id
         self.testrun_id = 0
         self.results = []
+        self.cert_check = cert_check
 
     # pytest hooks
 
@@ -97,12 +98,19 @@ class TestRailPlugin(object):
             testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
 
             if rep.when == 'call' and testcaseids:
-                self.add_result(clean_test_ids(testcaseids), get_test_outcome(outcome.result.outcome))
+                self.add_result(
+                    clean_test_ids(testcaseids),
+                    get_test_outcome(outcome.result.outcome)
+                )
 
     def pytest_sessionfinish(self, session, exitstatus):
         data = {'results': self.results}
         if data['results']:
-            self.client.send_post(ADD_RESULTS_URL.format(self.testrun_id), data)
+            self.client.send_post(
+                ADD_RESULTS_URL.format(self.testrun_id),
+                data,
+                self.cert_check
+            )
 
     # plugin
 
@@ -120,7 +128,8 @@ class TestRailPlugin(object):
             }
             self.results.append(data)
 
-    def create_test_run(self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
+    def create_test_run(
+            self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
         """
         Create testrun with ids collected from markers.
 
@@ -134,5 +143,10 @@ class TestRailPlugin(object):
             'case_ids': tr_keys,
         }
 
-        response = self.client.send_post(ADD_TESTRUN_URL.format(project_id), data)
+        response = self.client.send_post(
+            ADD_TESTRUN_URL.format(project_id),
+            data,
+            self.cert_check
+        )
+
         self.testrun_id = response['id']
