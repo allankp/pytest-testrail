@@ -1,7 +1,7 @@
 import configparser
 
-from plugin import TestRailPlugin
-from testrail_api import APIClient
+from .plugin import TestRailPlugin
+from .testrail_api import APIClient
 
 
 def pytest_addoption(parser):
