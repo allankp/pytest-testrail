@@ -15,7 +15,7 @@ setup(
     ],
     package_dir={'pytest_testrail': 'pytest_testrail'},
     install_requires=[
-        'pytest>=2,<3',
+        'pytest>=2',
         'configparser>=3,<4',
         'requests==2.11.1',
         'simplejson'
