@@ -152,5 +152,8 @@ class TestRailPlugin(object):
             data,
             self.cert_check
         )
-
-        self.testrun_id = response['id']
+        for key, _ in response.items():
+            if key == 'error':
+                print('Failed to create testrun: {}'.format(response))
+            else:
+                self.testrun_id = response['id']
