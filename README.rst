@@ -51,5 +51,19 @@ Usage
 This will create a test run in TestRail, add all marked tests to run.
 Once the all tests are finished they will be updated in TestRail.
 
+::
+
+    --tr_name='My Test Run'
+
+Testruns can be named using the above flag, if this is not set a
+generated one will be used. ' Automation Run "timestamp" '
+
+::
+
+    --no-ssl-cert-check
+
+This flag can be used prevent checking for a valid SSL certificate on
+TestRail host.
+
 .. |Build Status| image:: https://travis-ci.org/allankilpatrick/pytest-testrail.svg?branch=master
    :target: https://travis-ci.org/allankilpatrick/pytest-testrail
