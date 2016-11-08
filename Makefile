@@ -43,5 +43,5 @@ coverage:
 	tox -e coverage
 
 clean:
-	rm -rf .cache .coverage .tox pytests_py*-test.xml pytest_testrail.egg-info
+	rm -rf .cache .coverage .tox pytests_py*-test.xml pytest_testrail.egg-info pytest_testrail.txt pytests_coverage.xml
 	find . -name '*.pyc' -delete
