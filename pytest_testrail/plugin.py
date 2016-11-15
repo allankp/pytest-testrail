@@ -68,7 +68,7 @@ def get_testrail_keys(items):
 
 class TestRailPlugin(object):
     def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
+            self, client, assign_user_id, project_id, suite_id, milestone_id, cert_check, tr_name):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -76,6 +76,7 @@ class TestRailPlugin(object):
         self.results = []
         self.suite_id = suite_id
         self.testrun_id = 0
+        self.milestone_id = milestone_id
         self.testrun_name = tr_name
 
     # pytest hooks
@@ -91,6 +92,7 @@ class TestRailPlugin(object):
             self.project_id,
             self.suite_id,
             self.testrun_name,
+            self.milestone_id,
             tr_keys
         )
 
@@ -133,7 +135,7 @@ class TestRailPlugin(object):
             self.results.append(data)
 
     def create_test_run(
-            self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
+            self, assign_user_id, project_id, suite_id, testrun_name, milestone_id, tr_keys):
         """
         Create testrun with ids collected from markers.
 
@@ -144,6 +146,7 @@ class TestRailPlugin(object):
             'name': testrun_name,
             'assignedto_id': assign_user_id,
             'include_all': False,
+            'milestone_id': milestone_id,
             'case_ids': tr_keys,
         }
 
