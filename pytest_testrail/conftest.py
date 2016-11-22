@@ -17,6 +17,13 @@ def pytest_addoption(parser):
         required=False,
         help='Do not check for valid SSL certificate on TestRail host'
     )
+    group.addoption(
+        '--tr_name',
+        action='store',
+        default=None,
+        required=False,
+        help='Name given to testrun, that appears in TestRail'
+    )
 
 
 def pytest_configure(config):
@@ -26,17 +33,19 @@ def pytest_configure(config):
         client.user = cfg_file.get('API', 'email')
         client.password = cfg_file.get('API', 'password')
         ssl_cert_check = True
+        tr_name = config.getoption('--tr_name')
 
-        if config.getoption("--no-ssl-cert-check") is True:
+        if config.getoption('--no-ssl-cert-check') is True:
             ssl_cert_check = False
 
         config.pluginmanager.register(
             TestRailPlugin(
-                client,
-                cfg_file.get('TESTRUN', 'assignedto_id'),
-                cfg_file.get('TESTRUN', 'project_id'),
-                cfg_file.get('TESTRUN', 'suite_id'),
-                ssl_cert_check
+                client=client,
+                assign_user_id=cfg_file.get('TESTRUN', 'assignedto_id'),
+                project_id=cfg_file.get('TESTRUN', 'project_id'),
+                suite_id=cfg_file.get('TESTRUN', 'suite_id'),
+                cert_check=ssl_cert_check,
+                tr_name=tr_name
             )
         )
 

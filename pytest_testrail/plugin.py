@@ -68,25 +68,29 @@ def get_testrail_keys(items):
 
 class TestRailPlugin(object):
     def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check):
-        self.client = client
+            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
         self.assign_user_id = assign_user_id
+        self.cert_check = cert_check
+        self.client = client
         self.project_id = project_id
+        self.results = []
         self.suite_id = suite_id
         self.testrun_id = 0
-        self.results = []
-        self.cert_check = cert_check
+        self.testrun_name = tr_name
 
     # pytest hooks
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         tr_keys = get_testrail_keys(items)
+        if self.testrun_name is None:
+            self.testrun_name = testrun_name()
+
         self.create_test_run(
             self.assign_user_id,
             self.project_id,
             self.suite_id,
-            testrun_name(),
+            self.testrun_name,
             tr_keys
         )
 
@@ -148,5 +152,8 @@ class TestRailPlugin(object):
             data,
             self.cert_check
         )
-
-        self.testrun_id = response['id']
+        for key, _ in response.items():
+            if key == 'error':
+                print('Failed to create testrun: {}'.format(response))
+            else:
+                self.testrun_id = response['id']
