@@ -31,7 +31,7 @@ def pytest_configure(config):
         cfg_file = read_config_file(config.getoption("--testrail"))
         client = APIClient(cfg_file.get('API', 'url'))
         client.user = cfg_file.get('API', 'email')
-        client.password = cfg_file.get('API', 'password')
+        client.password = cfg_file.get('API', 'password', raw=True)
         ssl_cert_check = True
         tr_name = config.getoption('--tr_name')
 
