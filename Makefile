@@ -30,7 +30,7 @@ lint:
 requirements: .requirements.txt
 
 .requirements.txt: requirements/*.txt
-	pip install -r requirements/base.txt --extra-index-url https://localpypi.east.fdbox.net/simple/
+	pip install -r requirements/base.txt
 	pip freeze > $@
 
 README.rst: README.md
