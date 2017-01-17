@@ -1,4 +1,5 @@
 import configparser
+from configparser import NoOptionError
 
 from .plugin import TestRailPlugin
 from .testrail_api import APIClient
@@ -38,14 +39,29 @@ def pytest_configure(config):
         if config.getoption('--no-ssl-cert-check') is True:
             ssl_cert_check = False
 
+        try:
+            tmp = cfg_file.get('TESTRUN', 'use_plan')
+            if int(tmp) == 1:
+                use_testplan = True
+            else:
+                use_testplan = False
+        except NoOptionError:
+            use_testplan = False
+
+        try:
+            s_id = cfg_file.get('TESTRUN', 'suite_id')
+        except NoOptionError:
+            s_id = None
+
         config.pluginmanager.register(
             TestRailPlugin(
                 client=client,
                 assign_user_id=cfg_file.get('TESTRUN', 'assignedto_id'),
                 project_id=cfg_file.get('TESTRUN', 'project_id'),
-                suite_id=cfg_file.get('TESTRUN', 'suite_id'),
+                suite_id=s_id,
                 cert_check=ssl_cert_check,
-                tr_name=tr_name
+                tr_name=tr_name,
+                use_testplan=use_testplan
             )
         )
 

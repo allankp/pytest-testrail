@@ -41,6 +41,30 @@ Settings file template cfg:
     project_id = 1
     suite_id = 1
 
+
+If you'd prefer to be using test runs, this is what your marker and setup would look like.
+::
+
+    from pytest_testrail.plugin import suite_testrail
+
+    @suite_testrail('S123', 'C1234', 'C5678')
+    def test_foo():
+        # test code goes here
+
+Settings file template cfg:
+
+::
+
+    [API]
+    url = https://yoururl.testrail.net/
+    email = user@email.com
+    password = password
+
+    [TESTRUN]
+    assignedto_id = 1
+    project_id = 1
+    use_plan = 1
+
 Usage
 -----
 
