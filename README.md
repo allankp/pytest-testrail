@@ -1,7 +1,7 @@
 pytest-testrail
 =================
 
-[![Build Status](https://travis-ci.org/allankilpatrick/pytest-testrail.svg?branch=master)](https://travis-ci.org/allankilpatrick/pytest-testrail)
+[![Build Status](https://travis-ci.org/dubner/pytest-testrail.svg?branch=master)](https://travis-ci.org/dubner/pytest-testrail)
 
 
 This is a pytest plugin for creating testruns based on pytest markers.
