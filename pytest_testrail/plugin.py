@@ -14,6 +14,8 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULTS_URL = 'add_results_for_cases/{}/'
 ADD_TESTRUN_URL = 'add_run/{}'
+GET_TESTRUN_URL = 'get_runs/{}'
+UPDATE_TESTRUN_URL = 'update_run/{}'
 
 
 def testrail(*ids):
@@ -41,7 +43,7 @@ def testrun_name():
     """Returns testrun name with timestamp"""
     now = datetime.utcnow()
     return 'Automated Run {}'.format(now.strftime(DT_FORMAT))
-
+    
 
 def clean_test_ids(test_ids):
     """
@@ -68,31 +70,35 @@ def get_testrail_keys(items):
 
 class TestRailPlugin(object):
     def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
+            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, update):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
         self.project_id = project_id
         self.results = []
         self.suite_id = suite_id
-        self.testrun_id = 0
         self.testrun_name = tr_name
+        self.testrun_id = self.get_testrun_by_name(tr_name, project_id)
+        self.update= update
 
     # pytest hooks
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         tr_keys = get_testrail_keys(items)
-        if self.testrun_name is None:
-            self.testrun_name = testrun_name()
+        if self.testrun_id is not 0 and self.update is True:
+            self.update_testrun(tr_keys, self.testrun_id)
+        else:
+            if self.testrun_name is None:
+                self.testrun_name = testrun_name()
 
-        self.create_test_run(
-            self.assign_user_id,
-            self.project_id,
-            self.suite_id,
-            self.testrun_name,
-            tr_keys
-        )
+            self.create_test_run(
+                self.assign_user_id,
+                self.project_id,
+                self.suite_id,
+                self.testrun_name,
+                tr_keys
+            )
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
@@ -132,6 +138,7 @@ class TestRailPlugin(object):
             }
             self.results.append(data)
 
+
     def create_test_run(
             self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
         """
@@ -146,7 +153,6 @@ class TestRailPlugin(object):
             'include_all': False,
             'case_ids': tr_keys,
         }
-
         response = self.client.send_post(
             ADD_TESTRUN_URL.format(project_id),
             data,
@@ -157,3 +163,36 @@ class TestRailPlugin(object):
                 print('Failed to create testrun: {}'.format(response))
             else:
                 self.testrun_id = response['id']
+
+
+    def get_testrun_by_name(self, testrun_name, project_id):
+        runs = self.client.send_get(
+                GET_TESTRUN_URL.format(self.project_id),
+                self.cert_check
+        )
+        if self.testrun_name == None:
+            run_id = 0
+        else:
+            try:
+                for each in runs:
+                    if self.testrun_name in each['name'] and each['is_completed'] == False:
+                        run_id = each['id']
+                        break
+                    else:
+                        run_id = 0
+            except:
+                print(runs)
+                raise
+        return run_id
+
+
+    def update_testrun(self, testcaseids, run_id):
+        data = {
+            "include_all": False,
+            "case_ids": testcaseids
+        }
+        self.client.send_post(
+            UPDATE_TESTRUN_URL.format(run_id),
+            data,
+            self.cert_check
+        )
