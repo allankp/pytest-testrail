@@ -81,6 +81,6 @@ testrail	pytest_testrail/plugin.py	/^def testrail(*ids):$/;"	kind:function	line:
 testrail_api.py	pytest_testrail/testrail_api.py	1;"	kind:file	line:1
 testrun_name	pytest_testrail/plugin.py	/^def testrun_name():$/;"	kind:function	line:42
 tr_plugin	tests/test_plugin.py	/^def tr_plugin(api_client):$/;"	kind:function	line:32
-update_testrun	pytest_testrail/plugin.py	/^    def update_testrun(self, testcaseids, run_id):$/;"	kind:member	line:189
+update_testrun	pytest_testrail/plugin.py	/^    def update_testrun(self, testcaseids, run_id):$/;"	kind:member	line:185
 url	setup.py	/^    url='http:\/\/github.com\/allankilpatrick\/pytest-testrail\/',$/;"	kind:variable	line:12
 version	setup.py	/^    version='0.0.11',$/;"	kind:variable	line:9
