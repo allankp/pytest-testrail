@@ -1,0 +1,86 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ADD_RESULTS_URL	pytest_testrail/plugin.py	/^ADD_RESULTS_URL = 'add_results_for_cases\/{}\/'$/;"	kind:variable	line:15
+ADD_TESTRUN_URL	pytest_testrail/plugin.py	/^ADD_TESTRUN_URL = 'add_run\/{}'$/;"	kind:variable	line:16
+APIClient	pytest_testrail/conftest.py	/^from .testrail_api import APIClient$/;"	kind:namespace	line:4
+APIClient	pytest_testrail/testrail_api.py	/^class APIClient:$/;"	kind:class	line:17
+APIClient	tests/test_plugin.py	/^from pytest_testrail.testrail_api import APIClient$/;"	kind:namespace	line:8
+ASSIGN_USER_ID	tests/test_plugin.py	/^ASSIGN_USER_ID = 3$/;"	kind:variable	line:13
+DT_FORMAT	pytest_testrail/plugin.py	/^DT_FORMAT = '%d-%m-%Y %H:%M:%S'$/;"	kind:variable	line:11
+FAKE_NOW	tests/test_plugin.py	/^FAKE_NOW = datetime(2015, 1, 31, 19, 5, 42)$/;"	kind:variable	line:14
+GET_TESTRUN_URL	pytest_testrail/plugin.py	/^GET_TESTRUN_URL = 'get_runs\/{}'$/;"	kind:variable	line:17
+Mock	tests/test_plugin.py	/^from mock import create_autospec, Mock$/;"	kind:namespace	line:3
+PROJECT_ID	tests/test_plugin.py	/^PROJECT_ID = 4$/;"	kind:variable	line:15
+PYTEST_TO_TESTRAIL_STATUS	pytest_testrail/plugin.py	/^PYTEST_TO_TESTRAIL_STATUS = {$/;"	kind:variable	line:5
+SUITE_ID	tests/test_plugin.py	/^SUITE_ID = 1$/;"	kind:variable	line:22
+TESTRAIL_PREFIX	pytest_testrail/plugin.py	/^TESTRAIL_PREFIX = 'testrail'$/;"	kind:variable	line:13
+TR_NAME	tests/test_plugin.py	/^TR_NAME = None$/;"	kind:variable	line:23
+TestRailPlugin	pytest_testrail/conftest.py	/^from .plugin import TestRailPlugin$/;"	kind:namespace	line:3
+TestRailPlugin	pytest_testrail/plugin.py	/^class TestRailPlugin(object):$/;"	kind:class	line:71
+TestRailPlugin	tests/test_plugin.py	/^from pytest_testrail.plugin import TestRailPlugin$/;"	kind:namespace	line:7
+UPDATE_TESTRUN_URL	pytest_testrail/plugin.py	/^UPDATE_TESTRUN_URL = 'update_run\/{}'$/;"	kind:variable	line:18
+__init__	pytest_testrail/plugin.py	/^    def __init__($/;"	kind:member	line:72
+__init__	pytest_testrail/testrail_api.py	/^    def __init__(self, base_url):$/;"	kind:member	line:18
+__init__.py	pytest_testrail/__init__.py	1;"	kind:file	line:1
+add_result	pytest_testrail/plugin.py	/^    def add_result(self, test_ids, status):$/;"	kind:member	line:127
+api_client	tests/test_plugin.py	/^def api_client():$/;"	kind:function	line:27
+author	setup.py	/^    author='Allan Kilpatrick',$/;"	kind:variable	line:10
+author_email	setup.py	/^    author_email='allanklp@gmail.com',$/;"	kind:variable	line:11
+clean_test_ids	pytest_testrail/plugin.py	/^def clean_test_ids(test_ids):$/;"	kind:function	line:48
+configparser	pytest_testrail/conftest.py	/^import configparser$/;"	kind:namespace	line:1
+conftest.py	pytest_testrail/conftest.py	1;"	kind:file	line:1
+create_autospec	tests/test_plugin.py	/^from mock import create_autospec, Mock$/;"	kind:namespace	line:3
+create_test_run	pytest_testrail/plugin.py	/^    def create_test_run($/;"	kind:member	line:142
+datetime	pytest_testrail/plugin.py	/^from datetime import datetime$/;"	kind:namespace	line:1
+datetime	tests/test_plugin.py	/^from datetime import datetime$/;"	kind:namespace	line:1
+description	setup.py	/^    description='pytest plugin for creating TestRail runs and adding results',$/;"	kind:variable	line:7
+freeze_time	tests/test_plugin.py	/^from freezegun import freeze_time$/;"	kind:namespace	line:2
+get_test_outcome	pytest_testrail/plugin.py	/^def get_test_outcome(outcome):$/;"	kind:function	line:32
+get_testrail_keys	pytest_testrail/plugin.py	/^def get_testrail_keys(items):$/;"	kind:function	line:58
+get_testrun_by_name	pytest_testrail/plugin.py	/^    def get_testrun_by_name(self, testrun_name, project_id):$/;"	kind:member	line:168
+include_package_data	setup.py	/^    include_package_data=True,$/;"	kind:variable	line:23
+install_requires	setup.py	/^    install_requires=[$/;"	kind:variable	line:17
+json	pytest_testrail/testrail_api.py	/^import simplejson as json$/;"	kind:namespace	line:14
+long_description	setup.py	/^    long_description=long_description,$/;"	kind:variable	line:8
+long_description	setup.py	/^long_description = open("README.rst").read()$/;"	kind:variable	line:3
+name	setup.py	/^    name='pytest-testrail',$/;"	kind:variable	line:6
+package_dir	setup.py	/^    package_dir={'pytest_testrail': 'pytest_testrail'},$/;"	kind:variable	line:16
+packages	setup.py	/^    packages=[$/;"	kind:variable	line:13
+plugin	tests/test_plugin.py	/^from pytest_testrail import plugin$/;"	kind:namespace	line:6
+plugin.py	pytest_testrail/plugin.py	1;"	kind:file	line:1
+pytest	pytest_testrail/plugin.py	/^import pytest$/;"	kind:namespace	line:2
+pytest	tests/test_plugin.py	/^import pytest$/;"	kind:namespace	line:4
+pytest_addoption	pytest_testrail/conftest.py	/^def pytest_addoption(parser):$/;"	kind:function	line:7
+pytest_collection_modifyitems	pytest_testrail/plugin.py	/^    def pytest_collection_modifyitems(self, session, config, items):$/;"	kind:member	line:87
+pytest_configure	pytest_testrail/conftest.py	/^def pytest_configure(config):$/;"	kind:function	line:36
+pytest_plugins	tests/test_plugin.py	/^pytest_plugins = "pytester"$/;"	kind:variable	line:11
+pytest_runtest_makereport	pytest_testrail/plugin.py	/^    def pytest_runtest_makereport(self, item, call):$/;"	kind:member	line:104
+pytest_runtest_makereport	tests/test_plugin.py	/^def pytest_runtest_makereport(pytest_test_items, tr_plugin):$/;"	kind:function	line:81
+pytest_sessionfinish	pytest_testrail/plugin.py	/^    def pytest_sessionfinish(self, session, exitstatus):$/;"	kind:member	line:116
+pytest_test_items	tests/test_plugin.py	/^def pytest_test_items(testdir):$/;"	kind:function	line:37
+read_config_file	pytest_testrail/conftest.py	/^def read_config_file(configfile):$/;"	kind:function	line:64
+requests	pytest_testrail/testrail_api.py	/^import requests$/;"	kind:namespace	line:13
+send_get	pytest_testrail/testrail_api.py	/^    def send_get(self, uri, cert_check):$/;"	kind:member	line:37
+send_post	pytest_testrail/testrail_api.py	/^    def send_post(self, uri, data, cert_check):$/;"	kind:member	line:60
+setup	setup.py	/^from setuptools import setup$/;"	kind:namespace	line:1
+setup.py	setup.py	1;"	kind:file	line:1
+test_add_result	tests/test_plugin.py	/^def test_add_result(tr_plugin):$/;"	kind:function	line:64
+test_clean_test_ids	tests/test_plugin.py	/^def test_clean_test_ids():$/;"	kind:function	line:56
+test_create_test_run	tests/test_plugin.py	/^def test_create_test_run(api_client, tr_plugin):$/;"	kind:function	line:113
+test_failed_outcome	tests/test_plugin.py	/^def test_failed_outcome(tr_plugin):$/;"	kind:function	line:47
+test_get_testrail_keys	tests/test_plugin.py	/^def test_get_testrail_keys(pytest_test_items, testdir):$/;"	kind:function	line:60
+test_plugin.py	tests/test_plugin.py	1;"	kind:file	line:1
+test_pytest_sessionfinish	tests/test_plugin.py	/^def test_pytest_sessionfinish(api_client, tr_plugin):$/;"	kind:function	line:101
+test_successful_outcome	tests/test_plugin.py	/^def test_successful_outcome(tr_plugin):$/;"	kind:function	line:51
+test_testrun_name	tests/test_plugin.py	/^def test_testrun_name():$/;"	kind:function	line:43
+testrail	pytest_testrail/plugin.py	/^def testrail(*ids):$/;"	kind:function	line:21
+testrail_api.py	pytest_testrail/testrail_api.py	1;"	kind:file	line:1
+testrun_name	pytest_testrail/plugin.py	/^def testrun_name():$/;"	kind:function	line:42
+tr_plugin	tests/test_plugin.py	/^def tr_plugin(api_client):$/;"	kind:function	line:32
+update_testrun	pytest_testrail/plugin.py	/^    def update_testrun(self, testcaseids, run_id):$/;"	kind:member	line:189
+url	setup.py	/^    url='http:\/\/github.com\/allankilpatrick\/pytest-testrail\/',$/;"	kind:variable	line:12
+version	setup.py	/^    version='0.0.11',$/;"	kind:variable	line:9

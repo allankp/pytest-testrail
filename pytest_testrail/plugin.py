@@ -79,7 +79,7 @@ class TestRailPlugin(object):
         self.suite_id = suite_id
         self.testrun_name = tr_name
         self.testrun_id = self.get_testrun_by_name(tr_name, project_id)
-        self.update= update
+        self.update = update
 
     # pytest hooks
 
@@ -173,16 +173,12 @@ class TestRailPlugin(object):
         if self.testrun_name == None:
             run_id = 0
         else:
-            try:
-                for each in runs:
-                    if self.testrun_name in each['name'] and each['is_completed'] == False:
-                        run_id = each['id']
-                        break
-                    else:
-                        run_id = 0
-            except:
-                print(runs)
-                raise
+            for each in runs:
+                if self.testrun_name in each['name'] and each['is_completed'] == False:
+                    run_id = each['id']
+                    break
+                else:
+                    run_id = 0
         return run_id
 
 
@@ -195,4 +191,4 @@ class TestRailPlugin(object):
             UPDATE_TESTRUN_URL.format(run_id),
             data,
             self.cert_check
-        )
+            )
