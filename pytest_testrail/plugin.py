@@ -15,6 +15,7 @@ TESTRAIL_PREFIX = 'testrail'
 ADD_RESULTS_URL = 'add_results_for_cases/{}/'
 ADD_TESTRUN_URL = 'add_run/{}'
 GET_TESTRUN_URL = 'get_runs/{}'
+GET_TESTS_IN_RUN_URL = 'get_tests/{}'
 UPDATE_TESTRUN_URL = 'update_run/{}'
 
 
@@ -79,7 +80,7 @@ class TestRailPlugin(object):
         self.suite_id = suite_id
         self.testrun_name = tr_name
         self.testrun_id = self.get_testrun_by_name(tr_name, project_id)
-        self.update = update
+        self.update= update
 
     # pytest hooks
 
@@ -181,15 +182,31 @@ class TestRailPlugin(object):
                 else:
                     run_id = 0
         return run_id
+    
+
+    def get_run_tests(self, run_id):
+        test_raw = self.client.send_get(
+            GET_TESTS_IN_RUN_URL.format(run_id),
+            self.cert_check
+        )
+        tests = []
+        for each in test_raw:
+            tests.append(each['case_id'])
+        return tests
 
 
     def update_testrun(self, testcaseids, run_id):
+        tests = self.get_run_tests(run_id)
+        for each in testcaseids:
+            if each not in tests:
+                tests.append(each)
+
         data = {
             "include_all": False,
-            "case_ids": testcaseids
+            "case_ids": tests
         }
         self.client.send_post(
             UPDATE_TESTRUN_URL.format(run_id),
             data,
             self.cert_check
-            )
+        )
