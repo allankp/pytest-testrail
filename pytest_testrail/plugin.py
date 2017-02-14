@@ -170,8 +170,9 @@ class TestRailPlugin(object):
                 GET_TESTRUN_URL.format(self.project_id),
                 self.cert_check
         )
+        run_id = 0
         if self.testrun_name == None:
-            run_id = 0
+            pass
         else:
             for each in runs:
                 if self.testrun_name in each['name'] and each['is_completed'] == False:
