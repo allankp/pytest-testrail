@@ -24,6 +24,13 @@ def pytest_addoption(parser):
         required=False,
         help='Name given to testrun, that appears in TestRail'
     )
+    group.addoption(
+        '--update-existing-run',
+        action='store_true',
+        default=False,
+        required=False,
+        help='Updates an existing run if one is found'
+    )
 
 
 def pytest_configure(config):
@@ -34,9 +41,12 @@ def pytest_configure(config):
         client.password = cfg_file.get('API', 'password', raw=True)
         ssl_cert_check = True
         tr_name = config.getoption('--tr_name')
+        update_existing = False
 
         if config.getoption('--no-ssl-cert-check') is True:
             ssl_cert_check = False
+        if config.getoption('--update-existing-run') is True:
+            update_existing = True
 
         config.pluginmanager.register(
             TestRailPlugin(
@@ -45,7 +55,8 @@ def pytest_configure(config):
                 project_id=cfg_file.get('TESTRUN', 'project_id'),
                 suite_id=cfg_file.get('TESTRUN', 'suite_id'),
                 cert_check=ssl_cert_check,
-                tr_name=tr_name
+                tr_name=tr_name,
+                update=update_existing
             )
         )
 

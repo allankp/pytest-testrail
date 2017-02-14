@@ -51,3 +51,8 @@ Testruns can be named using the above flag, if this is not set a generated one w
 	--no-ssl-cert-check
 
 This flag can be used prevent checking for a valid SSL certificate on TestRail host.
+
+	--update-existing-run
+	
+This flag will check for a run with the same name as the one provided and will update that run instead of creating a new one.
+It will also add results to a testrun that were not part of the test run.	
