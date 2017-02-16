@@ -35,6 +35,7 @@ Settings file template cfg:
 	assignedto_id = 1
 	project_id = 1
 	suite_id = 1
+	milestone_id = 1
 
 Usage
 -----
