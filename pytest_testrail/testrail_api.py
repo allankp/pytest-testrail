@@ -10,60 +10,105 @@
 # Copyright Gurock Software GmbH. See license.md for details.
 #
 
+import sys
 import requests
 import simplejson as json
 
+if sys.version_info.major == 2:
+    from urlparse import urljoin
+else:
+    from urllib.parse import urljoin
+
 
 class APIClient:
-    def __init__(self, base_url):
-        self.user = ''
-        self.password = ''
-        if not base_url.endswith('/'):
-            base_url += '/'
-        self.__url = base_url + 'index.php?/api/v2/'
-        self.headers = {'Content-Type': 'application/json'}
+    def __init__(self, base_url, user, password, **kwargs):
+        '''
+        Instantiate the APIClient class.
 
-    #
-    # Send Get
-    #
-    # Issues a GET request (read) against the API and returns the result
-    # (as Python dict).
-    #
-    # Arguments:
-    #
-    # uri                 The API method to call including parameters
-    #                     (e.g. get_case/1)
-    #
-    def send_get(self, uri, cert_check):
-        url = self.__url + uri
+        :param base_url: The same TestRail address for the API client you also use to access TestRail with your web
+            browser (e.g., https://<your-name>.testrail.com/ or http://<server>/testrail/).
+        :type base_url: str
+        :param user: Username for the account on the TestRail server.
+        :type user: str
+        :param password: Password for the account on the TestRail server.
+        :type password: str
+        :param headers: (optional) Dictionary of HTTP Headers to send with each request.
+        :type headers: dict
+        :param cert_check: (optional) Either a boolean, in which case it controls whether we verify the server's TLS
+            certificate, or a string, in which case it must be a path to a CA bundle to use. Defaults to ``True``.
+        :type cert_check: bool or str
+        :param timeout: (optional) How many seconds to wait for the server to send data before giving up, as a float,
+            or a :ref:`(connect timeout, read timeout) <timeouts>` tuple.
+        :type timeout: float or tuple
+        '''
+        self.user = user
+        self.password = password
+        self.__url = urljoin(base_url, 'index.php?/api/v2/')
+        self.headers = kwargs.get('headers', {'Content-Type': 'application/json'})
+        self.cert_check = kwargs.get('cert_check', True)
+        self.timeout = kwargs.get('timeout', 10.0)
+
+
+    def send_get(self, uri, **kwargs):
+        '''
+        Send GET
+
+        Issues a GET request (read) against the API and returns the result (as Python dict).
+
+        :param uri: The API method to call including parameters (e.g. get_case/1)
+        :type uri: str
+        :param headers: (optional) Dictionary of HTTP Headers to send with the request.
+        :type headers: dict
+        :param cert_check: (optional) Either a boolean, in which case it controls whether we verify the server's TLS
+            certificate, or a string, in which case it must be a path to a CA bundle to use. Defaults to ``True``.
+        :type cert_check: bool or str
+        :param timeout: (optional) How many seconds to wait for the server to send data before giving up, as a float,
+            or a :ref:`(connect timeout, read timeout) <timeouts>` tuple.
+        :type timeout: float or tuple
+        '''
+        cert_check = kwargs.get('cert_check', self.cert_check)
+        headers = kwargs.get('headers', self.headers)
+        timeout = kwargs.get('timeout', self.timeout)
+        url = urljoin(self.__url, uri)
         r = requests.get(
             url,
             auth=(self.user, self.password),
-            headers=self.headers,
-            verify=cert_check
+            headers=headers,
+            verify=cert_check,
+            timeout=timeout
         )
         return r.json()
 
-    #
-    # Send POST
-    #
-    # Issues a POST request (write) against the API and returns the result
-    # (as Python dict).
-    #
-    # Arguments:
-    #
-    # uri                 The API method to call including parameters
-    #                     (e.g. add_case/1)
-    # data                The data to submit as part of the request (as
-    #                     Python dict, strings must be UTF-8 encoded)
-    #
-    def send_post(self, uri, data, cert_check):
-        url = self.__url + uri
+
+    def send_post(self, uri, data, cert_check=True):
+        '''
+        Send POST
+
+        Issues a POST request (write) against the API and returns the result (as Python dict).
+
+        :param uri: The API method to call including parameters (e.g. get_case/1)
+        :type uri: str
+        :param data: The data to submit as part of the request (strings must be UTF-8 encoded).
+        :type data: dict
+        :param headers: (optional) Dictionary of HTTP Headers to send with the request.
+        :type headers: dict
+        :param cert_check: (optional) Either a boolean, in which case it controls whether we verify the server's TLS
+            certificate, or a string, in which case it must be a path to a CA bundle to use. Defaults to ``True``.
+        :type cert_check: bool or str
+        :param timeout: (optional) How many seconds to wait for the server to send data before giving up, as a float,
+            or a :ref:`(connect timeout, read timeout) <timeouts>` tuple.
+        :type timeout: float or tuple
+        '''
+        cert_check = kwargs.get('cert_check', self.cert_check)
+        headers = kwargs.get('headers', self.headers)
+        timeout = kwargs.get('timeout', self.timeout)
+        url = urljoin(self.__url, uri)
         r = requests.post(
             url,
             auth=(self.user, self.password),
-            headers=self.headers,
-            data=json.dumps(data),
-            verify=cert_check
+            headers=headers,
+            json=data,
+            verify=cert_check,
+            timeout=timeout
         )
         return r.json()
