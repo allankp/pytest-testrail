@@ -17,6 +17,23 @@ ADD_RESULTS_URL = 'add_results_for_cases/{}/'
 ADD_TESTRUN_URL = 'add_run/{}'
 
 
+class pytestrail(object):
+    '''
+    An alternative to using the testrail function as a decorator for test cases, since py.test may confuse it as a test
+    function since it has the 'test' prefix
+    '''
+    @staticmethod
+    def case(*ids):
+        """
+        Decorator to mark tests with testcase ids.
+
+        ie. @pytestrail.case('C123', 'C12345')
+
+        :return pytest.mark:
+        """
+        return pytest.mark.testrail(ids=ids)
+
+
 def testrail(*ids):
     """
     Decorator to mark tests with testcase ids.
