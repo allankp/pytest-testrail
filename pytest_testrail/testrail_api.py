@@ -48,7 +48,6 @@ class APIClient:
         self.cert_check = kwargs.get('cert_check', True)
         self.timeout = kwargs.get('timeout', 10.0)
 
-
     def send_get(self, uri, **kwargs):
         '''
         Send GET
@@ -79,8 +78,7 @@ class APIClient:
         )
         return r.json()
 
-
-    def send_post(self, uri, data, cert_check=True):
+    def send_post(self, uri, data, **kwargs):
         '''
         Send POST
 
