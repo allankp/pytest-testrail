@@ -107,7 +107,7 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
     expected_uri = plugin.ADD_RESULTS_URL.format(10)
     expected_data = {'results': [1, 2]}
     check_cert = True
-    api_client.send_post.assert_called_once_with(expected_uri, expected_data, check_cert)
+    api_client.send_post.assert_called_once_with(expected_uri, expected_data, cert_check=check_cert)
 
 
 def test_create_test_run(api_client, tr_plugin):
@@ -125,4 +125,4 @@ def test_create_test_run(api_client, tr_plugin):
         'case_ids': expected_tr_keys
     }
     check_cert = True
-    api_client.send_post.assert_called_once_with(expected_uri, expected_data, check_cert)
+    api_client.send_post.assert_called_once_with(expected_uri, expected_data, cert_check=check_cert)

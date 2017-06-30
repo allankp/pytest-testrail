@@ -1,5 +1,6 @@
 from datetime import datetime
 import pytest
+import re
 
 
 PYTEST_TO_TESTRAIL_STATUS = {
@@ -50,7 +51,7 @@ def clean_test_ids(test_ids):
     :param list test_ids: list of test_ids.
     :return list ints: contains list of test_ids as ints.
     """
-    return map(int, [test_id.upper().replace('C', '') for test_id in test_ids])
+    return map(int, [re.search('(?P<test_id>[0-9]+$)', test_id).groupdict().get('test_id') for test_id in test_ids])
 
 
 def get_testrail_keys(items):
@@ -113,7 +114,7 @@ class TestRailPlugin(object):
             self.client.send_post(
                 ADD_RESULTS_URL.format(self.testrun_id),
                 data,
-                self.cert_check
+                cert_check=self.cert_check
             )
 
     # plugin
@@ -150,7 +151,7 @@ class TestRailPlugin(object):
         response = self.client.send_post(
             ADD_TESTRUN_URL.format(project_id),
             data,
-            self.cert_check
+            cert_check=self.cert_check
         )
         for key, _ in response.items():
             if key == 'error':
