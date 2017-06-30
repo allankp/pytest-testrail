@@ -1,9 +1,20 @@
+import sys
+
 from setuptools import setup
 
 
 def read_file(fname):
     with open(fname) as f:
         return f.read()
+
+
+requirements = [
+        'pytest==3.1.2',
+        'requests==2.18.1',
+        'simplejson==3.11.1',
+]
+if sys.version_info.major == 2:
+    requirements.append('configparser==3.5.0')
 
 
 setup(
@@ -18,12 +29,7 @@ setup(
         'pytest_testrail',
     ],
     package_dir={'pytest_testrail': 'pytest_testrail'},
-    install_requires=[
-        'pytest==3.1.2',
-        'configparser==3.5.0',
-        'requests==2.18.1',
-        'simplejson==3.11.1',
-    ],
+    install_requires=requirements,
     include_package_data=True,
     entry_points={'pytest11': ['pytest-testrail = pytest_testrail.conftest']},
 )
