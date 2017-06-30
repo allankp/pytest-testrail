@@ -43,7 +43,7 @@ class APIClient:
         '''
         self.user = user
         self.password = password
-        self.__url = urljoin(base_url, 'index.php?/api/v2/')
+        self._url = urljoin(base_url, 'index.php?/api/v2/')
         self.headers = kwargs.get('headers', {'Content-Type': 'application/json'})
         self.cert_check = kwargs.get('cert_check', True)
         self.timeout = kwargs.get('timeout', 10.0)
@@ -68,7 +68,7 @@ class APIClient:
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
         timeout = kwargs.get('timeout', self.timeout)
-        url = urljoin(self.__url, uri)
+        url = self._url + uri
         r = requests.get(
             url,
             auth=(self.user, self.password),
@@ -100,7 +100,7 @@ class APIClient:
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
         timeout = kwargs.get('timeout', self.timeout)
-        url = urljoin(self.__url, uri)
+        url = self._url + uri
         r = requests.post(
             url,
             auth=(self.user, self.password),
