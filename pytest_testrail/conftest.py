@@ -19,39 +19,36 @@ def pytest_addoption(parser):
     group.addoption(
         '--tr-url',
         action='store',
-        help='TestRail address you use to access TestRail with your web browser')
+        help='TestRail address you use to access TestRail with your web browser (config file: url in API section)')
     group.addoption(
         '--tr-email',
         action='store',
-        help='Email for the account on the TestRail server')
+        help='Email for the account on the TestRail server (config file: email in API section)')
     group.addoption(
         '--tr-password',
         action='store',
-        help='Password for the account on the TestRail server')
+        help='Password for the account on the TestRail server (config file: password in API section)')
     group.addoption(
         '--tr-testrun-assignedto-id',
         action='store',
-        help='ID of the user assigned to the test run')
+        help='ID of the user assigned to the test run (config file: assignedto_id in TESTRUN section)')
     group.addoption(
         '--tr-testrun-project-id',
         action='store',
-        help='ID of the project the test run is in')
+        help='ID of the project the test run is in (config file: project_id in TESTRUN section)')
     group.addoption(
         '--tr-testrun-suite-id',
         action='store',
-        help='ID of the test suite containing the test cases')
-    group.addoption(
-        '--tr-no-ssl-cert-check',
-        action='store_false',
-        help='Do not check for valid SSL certificate on TestRail host'
-    )
+        help='ID of the test suite containing the test cases (config file: suite_id in TESTRUN section)')
     group.addoption(
         '--tr-testrun-name',
         action='store',
         default=None,
-        required=False,
-        help='Name given to testrun, that appears in TestRail'
-    )
+        help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
+    group.addoption(
+        '--tr-no-ssl-cert-check',
+        action='store_false',
+        help='Do not check for valid SSL certificate on TestRail host')
 
 
 def pytest_configure(config):
