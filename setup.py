@@ -17,7 +17,7 @@ setup(
     install_requires=[
         'pytest>=2',
         'configparser>=3,<4',
-        'requests==2.11.1',
+        'requests>=2.11.1',
         'simplejson'
     ],
     include_package_data=True,

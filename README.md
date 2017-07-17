@@ -40,7 +40,7 @@ Usage
 -----
 	py.test --testrail=<settings file>.cfg
 
-This will create a test run in TestRail, add all marked tests to run.
+This will create a test run in TestRail (if not provided), add all marked tests to run.
 Once the all tests are finished they will be updated in TestRail.
 
 	--tr_name='My Test Run'
@@ -51,3 +51,12 @@ Testruns can be named using the above flag, if this is not set a generated one w
 	--no-ssl-cert-check
 
 This flag can be used prevent checking for a valid SSL certificate on TestRail host.
+
+    --run-id=<id>
+    
+This option allows to precise by id an existing test run to update. If provided, option `--tr_name` is ignored.
+
+    --plan-id=<id>
+
+This option allows to precise by id an existing test plan to update. If provided, options `--tr_name` and
+`--run-id` are ignored.

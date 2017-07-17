@@ -48,8 +48,9 @@ Usage
 
     py.test --testrail=<settings file>.cfg
 
-This will create a test run in TestRail, add all marked tests to run.
-Once the all tests are finished they will be updated in TestRail.
+This will create a test run in TestRail (if not provided), add all
+marked tests to run. Once the all tests are finished they will be
+updated in TestRail.
 
 ::
 
@@ -65,5 +66,19 @@ generated one will be used. ' Automation Run "timestamp" '
 This flag can be used prevent checking for a valid SSL certificate on
 TestRail host.
 
-.. |Build Status| image:: https://travis-ci.org/allankilpatrick/pytest-testrail.svg?branch=master
-   :target: https://travis-ci.org/allankilpatrick/pytest-testrail
+::
+
+    --run-id=<id>
+
+This option allows to precise by id an existing test run to update. If
+provided, option ``--tr_name`` is ignored.
+
+::
+
+    --plan-id=<id>
+
+This option allows to precise by id an existing test plan to update. If
+provided, options ``--tr_name`` and ``--run-id`` are ignored.
+
+.. |Build Status| image:: https://travis-ci.org/dubner/pytest-testrail.svg?branch=master
+   :target: https://travis-ci.org/dubner/pytest-testrail
