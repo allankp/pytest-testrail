@@ -165,7 +165,7 @@ class TestRailPlugin(object):
             )
             error = self.client.get_error(response)
             if error:
-                print('Info: Testcase #{} not published for following reason: "{}"'.format(result['case_id'],error))
+                print('Info: Testcase #{} not published for following reason: "{}"'.format(result['case_id'], error))
 
     def create_test_run(
             self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
