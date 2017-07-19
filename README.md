@@ -47,23 +47,22 @@ Usage
 
 	py.test --testrail=<settings file>.cfg --tr_name='My Testrun Name'
 
-This will creates a testrun in TestRail, add all marked tests to run.
+This will create a testrun in TestRail, add all marked tests to run.
 Once the all tests are finished they will be updated in TestRail.
 
 	py.test --testrail=<settings file>.cfg --run-id=1234
 
-This will updates testrun in TestRail with ID 1234.
+This will update testrun in TestRail with ID 1234.
 
 	py.test --testrail=<settings file>.cfg --plan-id=5678
 	
-This will updates testplan in TestRail with ID 5678.
+This will update testplan in TestRail with ID 5678.
 
 ### Options
 
 	--tr_name='My Testrun Name'
 
-Testruns can be named using the above flag, if this is not set a generated one will be used.
-' Automation Run "timestamp" '
+Testruns can be named using the above flag, if this is not set a generated one will be used with name `'Automation Run <timestamp>'`
 
 	--no-ssl-cert-check
 
