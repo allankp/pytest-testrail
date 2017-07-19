@@ -15,3 +15,11 @@ def test_func2():
 @testrail('C99999')
 def test_func3():
     pass
+
+@testrail('C1788')
+def test_func4():
+    pytest.skip()
+
+@testrail('C1789')
+def test_func5():
+    pass
