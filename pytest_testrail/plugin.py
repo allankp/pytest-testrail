@@ -72,7 +72,7 @@ def get_testrail_keys(items):
 
 class TestRailPlugin(object):
     def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0):
+            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0, version=''):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -82,6 +82,7 @@ class TestRailPlugin(object):
         self.testrun_name = tr_name
         self.testrun_id = run_id
         self.testplan_id = plan_id
+        self.version = version
 
     # pytest hooks
 
@@ -158,6 +159,8 @@ class TestRailPlugin(object):
         """
         for result in self.results:
             data = {'status_id': result['status_id']}
+            if self.version:
+                data['version'] = self.version
             response = self.client.send_post(
                 ADD_RESULT_URL.format(testrun_id, result['case_id']),
                 data,

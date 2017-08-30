@@ -61,7 +61,7 @@ def api_client():
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME)
+    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME, version='1.0.0.0')
 
 
 @pytest.fixture
@@ -140,11 +140,11 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     check_cert = True
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
-    expected_data = {'status_id': 1}
+    expected_data = {'status_id': 1, 'version': '1.0.0.0'}
     api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
-    expected_data = {'status_id': 2}
+    expected_data = {'status_id': 2, 'version': '1.0.0.0'}
     api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
 
 
@@ -159,10 +159,14 @@ def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
     check_cert = True
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234), {'status_id': 1}, check_cert)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678), {'status_id': 2}, check_cert)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234), {'status_id': 1}, check_cert)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678), {'status_id': 2}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234),
+                                         {'status_id': 1, 'version': '1.0.0.0'}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678),
+                                         {'status_id': 2, 'version': '1.0.0.0'}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234),
+                                         {'status_id': 1, 'version': '1.0.0.0'}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678),
+                                         {'status_id': 2, 'version': '1.0.0.0'}, check_cert)
 
 
 def test_create_test_run(api_client, tr_plugin):
