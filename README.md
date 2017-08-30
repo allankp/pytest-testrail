@@ -70,9 +70,13 @@ This flag can be used prevent checking for a valid SSL certificate on TestRail h
 
     --run-id=<id>
     
-This option allows to precise an existing testrun  to update (by its TestRail ID). If provided, option `--tr_name` is ignored.
+This option allows to precise an existing testrun to update (by its TestRail ID). If provided, option `--tr_name` is ignored.
 
     --plan-id=<id>
 
 This option allows to precise an existing test plan to update (by its TestRail ID). If provided, options `--tr_name` and
 `--run-id` are ignored.
+
+    --tr-version='1.0.0.0'
+
+This option allows to provide a version of execution to a test result.

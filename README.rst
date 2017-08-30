@@ -97,5 +97,11 @@ This option allows to precise an existing test plan to update (by its
 TestRail ID). If provided, options ``--tr_name`` and ``--run-id`` are
 ignored.
 
+::
+
+    --tr-version='1.0.0.0'
+
+This option allows to provide a version of execution to a test result.
+
 .. |Build Status| image:: https://travis-ci.org/dubner/pytest-testrail.svg?branch=master
    :target: https://travis-ci.org/dubner/pytest-testrail
