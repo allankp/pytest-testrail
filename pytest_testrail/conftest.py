@@ -75,7 +75,9 @@ def pytest_configure(config):
                 run_id=run_id,
                 plan_id=plan_id,
                 version=version
-            )
+            ),
+            # Name of plugin instance (allow to be used by other plugins)
+            name="pytest-testrail-instance"
         )
 
 
