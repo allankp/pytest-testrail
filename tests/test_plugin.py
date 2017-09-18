@@ -4,7 +4,7 @@ from mock import create_autospec, Mock
 import pytest
 
 from pytest_testrail import plugin
-from pytest_testrail.plugin import TestRailPlugin
+from pytest_testrail.plugin import PyTestRailPlugin
 from pytest_testrail.testrail_api import APIClient
 
 
@@ -30,7 +30,7 @@ def api_client():
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME)
+    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME)
 
 
 @pytest.fixture

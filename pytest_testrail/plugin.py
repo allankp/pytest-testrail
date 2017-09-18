@@ -84,7 +84,7 @@ def get_testrail_keys(items):
     return testcaseids
 
 
-class TestRailPlugin(object):
+class PyTestRailPlugin(object):
     def __init__(
             self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
         self.assign_user_id = assign_user_id
