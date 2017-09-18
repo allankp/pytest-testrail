@@ -1,5 +1,11 @@
 import os
-import configparser
+import sys
+if sys.version_info.major == 2:
+    # python2
+    import ConfigParser as configparser
+else:
+    # python3
+    import configparser
 
 from .plugin import TestRailPlugin
 from .testrail_api import APIClient
