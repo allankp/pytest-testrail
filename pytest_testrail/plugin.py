@@ -1,6 +1,7 @@
 from datetime import datetime
 import pytest
 import re
+import warnings
 
 
 PYTEST_TO_TESTRAIL_STATUS = {
@@ -15,6 +16,13 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULTS_URL = 'add_results_for_cases/{}/'
 ADD_TESTRUN_URL = 'add_run/{}'
+
+
+class DeprecatedTestDecorator(DeprecationWarning):
+    pass
+
+
+warnings.simplefilter(action='once', category=DeprecatedTestDecorator, lineno=0)
 
 
 class pytestrail(object):
@@ -42,7 +50,10 @@ def testrail(*ids):
 
     :return pytest.mark:
     """
-    return pytest.mark.testrail(ids=ids)
+    deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
+            '@pytestrail.case decorator instead.')
+    warnings.warn(deprecation_msg, DeprecatedTestDecorator)
+    return pytestrail.case(*ids)
 
 
 def get_test_outcome(outcome):
