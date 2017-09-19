@@ -14,9 +14,13 @@ ASSIGN_USER_ID = 3
 FAKE_NOW = datetime(2015, 1, 31, 19, 5, 42)
 PROJECT_ID = 4
 PYTEST_FILE = """
-    from pytest_testrail.plugin import testrail
+    from pytest_testrail.plugin import testrail, pytestrail
     @testrail('C1234', 'C5678')
     def test_func():
+        pass
+
+    @pytestrail.case('C8765', 'C4321')
+    def test_other_func():
         pass
 """
 SUITE_ID = 1
@@ -36,7 +40,7 @@ def tr_plugin(api_client):
 @pytest.fixture
 def pytest_test_items(testdir):
     testdir.makepyfile(PYTEST_FILE)
-    return [testdir.getitem(PYTEST_FILE)]
+    return [item for item in testdir.getitems(PYTEST_FILE) if item.name != 'testrail']
 
 
 @freeze_time(FAKE_NOW)
@@ -58,7 +62,7 @@ def test_clean_test_ids():
 
 
 def test_get_testrail_keys(pytest_test_items, testdir):
-    assert plugin.get_testrail_keys(pytest_test_items) == [1234, 5678]
+    assert plugin.get_testrail_keys(pytest_test_items) == [1234, 5678, 8765, 4321]
 
 
 def test_add_result(tr_plugin):
@@ -78,7 +82,7 @@ def test_add_result(tr_plugin):
     assert tr_plugin.results == expected_results
 
 
-def pytest_runtest_makereport(pytest_test_items, tr_plugin):
+def pytest_runtest_makereport(tr_plugin):
     keys = ['C4354', 'C1234']
     report = Mock(keywords={key: None for key in keys}, failed=True, when='teardown')
 
