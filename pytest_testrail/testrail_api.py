@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
 #
 # TestRail API binding for Python 2.x (API v2, available since
 # TestRail 3.0)
@@ -67,3 +69,14 @@ class APIClient:
             verify=cert_check
         )
         return r.json()
+
+    @staticmethod
+    def get_error(json_response):
+        """ Extract error contained in a API response.
+            If no error occured, return None
+
+            :param json_response: json response of request
+            :return: String of the error
+        """
+        if 'error' in json_response and json_response['error']:
+            return json_response['error']

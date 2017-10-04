@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
 from datetime import datetime
 from freezegun import freeze_time
 from mock import create_autospec, Mock
@@ -21,16 +23,45 @@ PYTEST_FILE = """
 """
 SUITE_ID = 1
 TR_NAME = None
-
+TESTPLAN = {
+        "id": 58,
+        "is_completed": False,
+        "entries": [{
+            "id": "ce2f3c8f-9899-47b9-a6da-db59a66fb794",
+            "name": "Test Run 5/23/2017",
+            "runs": [{
+                "id": 59,
+                "name": "Test Run 5/23/2017",
+                "is_completed": False,
+            }]
+        }, {
+            "id": "084f680c-f87a-402e-92be-d9cc2359b9a7",
+            "name": "Test Run 5/23/2017",
+            "runs": [{
+                "id": 60,
+                "name": "Test Run 5/23/2017",
+                "is_completed": True,
+            }]
+        }, {
+            "id": "775740ff-1ba3-4313-a9df-3acd9d5ef967",
+            "name": "Test Run 5/23/2017",
+            "runs": [{
+                "id": 61,
+                "is_completed": False,
+            }]
+        }]
+    }
 
 @pytest.fixture
 def api_client():
-    return create_autospec(APIClient)
+    spec = create_autospec(APIClient)
+    spec.get_error = APIClient.get_error  # don't mock get_error
+    return spec
 
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME)
+    return TestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME, version='1.0.0.0')
 
 
 @pytest.fixture
@@ -99,15 +130,43 @@ def pytest_runtest_makereport(pytest_test_items, tr_plugin):
 
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
-    tr_plugin.results = [1, 2]
+    tr_plugin.results = [
+        {'case_id': 1234, 'status_id': 1},
+        {'case_id': 5678, 'status_id': 2},
+    ]
     tr_plugin.testrun_id = 10
 
     tr_plugin.pytest_sessionfinish(None, 0)
 
-    expected_uri = plugin.ADD_RESULTS_URL.format(10)
-    expected_data = {'results': [1, 2]}
     check_cert = True
-    api_client.send_post.assert_called_once_with(expected_uri, expected_data, check_cert)
+    expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
+    expected_data = {'status_id': 1, 'version': '1.0.0.0'}
+    api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
+
+    expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
+    expected_data = {'status_id': 2, 'version': '1.0.0.0'}
+    api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
+
+
+def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
+    tr_plugin.results = [
+        {'case_id': 1234, 'status_id': 1},
+        {'case_id': 5678, 'status_id': 2},
+    ]
+    tr_plugin.testplan_id = 100
+    tr_plugin.testrun_id = 0
+
+    api_client.send_get.return_value = TESTPLAN
+    tr_plugin.pytest_sessionfinish(None, 0)
+    check_cert = True
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234),
+                                         {'status_id': 1, 'version': '1.0.0.0'}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678),
+                                         {'status_id': 2, 'version': '1.0.0.0'}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234),
+                                         {'status_id': 1, 'version': '1.0.0.0'}, check_cert)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678),
+                                         {'status_id': 2, 'version': '1.0.0.0'}, check_cert)
 
 
 def test_create_test_run(api_client, tr_plugin):
@@ -126,3 +185,38 @@ def test_create_test_run(api_client, tr_plugin):
     }
     check_cert = True
     api_client.send_post.assert_called_once_with(expected_uri, expected_data, check_cert)
+
+
+def test_is_testrun_available(api_client, tr_plugin):
+    """ Test of method `is_testrun_available` """
+    tr_plugin.testrun_id = 100
+
+    api_client.send_get.return_value = {'is_completed': False}
+    assert tr_plugin.is_testrun_available() is True
+
+    api_client.send_get.return_value = {'error': 'An error occured'}
+    assert tr_plugin.is_testrun_available() is False
+
+    api_client.send_get.return_value = {'is_completed': True}
+    assert tr_plugin.is_testrun_available() is False
+
+
+def test_is_testplan_available(api_client, tr_plugin):
+    """ Test of method `is_testplan_available` """
+    tr_plugin.testplan_id = 100
+
+    api_client.send_get.return_value = {'is_completed': False}
+    assert tr_plugin.is_testplan_available() is True
+
+    api_client.send_get.return_value = {'error': 'An error occured'}
+    assert tr_plugin.is_testplan_available() is False
+
+    api_client.send_get.return_value = {'is_completed': True}
+    assert tr_plugin.is_testplan_available() is False
+
+
+def test_get_available_testruns(api_client, tr_plugin):
+    """ Test of method `get_available_testruns` """
+    testplan_id = 100
+    api_client.send_get.return_value = TESTPLAN
+    assert tr_plugin.get_available_testruns(testplan_id) == [59, 61]
