@@ -19,6 +19,8 @@ ADD_TESTRUN_URL = 'add_run/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 
+COMMENT_SIZE_LIMIT = 1000
+
 
 def testrail(*ids):
     """
@@ -119,7 +121,9 @@ class TestRailPlugin(object):
             if rep.when == 'call' and testcaseids:
                 self.add_result(
                     clean_test_ids(testcaseids),
-                    get_test_outcome(outcome.result.outcome)
+                    get_test_outcome(outcome.result.outcome),
+                    failure=rep.longrepr,
+                    duration=rep.duration
                 )
 
     def pytest_sessionfinish(self, session, exitstatus):
@@ -136,17 +140,21 @@ class TestRailPlugin(object):
 
     # plugin
 
-    def add_result(self, test_ids, status):
+    def add_result(self, test_ids, status, failure='', duration=0):
         """
         Add a new result to results dict to be submitted at the end.
 
         :param list test_ids: list of test_ids.
         :param int status: status code of test (pass or fail).
+        :param failure: None or a failure representation.
+        :param duration: Time it took to run just the test.
         """
         for test_id in test_ids:
             data = {
                 'case_id': test_id,
                 'status_id': status,
+                'comment': failure,
+                'duration': duration
             }
             self.results.append(data)
 
@@ -161,6 +169,15 @@ class TestRailPlugin(object):
             data = {'status_id': result['status_id']}
             if self.version:
                 data['version'] = self.version
+            comment = result.get('comment', '')
+            if comment:
+                # Indent text to avoid string formatting by TestRail. Limit size of comment
+                data['comment'] = "# Pytest result: #\n    " + str(comment)[:COMMENT_SIZE_LIMIT].replace('\n', '\n    ')
+                data['comment'] += '\n...\nLog truncated' if len(str(comment)) > COMMENT_SIZE_LIMIT else ''
+            duration = result.get('duration')
+            if duration:
+                duration = 1 if (duration < 1) else round(duration)  # TestRail API doesn't manage milliseconds
+                data['elapsed'] = str(duration) + 's'
             response = self.client.send_post(
                 ADD_RESULT_URL.format(testrun_id, result['case_id']),
                 data,
@@ -211,8 +228,8 @@ class TestRailPlugin(object):
         if error:
             print('Failed to retrieve testrun: "{}"'.format(error))
             return False
-        else:
-            return response['is_completed'] is False
+
+        return response['is_completed'] is False
 
     def is_testplan_available(self):
         """
@@ -228,8 +245,8 @@ class TestRailPlugin(object):
         if error:
             print('Failed to retrieve testplan: "{}"'.format(error))
             return False
-        else:
-            return response['is_completed'] is False
+
+        return response['is_completed'] is False
 
     def get_available_testruns(self, plan_id):
         """

@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
 from freezegun import freeze_time
-from mock import create_autospec, Mock
+from mock import create_autospec
 import pytest
 
 from pytest_testrail import plugin
@@ -24,33 +24,33 @@ PYTEST_FILE = """
 SUITE_ID = 1
 TR_NAME = None
 TESTPLAN = {
-        "id": 58,
-        "is_completed": False,
-        "entries": [{
-            "id": "ce2f3c8f-9899-47b9-a6da-db59a66fb794",
+    "id": 58,
+    "is_completed": False,
+    "entries": [{
+        "id": "ce2f3c8f-9899-47b9-a6da-db59a66fb794",
+        "name": "Test Run 5/23/2017",
+        "runs": [{
+            "id": 59,
             "name": "Test Run 5/23/2017",
-            "runs": [{
-                "id": 59,
-                "name": "Test Run 5/23/2017",
-                "is_completed": False,
-            }]
-        }, {
-            "id": "084f680c-f87a-402e-92be-d9cc2359b9a7",
-            "name": "Test Run 5/23/2017",
-            "runs": [{
-                "id": 60,
-                "name": "Test Run 5/23/2017",
-                "is_completed": True,
-            }]
-        }, {
-            "id": "775740ff-1ba3-4313-a9df-3acd9d5ef967",
-            "name": "Test Run 5/23/2017",
-            "runs": [{
-                "id": 61,
-                "is_completed": False,
-            }]
+            "is_completed": False,
         }]
-    }
+    }, {
+        "id": "084f680c-f87a-402e-92be-d9cc2359b9a7",
+        "name": "Test Run 5/23/2017",
+        "runs": [{
+            "id": 60,
+            "name": "Test Run 5/23/2017",
+            "is_completed": True,
+        }]
+    }, {
+        "id": "775740ff-1ba3-4313-a9df-3acd9d5ef967",
+        "name": "Test Run 5/23/2017",
+        "runs": [{
+            "id": 61,
+            "is_completed": False,
+        }]
+    }]
+}
 
 @pytest.fixture
 def api_client():
@@ -93,46 +93,73 @@ def test_get_testrail_keys(pytest_test_items, testdir):
 
 
 def test_add_result(tr_plugin):
-    tr_plugin.add_result([1, 2], 3)
+    tr_plugin.add_result([1, 2], 3, failure='ERROR!', duration=3600)
 
     expected_results = [
         {
             'case_id': 1,
             'status_id': 3,
+            'comment': "ERROR!",
+            'duration': 3600
         },
         {
             'case_id': 2,
             'status_id': 3,
+            'comment': "ERROR!",
+            'duration': 3600
         }
     ]
 
     assert tr_plugin.results == expected_results
 
 
-def pytest_runtest_makereport(pytest_test_items, tr_plugin):
-    keys = ['C4354', 'C1234']
-    report = Mock(keywords={key: None for key in keys}, failed=True, when='teardown')
+def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
 
-    tr_plugin.pytest_runtest_makereport(report)
+    # This part of code is a little tricky: it fakes the execution of pytest_runtest_makereport (generator)
+    # by artificially send a stub object (Outcome)
+    # --------------------------------
+    class Outcome:
+        def __init__(self):
+            testdir.makepyfile(PYTEST_FILE)
+            self.result = testdir.runpytest()
+            setattr(self.result, "when", "call")
+            setattr(self.result, "longrepr", "An error")
+            setattr(self.result, "outcome", "failed")
+            self.result.duration = 2
+
+        def get_result(self):
+            return self.result
+
+    outcome = Outcome()
+    f = tr_plugin.pytest_runtest_makereport(pytest_test_items[0], None)
+    f.send(None)
+    try:
+        f.send(outcome)
+    except StopIteration:
+        pass
+        # --------------------------------
 
     expected_results = [
         {
-            'case_id': '4354',
-            'status_id': 1,
+            'case_id': 1234,
+            'status_id': 5,
+            'comment': "An error",
+            'duration': 2
         },
         {
-            'case_id': '1234',
-            'status_id': 1,
+            'case_id': 5678,
+            'status_id': 5,
+            'comment': "An error",
+            'duration': 2
         }
     ]
-
     assert tr_plugin.results == expected_results
 
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': 1},
-        {'case_id': 5678, 'status_id': 2},
+        {'case_id': 1234, 'status_id': 1, 'duration': 2.6},
+        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1}
     ]
     tr_plugin.testrun_id = 10
 
@@ -140,18 +167,19 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     check_cert = True
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
-    expected_data = {'status_id': 1, 'version': '1.0.0.0'}
+    expected_data = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
     api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
-    expected_data = {'status_id': 2, 'version': '1.0.0.0'}
+    expected_data = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
+                     'comment': "# Pytest result: #\n    An error"}
     api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': 1},
-        {'case_id': 5678, 'status_id': 2},
+        {'case_id': 1234, 'status_id': 1, 'duration': 2.6},
+        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1}
     ]
     tr_plugin.testplan_id = 100
     tr_plugin.testrun_id = 0
@@ -159,14 +187,17 @@ def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
     check_cert = True
+    expected_data_1234 = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
+    expected_data_5678 = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
+                          'comment': "# Pytest result: #\n    An error"}
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234),
-                                         {'status_id': 1, 'version': '1.0.0.0'}, check_cert)
+                                         expected_data_1234, check_cert)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678),
-                                         {'status_id': 2, 'version': '1.0.0.0'}, check_cert)
+                                         expected_data_5678, check_cert)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234),
-                                         {'status_id': 1, 'version': '1.0.0.0'}, check_cert)
+                                         expected_data_1234, check_cert)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678),
-                                         {'status_id': 2, 'version': '1.0.0.0'}, check_cert)
+                                         expected_data_5678, check_cert)
 
 
 def test_create_test_run(api_client, tr_plugin):
