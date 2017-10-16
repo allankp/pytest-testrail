@@ -19,7 +19,7 @@ ADD_TESTRUN_URL = 'add_run/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 
-COMMENT_SIZE_LIMIT = 1000
+COMMENT_SIZE_LIMIT = 4000
 
 
 def testrail(*ids):
@@ -122,7 +122,7 @@ class TestRailPlugin(object):
                 self.add_result(
                     clean_test_ids(testcaseids),
                     get_test_outcome(outcome.result.outcome),
-                    failure=rep.longrepr,
+                    comment=rep.longrepr,
                     duration=rep.duration
                 )
 
@@ -140,20 +140,20 @@ class TestRailPlugin(object):
 
     # plugin
 
-    def add_result(self, test_ids, status, failure='', duration=0):
+    def add_result(self, test_ids, status, comment='', duration=0):
         """
         Add a new result to results dict to be submitted at the end.
 
         :param list test_ids: list of test_ids.
         :param int status: status code of test (pass or fail).
-        :param failure: None or a failure representation.
+        :param comment: None or a failure representation.
         :param duration: Time it took to run just the test.
         """
         for test_id in test_ids:
             data = {
                 'case_id': test_id,
                 'status_id': status,
-                'comment': failure,
+                'comment': comment,
                 'duration': duration
             }
             self.results.append(data)
@@ -171,9 +171,10 @@ class TestRailPlugin(object):
                 data['version'] = self.version
             comment = result.get('comment', '')
             if comment:
-                # Indent text to avoid string formatting by TestRail. Limit size of comment
-                data['comment'] = "# Pytest result: #\n    " + str(comment)[:COMMENT_SIZE_LIMIT].replace('\n', '\n    ')
-                data['comment'] += '\n...\nLog truncated' if len(str(comment)) > COMMENT_SIZE_LIMIT else ''
+                # Indent text to avoid string formatting by TestRail. Limit size of comment.
+                data['comment'] = "# Pytest result: #\n"
+                data['comment'] += 'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else ''
+                data['comment'] += "    " + str(comment)[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else round(duration)  # TestRail API doesn't manage milliseconds

@@ -93,7 +93,7 @@ def test_get_testrail_keys(pytest_test_items, testdir):
 
 
 def test_add_result(tr_plugin):
-    tr_plugin.add_result([1, 2], 3, failure='ERROR!', duration=3600)
+    tr_plugin.add_result([1, 2], 3, comment='ERROR!', duration=3600)
 
     expected_results = [
         {
