@@ -1,12 +1,18 @@
+import sys
+
 from setuptools import setup
 
-long_description = open("README.rst").read()
+
+def read_file(fname):
+    with open(fname) as f:
+        return f.read()
+
 
 setup(
     name='pytest-testrail',
     description='pytest plugin for creating TestRail runs and adding results',
-    long_description=long_description,
-    version='0.0.11',
+    long_description=read_file('README.rst'),
+    version='1.0.0',
     author='Allan Kilpatrick',
     author_email='allanklp@gmail.com',
     url='http://github.com/allankilpatrick/pytest-testrail/',
@@ -15,10 +21,9 @@ setup(
     ],
     package_dir={'pytest_testrail': 'pytest_testrail'},
     install_requires=[
-        'pytest>=2',
-        'configparser>=3,<4',
-        'requests==2.11.1',
-        'simplejson'
+        'pytest==3.1.2',
+        'requests==2.18.1',
+        'simplejson==3.11.1',
     ],
     include_package_data=True,
     entry_points={'pytest11': ['pytest-testrail = pytest_testrail.conftest']},
