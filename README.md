@@ -24,6 +24,14 @@ from pytest_testrail.plugin import testrail
 @testrail('C1234', 'C5678')
 def test_foo():
     # test code goes here
+
+# OR	
+
+from pytest_testrail.plugin import pytestrail
+
+@pytestrail.case('C1234', 'C5678')
+def test_bar():
+    # test code goes here
 ```
 
 See a [more detailed example here](tests/livetest/livetest.py).
@@ -45,7 +53,7 @@ suite_id = 1
 Usage
 -----
 
-	py.test --testrail=<settings file>.cfg --tr_name='My Testrun Name'
+	py.test --testrail=<settings file>.cfg
 
 This will create a testrun in TestRail, add all marked tests to run.
 Once the all tests are finished they will be updated in TestRail.
@@ -58,11 +66,10 @@ This will update testrun in TestRail with ID 1234.
 	
 This will update testplan in TestRail with ID 5678.
 
-### Options
+	--tr-testrun-name='My Test Run'
 
-	--tr_name='My Testrun Name'
-
-Testruns can be named using the above flag, if this is not set a generated one will be used with name `'Automation Run <timestamp>'`
+Testruns can be named using the above flag, if this is not set a generated one will be used.
+' Automation Run "timestamp" '
 
 	--no-ssl-cert-check
 
@@ -80,3 +87,34 @@ This option allows to precise an existing test plan to update (by its TestRail I
     --tr-version='1.0.0.0'
 
 This option allows to provide a version of execution to a test result.
+
+
+### All available flags
+
+    --testrail            Create and update testruns with TestRail
+    --tr-config=TR_CONFIG
+                          Path to the config file containing information about
+                          the TestRail server (defaults to testrail.cfg)
+    --tr-url=TR_URL       TestRail address you use to access TestRail with your
+                          web browser (config file: url in API section)
+    --tr-email=TR_EMAIL   Email for the account on the TestRail server (config
+                          file: email in API section)
+    --tr-password=TR_PASSWORD
+                          Password for the account on the TestRail server
+                          (config file: password in API section)
+    --tr-testrun-assignedto-id=TR_TESTRUN_ASSIGNEDTO_ID
+                          ID of the user assigned to the test run (config file:
+                          assignedto_id in TESTRUN section)
+    --tr-testrun-project-id=TR_TESTRUN_PROJECT_ID
+                          ID of the project the test run is in (config file:
+                          project_id in TESTRUN section)
+    --tr-testrun-suite-id=TR_TESTRUN_SUITE_ID
+                          ID of the test suite containing the test cases (config
+                          file: suite_id in TESTRUN section)
+    --tr-testrun-name=TR_TESTRUN_NAME
+                          Name given to testrun, that appears in TestRail
+                          (config file: name in TESTRUN section)
+    --tr-no-ssl-cert-check
+                          Do not check for valid SSL certificate on TestRail
+                          host
+
