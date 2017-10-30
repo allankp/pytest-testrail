@@ -14,7 +14,6 @@
 
 import sys
 import requests
-import simplejson as json
 
 if sys.version_info.major == 2:
     from urlparse import urljoin

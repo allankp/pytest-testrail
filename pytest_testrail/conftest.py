@@ -54,18 +54,18 @@ def pytest_addoption(parser):
         default=None,
         help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
     group.addoption(
-        '--run-id',
+        '--tr-run-id',
         action='store',
         default=0,
         required=False,
-        help='Identifier of testrun, that appears in TestRail. If provided, option "--tr_name" will be ignored'
+        help='Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored'
     )
     group.addoption(
-        '--plan-id',
+        '--tr-plan-id',
         action='store',
         default=0,
         required=False,
-        help='Identifier of testplan, that appears in TestRail. If provided, option "--run-id" will be ignored'
+        help='Identifier of testplan, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored'
     )
     group.addoption(
         '--tr-version',
@@ -96,8 +96,8 @@ def pytest_configure(config):
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
                 cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
-                run_id=config.getoption('--run-id'),
-                plan_id=config.getoption('--plan-id'),
+                run_id=config.getoption('--tr-run-id'),
+                plan_id=config.getoption('--tr-plan-id'),
                 version=config.getoption('--tr-version')
             ),
             # Name of plugin instance (allow to be used by other plugins)

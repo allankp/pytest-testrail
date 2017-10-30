@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 import pytest
 
-from pytest_testrail.plugin import testrail
+from pytest_testrail.plugin import testrail, pytestrail
 
 @testrail('C344', 'C366')
 def test_func1():
@@ -16,10 +16,10 @@ def test_func2():
 def test_func3():
     pass
 
-@testrail('C1788')
+@pytestrail.case('C1788')
 def test_func4():
     pytest.skip()
 
-@testrail('C1789')
+@pytestrail.case('C1789')
 def test_func5():
     pass

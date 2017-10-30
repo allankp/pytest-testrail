@@ -142,14 +142,13 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     tr_plugin.pytest_sessionfinish(None, 0)
 
-    check_cert = True
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
     expected_data = {'status_id': 1, 'version': '1.0.0.0'}
-    api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
+    api_client.send_post.assert_any_call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
     expected_data = {'status_id': 2, 'version': '1.0.0.0'}
-    api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
+    api_client.send_post.assert_any_call(expected_uri, expected_data, cert_check=True)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):

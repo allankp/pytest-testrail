@@ -193,7 +193,7 @@ class PyTestRailPlugin(object):
             response = self.client.send_post(
                 ADD_RESULT_URL.format(testrun_id, result['case_id']),
                 data,
-                self.cert_check
+                cert_check=self.cert_check
             )
             error = self.client.get_error(response)
             if error:
@@ -234,7 +234,7 @@ class PyTestRailPlugin(object):
         """
         response = self.client.send_get(
             GET_TESTRUN_URL.format(self.testrun_id),
-            self.cert_check
+            cert_check=self.cert_check
         )
         error = self.client.get_error(response)
         if error:
@@ -251,7 +251,7 @@ class PyTestRailPlugin(object):
         """
         response = self.client.send_get(
             GET_TESTPLAN_URL.format(self.testplan_id),
-            self.cert_check
+            cert_check=self.cert_check
         )
         error = self.client.get_error(response)
         if error:
@@ -268,7 +268,7 @@ class PyTestRailPlugin(object):
         testruns_list = []
         response = self.client.send_get(
             GET_TESTPLAN_URL.format(plan_id),
-            self.cert_check
+            cert_check=self.cert_check
         )
         error = self.client.get_error(response)
         if error:
