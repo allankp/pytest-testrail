@@ -19,9 +19,9 @@ setup(
     ],
     package_dir={'pytest_testrail': 'pytest_testrail'},
     install_requires=[
-        'pytest==3.1.2',
-        'requests==2.18.1',
-        'simplejson==3.11.1',
+        'pytest>=2',
+        'requests>=2',
+        'simplejson',
     ],
     include_package_data=True,
     entry_points={'pytest11': ['pytest-testrail = pytest_testrail.conftest']},
