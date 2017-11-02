@@ -12,7 +12,7 @@ setup(
     name='pytest-testrail',
     description='pytest plugin for creating TestRail runs and adding results',
     long_description=read_file('README.rst'),
-    version='1.0.0',
+    version='1.0.1',
     author='Allan Kilpatrick',
     author_email='allanklp@gmail.com',
     url='http://github.com/allankilpatrick/pytest-testrail/',
