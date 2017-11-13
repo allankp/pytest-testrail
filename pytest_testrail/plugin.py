@@ -93,10 +93,10 @@ class TestRailPlugin(object):
         tr_keys = get_testrail_keys(items)
 
         if self.testplan_id and self.is_testplan_available():
-            print('Use existing testplan "ID={}"'.format(self.testplan_id))
+            print('[{}] Use existing testplan "ID={}"'.format(TESTRAIL_PREFIX, self.testplan_id))
             self.testrun_id = 0
         elif self.testrun_id and self.is_testrun_available():
-            print('Use existing testrun "ID={}"'.format(self.testrun_id))
+            print('[{}] Use existing testrun "ID={}"'.format(TESTRAIL_PREFIX, self.testrun_id))
             self.testplan_id = 0
         else:
             if self.testrun_name is None:
@@ -128,7 +128,10 @@ class TestRailPlugin(object):
 
     def pytest_sessionfinish(self, session, exitstatus):
         """ Publish results in TestRail """
+        print('[{}] Start publishing'.format(TESTRAIL_PREFIX))
         if self.results:
+            tests_list = [str(result['case_id']) for result in self.results]
+            print('[{}] Testcases to publish: {}'.format(TESTRAIL_PREFIX, ', '.join(tests_list)))
 
             if self.testrun_id:
                 self.add_results(self.testrun_id)
@@ -136,7 +139,8 @@ class TestRailPlugin(object):
                 for testrun_id in self.get_available_testruns(self.testplan_id):
                     self.add_results(testrun_id)
             else:
-                print('No data published')
+                print('[{}] No data published'.format(TESTRAIL_PREFIX))
+        print('[{}] End publishing'.format(TESTRAIL_PREFIX))
 
     # plugin
 
@@ -186,7 +190,9 @@ class TestRailPlugin(object):
             )
             error = self.client.get_error(response)
             if error:
-                print('Info: Testcase #{} not published for following reason: "{}"'.format(result['case_id'], error))
+                print('[{}] Info: Testcase #{} not published for following reason: "{}"'.format(TESTRAIL_PREFIX,
+                                                                                                result['case_id'],
+                                                                                                error))
 
     def create_test_run(
             self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
@@ -210,10 +216,12 @@ class TestRailPlugin(object):
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to create testrun: "{}"'.format(error))
+            print('[{}] Failed to create testrun: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             self.testrun_id = response['id']
-            print('New testrun created with name "{}" and ID={}'.format(testrun_name, self.testrun_id))
+            print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
+                                                                              testrun_name,
+                                                                              self.testrun_id))
 
     def is_testrun_available(self):
         """
@@ -227,7 +235,7 @@ class TestRailPlugin(object):
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to retrieve testrun: "{}"'.format(error))
+            print('[{}] Failed to retrieve testrun: "{}"'.format(TESTRAIL_PREFIX, error))
             return False
 
         return response['is_completed'] is False
@@ -244,7 +252,7 @@ class TestRailPlugin(object):
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to retrieve testplan: "{}"'.format(error))
+            print('[{}] Failed to retrieve testplan: "{}"'.format(TESTRAIL_PREFIX, error))
             return False
 
         return response['is_completed'] is False
@@ -261,7 +269,7 @@ class TestRailPlugin(object):
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to retrieve testplan: "{}"'.format(error))
+            print('[{}] Failed to retrieve testplan: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             for entry in response['entries']:
                 for run in entry['runs']:
