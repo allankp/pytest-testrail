@@ -136,7 +136,9 @@ class TestRailPlugin(object):
             if self.testrun_id:
                 self.add_results(self.testrun_id)
             elif self.testplan_id:
-                for testrun_id in self.get_available_testruns(self.testplan_id):
+                testruns = self.get_available_testruns(self.testplan_id)
+                print('[{}] Testruns to update: {}'.format(TESTRAIL_PREFIX, ', '.join([str(elt) for elt in testruns])))
+                for testrun_id in testruns:
                     self.add_results(testrun_id)
             else:
                 print('[{}] No data published'.format(TESTRAIL_PREFIX))
