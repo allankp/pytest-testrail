@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 from datetime import datetime
+from operator import itemgetter
+
 import pytest
 
 
@@ -171,7 +173,13 @@ class TestRailPlugin(object):
         :param testrun_id: Id of the testrun to feed
 
         """
-        for result in self.results:
+        # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
+        print(self.results)
+        results = sorted(self.results, key=itemgetter('status_id'))
+        results = sorted(results, key=itemgetter('case_id'))
+
+        # Publish results
+        for result in results:
             data = {'status_id': result['status_id']}
             if self.version:
                 data['version'] = self.version

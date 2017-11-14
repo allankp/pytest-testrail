@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 from datetime import datetime
+from unittest.mock import call
 from freezegun import freeze_time
 from mock import create_autospec
 import pytest
@@ -158,8 +159,9 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': 1, 'duration': 2.6},
-        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1}
+        {'case_id': 1234, 'status_id': 5, 'duration': 2.6},
+        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1},
+        {'case_id': 1234, 'status_id': 1, 'duration': 2.6}
     ]
     tr_plugin.testrun_id = 10
 
@@ -168,18 +170,22 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
     check_cert = True
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
     expected_data = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
+    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, check_cert)
+
+    expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
+    expected_data = {'status_id': 5, 'version': '1.0.0.0', 'elapsed': '3s'}
+    api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, check_cert)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
     expected_data = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
                      'comment': "# Pytest result: #\n    An error"}
-    api_client.send_post.assert_any_call(expected_uri, expected_data, check_cert)
+    api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, check_cert)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': 1, 'duration': 2.6},
-        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1}
+        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1},
+        {'case_id': 1234, 'status_id': 1, 'duration': 2.6}
     ]
     tr_plugin.testplan_id = 100
     tr_plugin.testrun_id = 0
