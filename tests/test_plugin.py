@@ -3,7 +3,7 @@
 from datetime import datetime
 from unittest.mock import call
 from freezegun import freeze_time
-from mock import create_autospec, Mock
+from mock import create_autospec
 import pytest
 
 from pytest_testrail import plugin
@@ -173,16 +173,16 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
     expected_data = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, check_cert)
+    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
     expected_data = {'status_id': 5, 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, check_cert)
+    api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
     expected_data = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
                      'comment': "# Pytest result: #\n    An error"}
-    api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, check_cert)
+    api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, cert_check=True)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
@@ -195,18 +195,20 @@ def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
 
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
-    check_cert = True
     expected_data_1234 = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
     expected_data_5678 = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
                           'comment': "# Pytest result: #\n    An error"}
+
+    print(api_client.send_post.call_args_list)
+
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234),
-                                         expected_data_1234, check_cert)
+                                         expected_data_1234, cert_check=True)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678),
-                                         expected_data_5678, check_cert)
+                                         expected_data_5678, cert_check=True)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234),
-                                         expected_data_1234, check_cert)
+                                         expected_data_1234, cert_check=True)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678),
-                                         expected_data_5678, check_cert)
+                                         expected_data_5678, cert_check=True)
 
 
 def test_create_test_run(api_client, tr_plugin):

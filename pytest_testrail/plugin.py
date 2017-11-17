@@ -203,12 +203,11 @@ class PyTestRailPlugin(object):
 
         """
         # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
-        print(self.results)
-        results = sorted(self.results, key=itemgetter('status_id'))
-        results = sorted(results, key=itemgetter('case_id'))
+        self.results.sort(key=itemgetter('status_id'))
+        self.results.sort(key=itemgetter('case_id'))
 
         # Publish results
-        for result in results:
+        for result in self.results:
             data = {'status_id': result['status_id']}
             if self.version:
                 data['version'] = self.version
