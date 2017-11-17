@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 import pytest
+import time
 
 from pytest_testrail.plugin import testrail, pytestrail
 
 @testrail('C344', 'C366')
 def test_func1():
-    pass
+    time.sleep(0.5)
 
 @testrail('C345')
 def test_func2():
+    time.sleep(1.6)
     pytest.fail()
 
 @testrail('C99999')
 def test_func3():
-    pass
+    time.sleep(0.5)
 
 @pytestrail.case('C1788')
 def test_func4():
@@ -22,4 +24,4 @@ def test_func4():
 
 @pytestrail.case('C1789')
 def test_func5():
-    pass
+    time.sleep(0.5)
