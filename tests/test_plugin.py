@@ -168,15 +168,15 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     tr_plugin.pytest_sessionfinish(None, 0)
 
-    expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
+    expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 1234)
     expected_data = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
     api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
 
-    expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
+    expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 1234)
     expected_data = {'status_id': 5, 'version': '1.0.0.0', 'elapsed': '3s'}
     api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, cert_check=True)
 
-    expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
+    expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 5678)
     expected_data = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
                      'comment': "# Pytest result: #\n    An error"}
     api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, cert_check=True)
@@ -283,10 +283,37 @@ def test_close_test_plan(api_client, tr_plugin):
     tr_plugin.testplan_id = 100
     tr_plugin.testrun_id = 0
     tr_plugin.close_on_complete = True
-    
+
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_uri = plugin.CLOSE_TESTPLAN_URL.format(tr_plugin.testplan_id)
     api_client.send_post.call_args_list[3] = call(expected_uri, {}, cert_check=True)
-    
+
+
+def test_dont_publish_blocked(api_client):
+    """ Case: one test is blocked"""
+    my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME,
+                     version='1.0.0.0',
+                     publish_blocked=False
+                     )
+
+    my_plugin.results = [
+        {'case_id': 1234, 'status_id': 5},
+        {'case_id': 5678, 'status_id': 1}
+    ]
+    my_plugin.testrun_id = 10
+
+    api_client.send_get.return_value = [
+        {'case_id': 1234, 'status_id': 2},
+        {'case_id': 5678, 'status_id': 1}
+    ]
+
+    my_plugin.pytest_sessionfinish(None, 0)
+
+    api_client.send_get.assert_called_once_with(plugin.GET_TESTS_URL.format(my_plugin.testrun_id),
+                                                cert_check=True)
+    expected_uri = plugin.ADD_RESULT_URL.format(my_plugin.testrun_id, 1234)
+    expected_data = {'status_id': 5, 'version': '1.0.0.0'}
+    len(api_client.send_post.call_args_list) == 1
+    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
