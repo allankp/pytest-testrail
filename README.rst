@@ -113,7 +113,9 @@ All available options
                             host
       --tr-close-on-complete
                            Close a test plan or test run on completion.
-
+      --tr-dont-publish-blocked
+                            Do not publish results of "blocked" testcases in
+                            TestRail
 
 .. |Build Status| image:: https://travis-ci.org/dubner/pytest-testrail.svg?branch=master
    :target: https://travis-ci.org/dubner/pytest-testrail

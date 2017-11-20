@@ -107,3 +107,7 @@ py.test --testrail --tr-config=<settings file>.cfg
                         host
   --tr-close-on-complete
                         Close a test plan or test run on completion.
+  --tr-dont-publish-blocked
+                        Do not publish results of "blocked" testcases in
+                        TestRail
+```

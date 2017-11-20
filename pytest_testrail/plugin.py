@@ -225,11 +225,14 @@ class PyTestRailPlugin(object):
         self.results.sort(key=itemgetter('case_id'))
 
         # Manage case of "blocked" testcases
-        if not self.publish_blocked:
+        if self.publish_blocked is False:
+            print('[{}] Option "Don\'t publish blocked testcases" activated'.format(TESTRAIL_PREFIX))
             blocked_tests_list = [
                 test.get('case_id') for test in self.get_tests(testrun_id)
                 if test.get('status_id') == 2
             ]
+            print('[{}] Blocked testcases excluded: {}'.format(TESTRAIL_PREFIX,
+                                                               ', '.join(str(elt) for elt in blocked_tests_list)))
             self.results = [result for result in self.results if result.get('case_id') not in blocked_tests_list]
 
         # Publish results

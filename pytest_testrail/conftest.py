@@ -81,9 +81,8 @@ def pytest_addoption(parser):
         required=False,
         help='Close a test run on completion')
     group.addoption(
-        '--tr-publish-blocked',
-        action='store',
-        default=True,
+        '--tr-dont-publish-blocked',
+        action='store_false',
         required=False,
         help='Determine if results of "blocked" testcases (in TestRail) are published or not')
 
