@@ -62,7 +62,7 @@ def pytest_addoption(parser):
         help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
 
 
-    group_exist_testrun = parser.getgroup('testrail exists test run')
+    group_exist_testrun = parser.getgroup('testrail use exist test run')
     group_exist_testrun.addoption(
         '--tr-testrun-id',
         action='store',
