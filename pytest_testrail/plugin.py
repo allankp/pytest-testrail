@@ -7,6 +7,7 @@ import warnings
 PYTEST_TO_TESTRAIL_STATUS = {
     "passed": 1,
     "failed": 5,
+    "untested":3,
     "skipped": 2,
 }
 
@@ -95,33 +96,44 @@ def get_testrail_keys(items):
     return testcaseids
 
 
-class PyTestRailPlugin(object):
-    def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
-        self.assign_user_id = assign_user_id
+class PyTestRailPluginSuper(object):
+
+    def __init__(self, client, cert_check):
+        self.results = dict()
         self.cert_check = cert_check
         self.client = client
-        self.project_id = project_id
-        self.results = []
-        self.suite_id = suite_id
         self.testrun_id = 0
-        self.testrun_name = tr_name
 
-    # pytest hooks
+    def add_result(self, test_ids, status, comment):
+        """
+        Add a new result to results dict to be submitted at the end.
 
-    @pytest.hookimpl(trylast=True)
-    def pytest_collection_modifyitems(self, session, config, items):
-        tr_keys = get_testrail_keys(items)
-        if self.testrun_name is None:
-            self.testrun_name = testrun_name()
+        :param list test_id: list of test_ids.
+        :param int status: status code of test (pass or fail).
+        """
+        for test_id in test_ids:
+            data = {
+                'case_id': test_id,
+                'comment': comment,
+                'status_id': status,
+            }
 
-        self.create_test_run(
-            self.assign_user_id,
-            self.project_id,
-            self.suite_id,
-            self.testrun_name,
-            tr_keys
-        )
+            if self.results.__contains__(test_id):
+                if not self.results[test_id]['status_id'] == 5:
+                    self.results[test_id]['status_id'] = status
+                self.results[test_id]['comment'] += "\n{}\n{}".format(30 * "-", data['comment'])
+            else:
+                self.results[test_id] = data
+
+    def get_test_results(self, test_id):
+        test_results = self.client.send_get("get_results/{}".format(test_id), cert_check=self.cert_check)
+        return test_results
+
+    def get_lastest_test_status(self, test_results):
+        if test_results:
+            return test_results[0]['status_id']
+        else:
+            return PYTEST_TO_TESTRAIL_STATUS['untested']
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
@@ -148,22 +160,32 @@ class PyTestRailPlugin(object):
                 cert_check=self.cert_check
             )
 
+
+class PyTestRailPlugin(PyTestRailPluginSuper):
+    def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
+        PyTestRailPluginSuper.__init__(self, client,cert_check)
+        self.assign_user_id = assign_user_id
+        self.project_id = project_id
+        self.suite_id = suite_id
+        self.testrun_name = tr_name
+
+    # pytest hooks
+
+    @pytest.hookimpl(trylast=True)
+    def pytest_collection_modifyitems(self, session, config, items):
+        tr_keys = get_testrail_keys(items)
+        if self.testrun_name is None:
+            self.testrun_name = testrun_name()
+
+        self.create_test_run(
+            self.assign_user_id,
+            self.project_id,
+            self.suite_id,
+            self.testrun_name,
+            tr_keys
+        )
+
     # plugin
-
-    def add_result(self, test_ids, status, comment):
-        """
-        Add a new result to results dict to be submitted at the end.
-
-        :param list test_id: list of test_ids.
-        :param int status: status code of test (pass or fail).
-        """
-        for test_id in test_ids:
-            data = {
-                'case_id': test_id,
-                'comment': comment,
-                'status_id': status,
-            }
-            self.results.append(data)
 
     def create_test_run(
             self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
@@ -190,3 +212,44 @@ class PyTestRailPlugin(object):
                 print('Failed to create testrun: {}'.format(response))
             else:
                 self.testrun_id = response['id']
+
+
+class PyTestRailPlugin2(PyTestRailPluginSuper):
+    def __init__(self, client, test_run_id, cert_check, type_skip_list):
+        PyTestRailPluginSuper.__init__(self, client, cert_check)
+        self.testrun_id = test_run_id
+        self.type_skip_list = type_skip_list
+
+    # pytest hooks
+    @pytest.hookimpl(trylast=True)
+    def pytest_collection_modifyitems(self, config, items):
+        tests_list = self.get_test_run()
+
+        run = set()
+        skip = set()
+        for case in tests_list:
+
+            test_results = self.get_test_results(case['test_id'])
+            last_status_test = self.get_lastest_test_status(test_results)
+            for item in items:
+
+                testcaseids = clean_test_ids(item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')) if item.get_marker(TESTRAIL_PREFIX) else None
+                if (testcaseids and last_status_test not in self.type_skip_list):
+                    run.add(item)
+                else:
+                    skip.add(item)
+
+                if item.get_marker('C{}'.format(case['case_id'])):
+                    item.add_marker("testrail_id{}".format(case['test_id']))
+
+        items[:] = run
+        if skip:
+            config.hook.pytest_deselected(items=list(skip))
+
+    def get_test_run(self):
+
+        case = self.client.send_get("get_tests/{}".format(self.testrun_id), cert_check=self.cert_check)
+        test_cases_id_list = []
+        for test in case:
+            test_cases_id_list.append({"case_id": test['case_id'], "test_id": test['id']})
+        return test_cases_id_list
