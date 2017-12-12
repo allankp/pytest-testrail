@@ -64,29 +64,13 @@ Or
 Usage
 -----
 
-This will create a testrun in TestRail, add all marked tests to run.
-Once the all tests are finished they will be updated in TestRail:
+Basically, the following command will create a testrun in TestRail, add
+all marked tests to run. Once the all tests are finished they will be
+updated in TestRail:
 
 .. code:: bash
 
     py.test --testrail --tr-config=<settings file>.cfg
-
-    or
-
-    py.test --testrail --tr-url=https://yoururl.testrail.net/ --tr-email=user@email.com --tr-password=uiqefhqliefl34534
-    --tr-testrun-assignedto-id=1 --tr-testrun-project-id=2 --tr-testrun-suite-id=3
-
-This will update testrun in TestRail with ID 1234:
-
-::
-
-    py.test --testrail --tr-config=<settings file>.cfg --tr-run-id=1234
-
-This will update testplan in TestRail with ID 5678:
-
-::
-
-    py.test --testrail --tr-config=<settings file>.cfg --tr-plan-id=5678
 
 All available options
 ~~~~~~~~~~~~~~~~~~~~~
