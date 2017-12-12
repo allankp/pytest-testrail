@@ -114,15 +114,24 @@ class PyTestRailPlugin(object):
 
     # pytest hooks
 
+    def pytest_report_header(self, config, startdir):
+        """ Add extra-info in header """
+        message = 'pytest-testrail: '
+        if self.testplan_id:
+            message += 'existing testplan #{} selected'.format(self.testplan_id)
+        elif self.testrun_id:
+            message += 'existing testrun #{} selected'.format(self.testrun_id)
+        else:
+            message += 'a new testrun will be created'
+        return message
+
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         tr_keys = get_testrail_keys(items)
 
         if self.testplan_id and self.is_testplan_available():
-            print('Use existing testplan "ID={}"'.format(self.testplan_id))
             self.testrun_id = 0
         elif self.testrun_id and self.is_testrun_available():
-            print('Use existing testrun "ID={}"'.format(self.testrun_id))
             self.testplan_id = 0
         else:
             if self.testrun_name is None:
