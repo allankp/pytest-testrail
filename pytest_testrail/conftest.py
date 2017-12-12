@@ -7,7 +7,7 @@ else:
     # python3
     import configparser
 
-from .plugin import PyTestRailPlugin
+from .plugin import PyTestRailPlugin, PyTestRailPlugin2
 from .testrail_api import APIClient
 
 
@@ -15,13 +15,10 @@ def pytest_addoption(parser):
     group = parser.getgroup('testrail')
     group.addoption(
         '--testrail',
-        action='store_true',
-        help='Create and update testruns with TestRail')
-    group.addoption(
-        '--tr-config',
+        choices=['1', '2'],
         action='store',
-        default='testrail.cfg',
-        help='Path to the config file containing information about the TestRail server (defaults to testrail.cfg)')
+        help='''1.Create and update tests in testruns with TestRail\n 
+                2.Read testrun and update tests with TestRail''')
     group.addoption(
         '--tr-url',
         action='store',
@@ -35,30 +32,70 @@ def pytest_addoption(parser):
         action='store',
         help='Password for the account on the TestRail server (config file: password in API section)')
     group.addoption(
+        '--tr-no-ssl-cert-check',
+        action='store_false',
+        default=True,
+        help='Do not check for valid SSL certificate on TestRail host')
+
+    group_create_testrun = parser.getgroup('testrail create test run')
+    group_create_testrun.addoption(
+        '--tr-config',
+        action='store',
+        default='testrail.cfg',
+        help='Path to the config file containing information about the TestRail server (defaults to testrail.cfg)')
+    group_create_testrun.addoption(
         '--tr-testrun-assignedto-id',
         action='store',
         help='ID of the user assigned to the test run (config file: assignedto_id in TESTRUN section)')
-    group.addoption(
+    group_create_testrun.addoption(
         '--tr-testrun-project-id',
         action='store',
         help='ID of the project the test run is in (config file: project_id in TESTRUN section)')
-    group.addoption(
+    group_create_testrun.addoption(
         '--tr-testrun-suite-id',
         action='store',
         help='ID of the test suite containing the test cases (config file: suite_id in TESTRUN section)')
-    group.addoption(
+    group_create_testrun.addoption(
         '--tr-testrun-name',
         action='store',
         default=None,
         help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
-    group.addoption(
-        '--tr-no-ssl-cert-check',
-        action='store_false',
-        help='Do not check for valid SSL certificate on TestRail host')
 
+
+    group_exist_testrun = parser.getgroup('testrail use exist test run')
+    group_exist_testrun.addoption(
+        '--tr-testrun-id',
+        action='store',
+        default=None,
+        help='ID of the test run containing the tests',)
+    group_exist_testrun.addoption(
+        '--tr-skip-passed-tests',
+        action='store_true',
+        default=False,
+        help='Skip all passed tests in testrun', )
+    group_exist_testrun.addoption(
+        '--tr-skip-blocked-tests',
+        action='store_true',
+        default=False,
+        help='Skip all blocked tests in testrun', )
+    group_exist_testrun.addoption(
+        '--tr-skip-untested-tests',
+        action='store_true',
+        default=False,
+        help='Skip all untested tests in testrun', )
+    group_exist_testrun.addoption(
+        '--tr-skip-retest-tests',
+        action='store_true',
+        default=False,
+        help='Skip all retest tests in testrun', )
+    group_exist_testrun.addoption(
+        '--tr-skip-failed-tests',
+        action='store_true',
+        default=False,
+        help='Skip all failed tests in testrun', )
 
 def pytest_configure(config):
-    if config.getoption('--testrail'):
+    if config.getoption('--testrail') == "1":
         cfg_file_path = config.getoption('--tr-config')
         config_manager = ConfigManager(cfg_file_path, config)
         client = APIClient(config_manager.getoption('tr-url', 'url', 'API'),
@@ -74,6 +111,32 @@ def pytest_configure(config):
                 cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN')
             )
+        )
+    elif config.getoption('--testrail') == "2":
+
+        client = APIClient(config.getoption("--tr-url"),
+                           config.getoption("--tr-email"),
+                           config.getoption("--tr-password"))
+        testrun_id = config.getoption("--tr-testrun-id")
+
+        assert testrun_id
+
+        type_skip_list = list()
+        if config.getoption("--tr-skip-passed-tests"):
+            type_skip_list.append(1)
+        if config.getoption("--tr-skip-blocked-tests"):
+            type_skip_list.append(2)
+        if config.getoption("--tr-skip-untested-tests"):
+            type_skip_list.append(3)
+        if config.getoption("--tr-skip-retest-tests"):
+            type_skip_list.append(4)
+        if config.getoption("--tr-skip-failed-tests"):
+            type_skip_list.append(5)
+
+        ssl_cert_check = config.getoption('--tr-no-ssl-cert-check')
+
+        config.pluginmanager.register(
+            PyTestRailPlugin2(client, testrun_id, ssl_cert_check, type_skip_list)
         )
 
 
