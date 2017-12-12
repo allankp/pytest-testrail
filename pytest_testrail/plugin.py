@@ -3,11 +3,10 @@ import pytest
 import re
 import warnings
 
-
 PYTEST_TO_TESTRAIL_STATUS = {
     "passed": 1,
     "failed": 5,
-    "untested":3,
+    "untested": 3,
     "skipped": 2,
 }
 
@@ -17,6 +16,7 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULTS_URL = 'add_results_for_cases/{}/'
 ADD_TESTRUN_URL = 'add_run/{}'
+GET_CASE = 'get_case/{}'
 
 
 class DeprecatedTestDecorator(DeprecationWarning):
@@ -31,6 +31,7 @@ class pytestrail(object):
     An alternative to using the testrail function as a decorator for test cases, since py.test may confuse it as a test
     function since it has the 'test' prefix
     '''
+
     @staticmethod
     def case(*ids):
         """
@@ -52,7 +53,7 @@ def testrail(*ids):
     :return pytest.mark:
     """
     deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
-            '@pytestrail.case decorator instead.')
+                       '@pytestrail.case decorator instead.')
     warnings.warn(deprecation_msg, DeprecatedTestDecorator)
     return pytestrail.case(*ids)
 
@@ -97,7 +98,6 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPluginSuper(object):
-
     def __init__(self, client, cert_check):
         self.results = dict()
         self.cert_check = cert_check
@@ -115,7 +115,7 @@ class PyTestRailPluginSuper(object):
             data = {
                 'case_id': test_id,
                 'comment': comment,
-                'status_id': status,
+                'status_id': status
             }
 
             if self.results.__contains__(test_id):
@@ -135,14 +135,20 @@ class PyTestRailPluginSuper(object):
         else:
             return PYTEST_TO_TESTRAIL_STATUS['untested']
 
+    def get_case(self, case_id):
+        response = self.client.send_get(
+            GET_CASE.format(case_id)
+        )
+
+        return response
+
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
         outcome = yield
         rep = outcome.get_result()
-        comment = ""
-        if call.excinfo:
-            comment = str(item.repr_failure(call.excinfo))
+
         if item.get_marker(TESTRAIL_PREFIX):
+            comment = str(item.repr_failure(call.excinfo)) if call.excinfo else ""
             testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
 
             if rep.when == 'call' and testcaseids:
@@ -162,8 +168,9 @@ class PyTestRailPluginSuper(object):
 
 
 class PyTestRailPlugin(PyTestRailPluginSuper):
+
     def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name):
-        PyTestRailPluginSuper.__init__(self, client,cert_check)
+        PyTestRailPluginSuper.__init__(self, client, cert_check)
         self.assign_user_id = assign_user_id
         self.project_id = project_id
         self.suite_id = suite_id
@@ -217,31 +224,50 @@ class PyTestRailPlugin(PyTestRailPluginSuper):
 class PyTestRailPlugin2(PyTestRailPluginSuper):
     def __init__(self, client, test_run_id, cert_check, type_skip_list):
         PyTestRailPluginSuper.__init__(self, client, cert_check)
+        # testrail testrun id
         self.testrun_id = test_run_id
+        # testrail statuses you need to skip
         self.type_skip_list = type_skip_list
 
     # pytest hooks
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, config, items):
+        # get all tests in testrun testrail
         tests_list = self.get_test_run()
-
+        # list tests for run
         run = set()
+        # list tests for skip
         skip = set()
+        # dict with all tests pytest marks
+        item_dict = dict()
+        for item in items:
+            testcaseids = clean_test_ids(item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')) if item.get_marker(
+                TESTRAIL_PREFIX) else None
+
+            # add in dict "item_dict" all tests testrail marks
+            if testcaseids:
+                for test_case_id in testcaseids:
+                    if item_dict.__contains__(test_case_id):
+                        item_dict[test_case_id] += [item]
+                    else:
+                        item_dict[test_case_id] = [item]
+
         for case in tests_list:
-
+            # get all results for test in testrail
             test_results = self.get_test_results(case['test_id'])
+            # get the latest test status in testrail
             last_status_test = self.get_lastest_test_status(test_results)
-            for item in items:
 
-                testcaseids = clean_test_ids(item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')) if item.get_marker(TESTRAIL_PREFIX) else None
-                if (testcaseids and last_status_test not in self.type_skip_list):
-                    run.add(item)
+            # if testrail_case_id is contained in item_dict and test_last_status dont need skip, add in dict run, else add in dict skip
+            if (case['case_id'] in item_dict.keys()):
+                if last_status_test not in self.type_skip_list:
+                    for test_case_id in item_dict[case['case_id']]:
+                        run.add(test_case_id)
                 else:
-                    skip.add(item)
+                    for test_case_id in item_dict[case['case_id']]:
+                        skip.add(test_case_id)
 
-                if item.get_marker('C{}'.format(case['case_id'])):
-                    item.add_marker("testrail_id{}".format(case['test_id']))
-
+        # running only the necessary tests and deselected all missed tests
         items[:] = run
         if skip:
             config.hook.pytest_deselected(items=list(skip))
