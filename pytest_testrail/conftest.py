@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import os
 import sys
 if sys.version_info.major == 2:
@@ -52,6 +53,27 @@ def pytest_addoption(parser):
         default=None,
         help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
     group.addoption(
+        '--tr-run-id',
+        action='store',
+        default=0,
+        required=False,
+        help='Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored'
+    )
+    group.addoption(
+        '--tr-plan-id',
+        action='store',
+        default=0,
+        required=False,
+        help='Identifier of testplan, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored'
+    )
+    group.addoption(
+        '--tr-version',
+        action='store',
+        default='',
+        required=False,
+        help='Indicate a version in Test Case result.'
+    )
+    group.addoption(
         '--tr-no-ssl-cert-check',
         action='store_false',
         help='Do not check for valid SSL certificate on TestRail host')
@@ -72,8 +94,13 @@ def pytest_configure(config):
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
                 cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', default=True),
-                tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN')
-            )
+                tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
+                run_id=config.getoption('--tr-run-id'),
+                plan_id=config.getoption('--tr-plan-id'),
+                version=config.getoption('--tr-version')
+            ),
+            # Name of plugin instance (allow to be used by other plugins)
+            name="pytest-testrail-instance"
         )
 
 
