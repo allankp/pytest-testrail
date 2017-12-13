@@ -62,17 +62,27 @@ This flag can be used prevent checking for a valid SSL certificate on TestRail h
 
 Available flags:
 
-    --testrail            Create and update testruns with TestRail
-    --tr-config=TR_CONFIG
-                          Path to the config file containing information about
-                          the TestRail server (defaults to testrail.cfg)
+    --testrail [1,2]      
+			  1.Create and update testruns with TestRail
+			  2.Read testrun and update tests with TestRail
     --tr-url=TR_URL       TestRail address you use to access TestRail with your
                           web browser (config file: url in API section)
     --tr-email=TR_EMAIL   Email for the account on the TestRail server (config
                           file: email in API section)
     --tr-password=TR_PASSWORD
                           Password for the account on the TestRail server
-                          (config file: password in API section)
+                          (config file: password in API section) 
+    --tr-no-ssl-cert-check
+                          Do not check for valid SSL certificate on TestRail
+                          host
+	
+   for testrail 1
+    
+    --tr-config=TR_CONFIG
+                          Path to the config file containing information about
+                          the TestRail server (defaults to testrail.cfg)
+                          Path to the config file containing information about
+                          the TestRail server (defaults to testrail.cfg)
     --tr-testrun-assignedto-id=TR_TESTRUN_ASSIGNEDTO_ID
                           ID of the user assigned to the test run (config file:
                           assignedto_id in TESTRUN section)
@@ -85,6 +95,20 @@ Available flags:
     --tr-testrun-name=TR_TESTRUN_NAME
                           Name given to testrun, that appears in TestRail
                           (config file: name in TESTRUN section)
-    --tr-no-ssl-cert-check
-                          Do not check for valid SSL certificate on TestRail
                           host
+
+   for testrail 2
+
+    --tr-testrun-id=TR_TESTRUN_ID
+                          ID of the test run containing the tests
+    --tr-skip-passed-tests
+                          Skip all passed tests in testrun
+    --tr-skip-blocked-tests
+                          Skip all blocked tests in testrun
+    --tr-skip-untested-tests
+                          Skip all untested tests in testrun
+    --tr-skip-retest-tests
+                          Skip all retest tests in testrun
+    --tr-skip-failed-tests
+                          Skip all failed tests in testrun
+
