@@ -96,16 +96,18 @@ def test_get_testrail_keys(pytest_test_items, testdir):
 
 
 def test_add_result(tr_plugin):
-    tr_plugin.add_result([1, 2], 3)
+    tr_plugin.add_result([1, 2], 3, 'comment')
 
     expected_results = [
         {
             'case_id': 1,
             'status_id': 3,
+            'comment': 'comment',
         },
         {
             'case_id': 2,
             'status_id': 3,
+            'comment': 'comment',
         }
     ]
 

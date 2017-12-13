@@ -150,14 +150,17 @@ class PyTestRailPlugin(object):
         """ Collect result and associated testcases (TestRail) of an execution """
         outcome = yield
         rep = outcome.get_result()
+        comment = ""
+        if call.excinfo:
+            comment = str(item.repr_failure(call.excinfo))
         if item.get_marker(TESTRAIL_PREFIX):
             testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
 
             if rep.when == 'call' and testcaseids:
                 self.add_result(
                     clean_test_ids(testcaseids),
-                    get_test_outcome(outcome.result.outcome)
-                )
+                    get_test_outcome(outcome.result.outcome),
+                    comment)
 
     def pytest_sessionfinish(self, session, exitstatus):
         """ Publish results in TestRail """
@@ -173,7 +176,7 @@ class PyTestRailPlugin(object):
 
     # plugin
 
-    def add_result(self, test_ids, status):
+    def add_result(self, test_ids, status, comment):
         """
         Add a new result to results dict to be submitted at the end.
 
@@ -183,6 +186,7 @@ class PyTestRailPlugin(object):
         for test_id in test_ids:
             data = {
                 'case_id': test_id,
+                'comment': comment,
                 'status_id': status,
             }
             self.results.append(data)
