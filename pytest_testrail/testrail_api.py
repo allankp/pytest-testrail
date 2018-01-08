@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 #
 # TestRail API binding for Python 2.x (API v2, available since

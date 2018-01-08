@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 from datetime import datetime
 from unittest.mock import call
@@ -142,7 +141,7 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
         f.send(outcome)
     except StopIteration:
         pass
-        # --------------------------------
+    # --------------------------------
 
     expected_results = [
         {
