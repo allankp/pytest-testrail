@@ -119,9 +119,9 @@ def test_add_result(tr_plugin):
 
 def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
 
+    # --------------------------------
     # This part of code is a little tricky: it fakes the execution of pytest_runtest_makereport (generator)
     # by artificially send a stub object (Outcome)
-    # --------------------------------
     class Outcome:
         def __init__(self):
             testdir.makepyfile(PYTEST_FILE)
