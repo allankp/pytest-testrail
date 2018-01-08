@@ -227,7 +227,7 @@ class PyTestRailPlugin(object):
                 data['comment'] += "    " + str(comment)[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             duration = result.get('duration')
             if duration:
-                duration = 1 if (duration < 1) else round(duration)  # TestRail API doesn't manage milliseconds
+                duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
                 data['elapsed'] = str(duration) + 's'
             response = self.client.send_post(
                 ADD_RESULT_URL.format(testrun_id, result['case_id']),
