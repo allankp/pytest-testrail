@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from unittest.mock import call
 from freezegun import freeze_time
-from mock import create_autospec
+from mock import call, create_autospec
 import pytest
 
 from pytest_testrail import plugin
