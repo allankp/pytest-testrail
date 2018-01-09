@@ -82,7 +82,7 @@ class APIClient:
             pause = int(r.headers.get('Retry-After', 60))
             print("Too many requests: pause for {}s".format(pause))
             time.sleep(pause)
-            self.send_get(uri,**kwargs)
+            return self.send_get(uri,**kwargs)
         else:
             return r.json()
 
@@ -122,7 +122,7 @@ class APIClient:
             pause = int(r.headers.get('Retry-After', 60))
             print("Too many requests: pause for {}s".format(pause))
             time.sleep(pause)
-            self.send_post(uri, data, **kwargs)
+            return self.send_post(uri, data, **kwargs)
         else:
             return r.json()
 
