@@ -17,6 +17,7 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULT_URL = 'add_result_for_case/{}/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
+CLOSE_TESTRUN_URL = 'close_run/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 
@@ -173,6 +174,7 @@ class PyTestRailPlugin(object):
                     self.add_results(testrun_id)
             else:
                 print('No data published')
+            self.close_last_test_run()
 
     # plugin
 
@@ -237,6 +239,22 @@ class PyTestRailPlugin(object):
         else:
             self.testrun_id = response['id']
             print('New testrun created with name "{}" and ID={}'.format(testrun_name, self.testrun_id))
+
+    def close_last_test_run(self):
+        """
+        Closes testrun.
+
+        """
+        response = self.client.send_post(
+            CLOSE_TESTRUN_URL.format(self.testrun_id),
+            data={},
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('Failed to close testrun: "{}"'.format(error))
+        else:
+            print('Testrun with name "{}" and ID={} was closed'.format(testrun_name, self.testrun_id))
 
     def is_testrun_available(self):
         """
