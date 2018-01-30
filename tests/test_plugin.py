@@ -224,3 +224,13 @@ def test_get_available_testruns(api_client, tr_plugin):
     testplan_id = 100
     api_client.send_get.return_value = TESTPLAN
     assert tr_plugin.get_available_testruns(testplan_id) == [59, 61]
+
+
+def test_close_test_run(api_client, tr_plugin):
+    api_client.send_get.return_value = {'is_completed': False}
+    assert tr_plugin.is_testrun_available() is True
+    
+    tr_plugin.close_test_run()
+    
+    api_client.send_get.return_value = {'is_completed': True}
+    assert tr_plugin.is_testrun_available() is False
