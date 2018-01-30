@@ -57,26 +57,29 @@ def pytest_addoption(parser):
         action='store',
         default=0,
         required=False,
-        help='Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored'
-    )
+        help='Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
         '--tr-plan-id',
         action='store',
         default=0,
         required=False,
-        help='Identifier of testplan, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored'
-    )
+        help='Identifier of testplan, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
         '--tr-version',
         action='store',
         default='',
         required=False,
-        help='Indicate a version in Test Case result.'
-    )
+        help='Indicate a version in Test Case result')
     group.addoption(
         '--tr-no-ssl-cert-check',
         action='store_false',
         help='Do not check for valid SSL certificate on TestRail host')
+    group.addoption(
+        '--close-on-complete',
+        action='store_true',
+        default=False,
+        required=False,
+        help='Close a test run on completion')
 
 
 def pytest_configure(config):
@@ -97,7 +100,8 @@ def pytest_configure(config):
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id'),
-                version=config.getoption('--tr-version')
+                version=config.getoption('--tr-version'),
+                close_on_complete=config.getoption('--close-on-complete')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

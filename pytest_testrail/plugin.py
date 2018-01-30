@@ -100,8 +100,8 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPlugin(object):
-    def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0, version=''):
+    def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0,
+                 version='', close_on_complete=False):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -112,6 +112,7 @@ class PyTestRailPlugin(object):
         self.testrun_id = run_id
         self.testplan_id = plan_id
         self.version = version
+        self.close_on_complete = close_on_complete
 
     # pytest hooks
 
@@ -174,7 +175,9 @@ class PyTestRailPlugin(object):
                     self.add_results(testrun_id)
             else:
                 print('No data published')
-            self.close_last_test_run()
+            
+            if self.close_on_complete:
+                self.close_test_run()
 
     # plugin
 
@@ -240,7 +243,7 @@ class PyTestRailPlugin(object):
             self.testrun_id = response['id']
             print('New testrun created with name "{}" and ID={}'.format(testrun_name, self.testrun_id))
 
-    def close_last_test_run(self):
+    def close_test_run(self):
         """
         Closes testrun.
 
