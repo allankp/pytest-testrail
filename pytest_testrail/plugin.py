@@ -290,9 +290,10 @@ class PyTestRailPlugin(object):
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to close test run: "{}"'.format(error))
+            print('[{}] Failed to close test run: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
-            print('Test run with name "{}" and ID={} was closed'.format(testrun_name, self.testrun_id))
+            print('[{}] Test run with name "{}" and ID={} was closed'.format(TESTRAIL_PREFIX, testrun_name,
+                self.testrun_id))
     
     def close_test_plan(self, testplan_id):
         """
@@ -306,9 +307,9 @@ class PyTestRailPlugin(object):
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to close test plan: "{}"'.format(error))
+            print('[{}] Failed to close test plan: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
-            print('Test plan with ID={} was closed'.format(self.testplan_id))
+            print('[{}] Test plan with ID={} was closed'.format(TESTRAIL_PREFIX, self.testplan_id))
     
     
     def is_testrun_available(self):
