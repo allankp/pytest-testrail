@@ -19,6 +19,7 @@ PYTEST_FILE = """
     @testrail('C1234', 'C5678')
     def test_func():
         pass
+
     @pytestrail.case('C8765', 'C4321')
     def test_other_func():
         pass
@@ -26,33 +27,33 @@ PYTEST_FILE = """
 SUITE_ID = 1
 TR_NAME = None
 TESTPLAN = {
-    "id": 58,
-    "is_completed": False,
-    "entries": [{
-        "id": "ce2f3c8f-9899-47b9-a6da-db59a66fb794",
-        "name": "Test Run 5/23/2017",
-        "runs": [{
-            "id": 59,
+        "id": 58,
+        "is_completed": False,
+        "entries": [{
+            "id": "ce2f3c8f-9899-47b9-a6da-db59a66fb794",
             "name": "Test Run 5/23/2017",
-            "is_completed": False,
-        }]
-    }, {
-        "id": "084f680c-f87a-402e-92be-d9cc2359b9a7",
-        "name": "Test Run 5/23/2017",
-        "runs": [{
-            "id": 60,
+            "runs": [{
+                "id": 59,
+                "name": "Test Run 5/23/2017",
+                "is_completed": False,
+            }]
+        }, {
+            "id": "084f680c-f87a-402e-92be-d9cc2359b9a7",
             "name": "Test Run 5/23/2017",
-            "is_completed": True,
+            "runs": [{
+                "id": 60,
+                "name": "Test Run 5/23/2017",
+                "is_completed": True,
+            }]
+        }, {
+            "id": "775740ff-1ba3-4313-a9df-3acd9d5ef967",
+            "name": "Test Run 5/23/2017",
+            "runs": [{
+                "id": 61,
+                "is_completed": False,
+            }]
         }]
-    }, {
-        "id": "775740ff-1ba3-4313-a9df-3acd9d5ef967",
-        "name": "Test Run 5/23/2017",
-        "runs": [{
-            "id": 61,
-            "is_completed": False,
-        }]
-    }]
-}
+    }
 
 @pytest.fixture
 def api_client():
@@ -149,10 +150,8 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
             'duration': 2
         },
         {
-            'case_id': 5678,
-            'status_id': 5,
-            'comment': "An error",
-            'duration': 2
+            'case_id': '1234',
+            'status_id': 1,
         }
     ]
     assert tr_plugin.results == expected_results
@@ -160,9 +159,8 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': 5, 'duration': 2.6},
-        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1},
-        {'case_id': 1234, 'status_id': 1, 'duration': 2.6}
+        {'case_id': 1234, 'status_id': 1},
+        {'case_id': 5678, 'status_id': 2},
     ]
     tr_plugin.testrun_id = 10
 
@@ -170,42 +168,37 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
     expected_data = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
-    assert api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
+    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 1234)
     expected_data = {'status_id': 5, 'version': '1.0.0.0', 'elapsed': '3s'}
-    assert api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, cert_check=True)
+    api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(10, 5678)
     expected_data = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
                      'comment': "# Pytest result: #\n    An error"}
-    assert api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, cert_check=True)
+    api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, cert_check=True)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1},
-        {'case_id': 1234, 'status_id': 1, 'duration': 2.6}
+        {'case_id': 1234, 'status_id': 1},
+        {'case_id': 5678, 'status_id': 2},
     ]
     tr_plugin.testplan_id = 100
     tr_plugin.testrun_id = 0
 
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
-    expected_data_1234 = {'status_id': 1, 'version': '1.0.0.0', 'elapsed': '3s'}
-    expected_data_5678 = {'status_id': 2, 'version': '1.0.0.0', 'elapsed': '1s',
-                          'comment': "# Pytest result: #\n    An error"}
-
-    print(api_client.send_post.call_args_list)
-
+    check_cert = True
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234),
-                                         expected_data_1234, cert_check=True)
+                                         {'status_id': 1, 'version': '1.0.0.0'}, cert_check=check_cert)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678),
-                                         expected_data_5678, cert_check=True)
+                                         {'status_id': 2, 'version': '1.0.0.0'}, cert_check=check_cert)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234),
-                                         expected_data_1234, cert_check=True)
+                                         {'status_id': 1, 'version': '1.0.0.0'}, cert_check=check_cert)
     api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678),
-                                         expected_data_5678, cert_check=True)
+                                         {'status_id': 2, 'version': '1.0.0.0'}, cert_check=check_cert)
 
 
 def test_create_test_run(api_client, tr_plugin):
