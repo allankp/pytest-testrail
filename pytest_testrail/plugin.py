@@ -6,8 +6,8 @@ import warnings
 
 
 PYTEST_TO_TESTRAIL_STATUS = {
-    "passed": 1,
-    "failed": 5,
+    "passed" : 1,
+    "failed" : 5,
     "skipped": 2,
 }
 
@@ -18,6 +18,7 @@ TESTRAIL_PREFIX = 'testrail'
 ADD_RESULT_URL = 'add_result_for_case/{}/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
 CLOSE_TESTRUN_URL = 'close_run/{}'
+CLOSE_TESTPLAN_URL = 'close_plan/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 
@@ -34,6 +35,7 @@ class pytestrail(object):
     An alternative to using the testrail function as a decorator for test cases, since py.test may confuse it as a test
     function since it has the 'test' prefix
     '''
+    
     @staticmethod
     def case(*ids):
         """
@@ -55,7 +57,7 @@ def testrail(*ids):
     :return pytest.mark:
     """
     deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
-            '@pytestrail.case decorator instead.')
+                       '@pytestrail.case decorator instead.')
     warnings.warn(deprecation_msg, DeprecatedTestDecorator)
     return pytestrail.case(*ids)
 
@@ -113,9 +115,9 @@ class PyTestRailPlugin(object):
         self.testplan_id = plan_id
         self.version = version
         self.close_on_complete = close_on_complete
-
+    
     # pytest hooks
-
+    
     def pytest_report_header(self, config, startdir):
         """ Add extra-info in header """
         message = 'pytest-testrail: '
@@ -126,11 +128,11 @@ class PyTestRailPlugin(object):
         else:
             message += 'a new testrun will be created'
         return message
-
+    
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         tr_keys = get_testrail_keys(items)
-
+        
         if self.testplan_id and self.is_testplan_available():
             self.testrun_id = 0
         elif self.testrun_id and self.is_testrun_available():
@@ -138,7 +140,7 @@ class PyTestRailPlugin(object):
         else:
             if self.testrun_name is None:
                 self.testrun_name = testrun_name()
-
+            
             self.create_test_run(
                 self.assign_user_id,
                 self.project_id,
@@ -146,7 +148,7 @@ class PyTestRailPlugin(object):
                 self.testrun_name,
                 tr_keys
             )
-
+    
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
         """ Collect result and associated testcases (TestRail) of an execution """
@@ -157,17 +159,17 @@ class PyTestRailPlugin(object):
             comment = str(item.repr_failure(call.excinfo))
         if item.get_marker(TESTRAIL_PREFIX):
             testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
-
+            
             if rep.when == 'call' and testcaseids:
                 self.add_result(
                     clean_test_ids(testcaseids),
                     get_test_outcome(outcome.result.outcome),
                     comment)
-
+    
     def pytest_sessionfinish(self, session, exitstatus):
         """ Publish results in TestRail """
         if self.results:
-
+            
             if self.testrun_id:
                 self.add_results(self.testrun_id)
             elif self.testplan_id:
@@ -176,11 +178,13 @@ class PyTestRailPlugin(object):
             else:
                 print('No data published')
             
-            if self.close_on_complete:
-                self.close_test_run()
-
+            if self.close_on_complete and self.testrun_id:
+                self.close_test_run(self.testrun_id)
+            elif self.close_on_complete and self.testplan_id:
+                self.close_test_plan(self.testplan_id)
+    
     # plugin
-
+    
     def add_result(self, test_ids, status, comment):
         """
         Add a new result to results dict to be submitted at the end.
@@ -190,12 +194,12 @@ class PyTestRailPlugin(object):
         """
         for test_id in test_ids:
             data = {
-                'case_id': test_id,
-                'comment': comment,
+                'case_id'  : test_id,
+                'comment'  : comment,
                 'status_id': status,
             }
             self.results.append(data)
-
+    
     def add_results(self, testrun_id):
         """
         Add results one by one to improve errors handling.
@@ -215,7 +219,7 @@ class PyTestRailPlugin(object):
             error = self.client.get_error(response)
             if error:
                 print('Info: Testcase #{} not published for following reason: "{}"'.format(result['case_id'], error))
-
+    
     def create_test_run(
             self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
         """
@@ -224,13 +228,13 @@ class PyTestRailPlugin(object):
         :param tr_keys: collected testrail ids.
         """
         data = {
-            'suite_id': suite_id,
-            'name': testrun_name,
+            'suite_id'     : suite_id,
+            'name'         : testrun_name,
             'assignedto_id': assign_user_id,
-            'include_all': False,
-            'case_ids': tr_keys,
+            'include_all'  : False,
+            'case_ids'     : tr_keys,
         }
-
+        
         response = self.client.send_post(
             ADD_TESTRUN_URL.format(project_id),
             data,
@@ -242,23 +246,40 @@ class PyTestRailPlugin(object):
         else:
             self.testrun_id = response['id']
             print('New testrun created with name "{}" and ID={}'.format(testrun_name, self.testrun_id))
-
-    def close_test_run(self):
+    
+    def close_test_run(self, testrun_id):
         """
         Closes testrun.
 
         """
         response = self.client.send_post(
-            CLOSE_TESTRUN_URL.format(self.testrun_id),
+            CLOSE_TESTRUN_URL.format(testrun_id),
             data={},
             cert_check=self.cert_check
         )
         error = self.client.get_error(response)
         if error:
-            print('Failed to close testrun: "{}"'.format(error))
+            print('Failed to close test run: "{}"'.format(error))
         else:
-            print('Testrun with name "{}" and ID={} was closed'.format(testrun_name, self.testrun_id))
+            print('Test run with name "{}" and ID={} was closed'.format(testrun_name, self.testrun_id))
+    
+    def close_test_plan(self, testplan_id):
+        """
+        Closes testrun.
 
+        """
+        response = self.client.send_post(
+            CLOSE_TESTPLAN_URL.format(testplan_id),
+            data={},
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('Failed to close test plan: "{}"'.format(error))
+        else:
+            print('Test plan with ID={} was closed'.format(self.testplan_id))
+    
+    
     def is_testrun_available(self):
         """
         Ask if testrun is available in TestRail.
@@ -275,7 +296,7 @@ class PyTestRailPlugin(object):
             return False
         else:
             return response['is_completed'] is False
-
+    
     def is_testplan_available(self):
         """
         Ask if testplan is available in TestRail.
@@ -292,7 +313,7 @@ class PyTestRailPlugin(object):
             return False
         else:
             return response['is_completed'] is False
-
+    
     def get_available_testruns(self, plan_id):
         """
         :return: a list of available testruns associated to a testplan in TestRail.

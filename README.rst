@@ -112,7 +112,7 @@ All available options
                             Do not check for valid SSL certificate on TestRail
                             host
       --close-on-complete
-                           Close a test run on completion
+                           Close a test plan or test run on completion.
 
 
 .. |Build Status| image:: https://travis-ci.org/dubner/pytest-testrail.svg?branch=master
