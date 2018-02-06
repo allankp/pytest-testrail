@@ -128,4 +128,4 @@ class ConfigManager(object):
             return value
         if section is None or self.cfg_file is None:
             return None
-        return self.cfg_file.get(section, cfg_name, fallback=None)
+        return self.cfg_file.get(section, cfg_name)
