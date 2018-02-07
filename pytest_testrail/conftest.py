@@ -75,7 +75,7 @@ def pytest_addoption(parser):
         action='store_false',
         help='Do not check for valid SSL certificate on TestRail host')
     group.addoption(
-        '--close-on-complete',
+        '--tr-close-on-complete',
         action='store_true',
         default=False,
         required=False,
@@ -101,7 +101,7 @@ def pytest_configure(config):
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id'),
                 version=config.getoption('--tr-version'),
-                close_on_complete=config.getoption('--close-on-complete')
+                close_on_complete=config.getoption('--tr-close-on-complete')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

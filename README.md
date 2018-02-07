@@ -105,5 +105,5 @@ py.test --testrail --tr-config=<settings file>.cfg
   --tr-no-ssl-cert-check
                         Do not check for valid SSL certificate on TestRail
                         host
-  --close-on-complete
+  --tr-close-on-complete
                         Close a test plan or test run on completion.
