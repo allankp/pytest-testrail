@@ -292,8 +292,8 @@ class PyTestRailPlugin(object):
         if error:
             print('[{}] Failed to close test run: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
-            print('[{}] Test run with name "{}" and ID={} was closed'.format(TESTRAIL_PREFIX, self.testrun_name,
-                self.testrun_id))
+            print('[{}] Test run with ID={} was closed'.format(TESTRAIL_PREFIX, self.testrun_id))
+    
     
     def close_test_plan(self, testplan_id):
         """
