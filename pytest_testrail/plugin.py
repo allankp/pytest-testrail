@@ -104,7 +104,9 @@ def get_testrail_keys(items):
 
 class PyTestRailPlugin(object):
     def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0, version=''):
+            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0, version='',
+            add_skips=True
+    ):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -115,6 +117,7 @@ class PyTestRailPlugin(object):
         self.testrun_id = run_id
         self.testplan_id = plan_id
         self.version = version
+        self.add_skips = add_skips
 
     # pytest hooks
 
@@ -229,16 +232,20 @@ class PyTestRailPlugin(object):
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
                 data['elapsed'] = str(duration) + 's'
-            response = self.client.send_post(
-                ADD_RESULT_URL.format(testrun_id, result['case_id']),
-                data,
-                cert_check=self.cert_check
-            )
-            error = self.client.get_error(response)
-            if error:
-                print('[{}] Info: Testcase #{} not published for following reason: "{}"'.format(TESTRAIL_PREFIX,
-                                                                                                result['case_id'],
-                                                                                                error))
+
+            if self.add_skips is False and data['status_id'] == PYTEST_TO_TESTRAIL_STATUS['skipped']:
+                continue
+            else:
+                response = self.client.send_post(
+                    ADD_RESULT_URL.format(testrun_id, result['case_id']),
+                    data,
+                    cert_check=self.cert_check
+                )
+                error = self.client.get_error(response)
+                if error:
+                    print('[{}] Info: Testcase #{} not published for following reason: "{}"'.format(TESTRAIL_PREFIX,
+                                                                                                    result['case_id'],
+                                                                                                    error))
 
     def create_test_run(
             self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
