@@ -91,3 +91,6 @@ ENV/
 
 # Tox files
 pytests_*-test.xml
+
+# PyCharm
+**/.idea/*
