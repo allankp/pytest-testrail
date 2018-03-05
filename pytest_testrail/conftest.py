@@ -76,7 +76,14 @@ def pytest_addoption(parser):
     group.addoption(
         '--tr-no-ssl-cert-check',
         action='store_false',
-        help='Do not check for valid SSL certificate on TestRail host')
+        help='Do not check for valid SSL certificate on TestRail host'
+    )
+    group.addoption(
+        '--tr-add-skips',
+        action='store_true',
+        required=False,
+        help='Add skipped tests to test run, default is True'
+    )
 
 
 def pytest_configure(config):
@@ -97,7 +104,8 @@ def pytest_configure(config):
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id'),
-                version=config.getoption('--tr-version')
+                version=config.getoption('--tr-version'),
+                add_skips=config.getoption('--tr-add-skips', 'add_skips', 'TESTRUN')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"
