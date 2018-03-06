@@ -84,6 +84,13 @@ def pytest_addoption(parser):
         required=False,
         help='Add skipped tests to test run, default is True'
     )
+    group.addoption(
+        '--tr-milestone-id',
+        action='store',
+        default=0,
+        required=False,
+        help='Identifier for milestone, that appears in TestRail. If provided, testrun will be associated with milestone'
+    )
 
 
 def pytest_configure(config):

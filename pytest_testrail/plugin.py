@@ -21,6 +21,7 @@ ADD_RESULT_URL = 'add_result_for_case/{}/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
+GET_MILESTONE_URL = 'get_milestone/{}'
 
 COMMENT_SIZE_LIMIT = 4000
 
@@ -105,7 +106,7 @@ def get_testrail_keys(items):
 class PyTestRailPlugin(object):
     def __init__(
             self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0, version='',
-            add_skips=True
+            add_skips=True, milestone_id=0
     ):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
@@ -118,6 +119,7 @@ class PyTestRailPlugin(object):
         self.testplan_id = plan_id
         self.version = version
         self.add_skips = add_skips
+        self.milestone_id = milestone_id
 
     # pytest hooks
 
@@ -140,6 +142,8 @@ class PyTestRailPlugin(object):
             self.testrun_id = 0
         elif self.testrun_id and self.is_testrun_available():
             self.testplan_id = 0
+        elif self.milestone_id and self.is_milestone_available():
+            self.milestone_id = 0
         else:
             if self.testrun_name is None:
                 self.testrun_name = testrun_name()
@@ -149,7 +153,8 @@ class PyTestRailPlugin(object):
                 self.project_id,
                 self.suite_id,
                 self.testrun_name,
-                tr_keys
+                tr_keys,
+                self.milestone_id
             )
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -248,7 +253,7 @@ class PyTestRailPlugin(object):
                                                                                                     error))
 
     def create_test_run(
-            self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
+            self, assign_user_id, project_id, suite_id, testrun_name, tr_keys, milestone_id):
         """
         Create testrun with ids collected from markers.
 
@@ -260,6 +265,7 @@ class PyTestRailPlugin(object):
             'assignedto_id': assign_user_id,
             'include_all': False,
             'case_ids': tr_keys,
+            'milestone_id': milestone_id
         }
 
         response = self.client.send_post(
@@ -308,6 +314,22 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to retrieve testplan: "{}"'.format(TESTRAIL_PREFIX, error))
             return False
 
+        return response['is_completed'] is False
+
+    def is_milestone_available(self):
+        """
+        Ask if milestone is available in TestRail.
+
+        :return: True is milestone is available AND is open
+        """
+        response = self.client.send_get(
+            GET_MILESTONE_URL.format(self.milestone_id),
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to retrieve milestone: "{}"'.format(TESTRAIL_PREFIX, error))
+            return False
         return response['is_completed'] is False
 
     def get_available_testruns(self, plan_id):
