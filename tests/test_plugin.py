@@ -19,7 +19,6 @@ PYTEST_FILE = """
     @testrail('C1234', 'C5678')
     def test_func():
         pass
-
     @pytestrail.case('C8765', 'C4321')
     def test_other_func():
         pass
@@ -260,3 +259,34 @@ def test_get_available_testruns(api_client, tr_plugin):
     testplan_id = 100
     api_client.send_get.return_value = TESTPLAN
     assert tr_plugin.get_available_testruns(testplan_id) == [59, 61]
+
+
+def test_close_test_run(api_client, tr_plugin):
+    tr_plugin.results = [
+        {'case_id': 1234, 'status_id': 5, 'duration': 2.6},
+        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1},
+        {'case_id': 1234, 'status_id': 1, 'duration': 2.6}
+    ]
+    tr_plugin.testrun_id = 10
+    tr_plugin.close_on_complete = True
+    tr_plugin.pytest_sessionfinish(None, 0)
+
+    expected_uri = plugin.CLOSE_TESTRUN_URL.format(tr_plugin.testrun_id)
+    api_client.send_post.call_args_list[3] = call(expected_uri, {}, cert_check=True)
+
+
+def test_close_test_plan(api_client, tr_plugin):
+    tr_plugin.results = [
+        {'case_id': 5678, 'status_id': 2, 'comment': "An error", 'duration': 0.1},
+        {'case_id': 1234, 'status_id': 1, 'duration': 2.6}
+    ]
+    tr_plugin.testplan_id = 100
+    tr_plugin.testrun_id = 0
+    tr_plugin.close_on_complete = True
+    
+    api_client.send_get.return_value = TESTPLAN
+    tr_plugin.pytest_sessionfinish(None, 0)
+
+    expected_uri = plugin.CLOSE_TESTPLAN_URL.format(tr_plugin.testplan_id)
+    api_client.send_post.call_args_list[3] = call(expected_uri, {}, cert_check=True)
+    
