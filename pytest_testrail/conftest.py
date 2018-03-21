@@ -87,8 +87,6 @@ def pytest_addoption(parser):
     group.addoption(
         '--tr-testrun-milestone-id',
         action='store',
-        default=0,
-        required=False,
         help='Identifier for milestone, that appears in TestRail. If provided, testrun will be associated with milestone'
     )
 
