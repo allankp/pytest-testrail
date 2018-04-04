@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from unittest.mock import call
 from freezegun import freeze_time
 from mock import call, create_autospec
 import pytest
@@ -284,9 +283,10 @@ def test_close_test_plan(api_client, tr_plugin):
     tr_plugin.testplan_id = 100
     tr_plugin.testrun_id = 0
     tr_plugin.close_on_complete = True
-
+    
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_uri = plugin.CLOSE_TESTPLAN_URL.format(tr_plugin.testplan_id)
     api_client.send_post.call_args_list[3] = call(expected_uri, {}, cert_check=True)
+    

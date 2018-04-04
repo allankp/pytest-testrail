@@ -30,7 +30,7 @@ Add a marker to the tests that will be picked up to be added to the run.
     def test_foo():
         # test code goes here
 
-    # OR
+    # OR    
 
     from pytest_testrail.plugin import pytestrail
 

@@ -118,7 +118,7 @@ class PyTestRailPlugin(object):
         self.testplan_id = plan_id
         self.version = version
         self.close_on_complete = close_on_complete
-
+    
     # pytest hooks
 
     def pytest_report_header(self, config, startdir):
@@ -184,13 +184,13 @@ class PyTestRailPlugin(object):
                     self.add_results(testrun_id)
             else:
                 print('[{}] No data published'.format(TESTRAIL_PREFIX))
-
+            
             if self.close_on_complete and self.testrun_id:
                 self.close_test_run(self.testrun_id)
             elif self.close_on_complete and self.testplan_id:
                 self.close_test_plan(self.testplan_id)
         print('[{}] End publishing'.format(TESTRAIL_PREFIX))
-
+    
     # plugin
 
     def add_result(self, test_ids, status, comment='', duration=0):
@@ -276,8 +276,8 @@ class PyTestRailPlugin(object):
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
                                                                               testrun_name,
                                                                               self.testrun_id))
-
-
+            
+    
     def close_test_run(self, testrun_id):
         """
         Closes testrun.
@@ -293,8 +293,8 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to close test run: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             print('[{}] Test run with ID={} was closed'.format(TESTRAIL_PREFIX, self.testrun_id))
-
-
+    
+    
     def close_test_plan(self, testplan_id):
         """
         Closes testrun.
@@ -310,8 +310,8 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to close test plan: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             print('[{}] Test plan with ID={} was closed'.format(TESTRAIL_PREFIX, self.testplan_id))
-
-
+    
+    
     def is_testrun_available(self):
         """
         Ask if testrun is available in TestRail.
