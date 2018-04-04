@@ -13,6 +13,7 @@
 
 import sys
 import requests
+import time
 
 if sys.version_info.major == 2:
     from urlparse import urljoin
@@ -76,7 +77,14 @@ class APIClient:
             verify=cert_check,
             timeout=timeout
         )
-        return r.json()
+
+        if r.status_code == 429:  # Too many requests
+            pause = int(r.headers.get('Retry-After', 60))
+            print("Too many requests: pause for {}s".format(pause))
+            time.sleep(pause)
+            return self.send_get(uri,**kwargs)
+        else:
+            return r.json()
 
     def send_post(self, uri, data, **kwargs):
         '''
@@ -109,7 +117,14 @@ class APIClient:
             verify=cert_check,
             timeout=timeout
         )
-        return r.json()
+
+        if r.status_code == 429:  # Too many requests
+            pause = int(r.headers.get('Retry-After', 60))
+            print("Too many requests: pause for {}s".format(pause))
+            time.sleep(pause)
+            return self.send_post(uri, data, **kwargs)
+        else:
+            return r.json()
 
     @staticmethod
     def get_error(json_response):

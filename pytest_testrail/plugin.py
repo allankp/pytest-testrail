@@ -19,6 +19,8 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULT_URL = 'add_result_for_case/{}/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
+CLOSE_TESTRUN_URL = 'close_run/{}'
+CLOSE_TESTPLAN_URL = 'close_plan/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 
@@ -103,8 +105,8 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPlugin(object):
-    def __init__(
-            self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0, version=''):
+    def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0,
+                 version='', close_on_complete=False):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -115,6 +117,7 @@ class PyTestRailPlugin(object):
         self.testrun_id = run_id
         self.testplan_id = plan_id
         self.version = version
+        self.close_on_complete = close_on_complete
 
     # pytest hooks
 
@@ -181,6 +184,11 @@ class PyTestRailPlugin(object):
                     self.add_results(testrun_id)
             else:
                 print('[{}] No data published'.format(TESTRAIL_PREFIX))
+
+            if self.close_on_complete and self.testrun_id:
+                self.close_test_run(self.testrun_id)
+            elif self.close_on_complete and self.testplan_id:
+                self.close_test_plan(self.testplan_id)
         print('[{}] End publishing'.format(TESTRAIL_PREFIX))
 
     # plugin
@@ -227,7 +235,7 @@ class PyTestRailPlugin(object):
                 data['comment'] += "    " + str(comment)[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             duration = result.get('duration')
             if duration:
-                duration = 1 if (duration < 1) else round(duration)  # TestRail API doesn't manage milliseconds
+                duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
                 data['elapsed'] = str(duration) + 's'
             response = self.client.send_post(
                 ADD_RESULT_URL.format(testrun_id, result['case_id']),
@@ -268,6 +276,41 @@ class PyTestRailPlugin(object):
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
                                                                               testrun_name,
                                                                               self.testrun_id))
+
+
+    def close_test_run(self, testrun_id):
+        """
+        Closes testrun.
+
+        """
+        response = self.client.send_post(
+            CLOSE_TESTRUN_URL.format(testrun_id),
+            data={},
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to close test run: "{}"'.format(TESTRAIL_PREFIX, error))
+        else:
+            print('[{}] Test run with ID={} was closed'.format(TESTRAIL_PREFIX, self.testrun_id))
+
+
+    def close_test_plan(self, testplan_id):
+        """
+        Closes testrun.
+
+        """
+        response = self.client.send_post(
+            CLOSE_TESTPLAN_URL.format(testplan_id),
+            data={},
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to close test plan: "{}"'.format(TESTRAIL_PREFIX, error))
+        else:
+            print('[{}] Test plan with ID={} was closed'.format(TESTRAIL_PREFIX, self.testplan_id))
+
 
     def is_testrun_available(self):
         """
