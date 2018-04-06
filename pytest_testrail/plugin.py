@@ -6,11 +6,19 @@ import pytest
 import re
 import warnings
 
+# Reference: http://docs.gurock.com/testrail-api2/reference-statuses
+TESTRAIL_TEST_STATUS = {
+    "passed": 1,
+    "blocked": 2,
+    "untested": 3,
+    "retest": 4,
+    "failed": 5
+}
 
 PYTEST_TO_TESTRAIL_STATUS = {
-    "passed": 1,
-    "failed": 5,
-    "skipped": 2,
+    "passed": TESTRAIL_TEST_STATUS["passed"],
+    "failed": TESTRAIL_TEST_STATUS["failed"],
+    "skipped": TESTRAIL_TEST_STATUS["blocked"],
 }
 
 DT_FORMAT = '%d-%m-%Y %H:%M:%S'
@@ -229,7 +237,7 @@ class PyTestRailPlugin(object):
             print('[{}] Option "Don\'t publish blocked testcases" activated'.format(TESTRAIL_PREFIX))
             blocked_tests_list = [
                 test.get('case_id') for test in self.get_tests(testrun_id)
-                if test.get('status_id') == 2
+                if test.get('status_id') == TESTRAIL_TEST_STATUS["blocked"]
             ]
             print('[{}] Blocked testcases excluded: {}'.format(TESTRAIL_PREFIX,
                                                                ', '.join(str(elt) for elt in blocked_tests_list)))
