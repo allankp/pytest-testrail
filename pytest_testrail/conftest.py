@@ -106,7 +106,7 @@ def pytest_configure(config):
                 plan_id=config.getoption('--tr-plan-id'),
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
-                publish_blocked=config.getoption('--tr-publish-blocked')
+                publish_blocked=config.getoption('--tr-dont-publish-blocked')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"
