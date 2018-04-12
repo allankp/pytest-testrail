@@ -6,11 +6,19 @@ import pytest
 import re
 import warnings
 
+# Reference: http://docs.gurock.com/testrail-api2/reference-statuses
+TESTRAIL_TEST_STATUS = {
+    "passed": 1,
+    "blocked": 2,
+    "untested": 3,
+    "retest": 4,
+    "failed": 5
+}
 
 PYTEST_TO_TESTRAIL_STATUS = {
-    "passed": 1,
-    "failed": 5,
-    "skipped": 2,
+    "passed": TESTRAIL_TEST_STATUS["passed"],
+    "failed": TESTRAIL_TEST_STATUS["failed"],
+    "skipped": TESTRAIL_TEST_STATUS["blocked"],
 }
 
 DT_FORMAT = '%d-%m-%Y %H:%M:%S'
@@ -23,6 +31,7 @@ CLOSE_TESTRUN_URL = 'close_run/{}'
 CLOSE_TESTPLAN_URL = 'close_plan/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
+GET_TESTS_URL = 'get_tests/{}'
 
 COMMENT_SIZE_LIMIT = 4000
 
@@ -106,7 +115,7 @@ def get_testrail_keys(items):
 
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0,
-                 version='', close_on_complete=False):
+                 version='', close_on_complete=False, publish_blocked=True):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -118,7 +127,8 @@ class PyTestRailPlugin(object):
         self.testplan_id = plan_id
         self.version = version
         self.close_on_complete = close_on_complete
-    
+        self.publish_blocked = publish_blocked
+
     # pytest hooks
 
     def pytest_report_header(self, config, startdir):
@@ -184,13 +194,13 @@ class PyTestRailPlugin(object):
                     self.add_results(testrun_id)
             else:
                 print('[{}] No data published'.format(TESTRAIL_PREFIX))
-            
+
             if self.close_on_complete and self.testrun_id:
                 self.close_test_run(self.testrun_id)
             elif self.close_on_complete and self.testplan_id:
                 self.close_test_plan(self.testplan_id)
         print('[{}] End publishing'.format(TESTRAIL_PREFIX))
-    
+
     # plugin
 
     def add_result(self, test_ids, status, comment='', duration=0):
@@ -221,6 +231,17 @@ class PyTestRailPlugin(object):
         # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
         self.results.sort(key=itemgetter('status_id'))
         self.results.sort(key=itemgetter('case_id'))
+
+        # Manage case of "blocked" testcases
+        if self.publish_blocked is False:
+            print('[{}] Option "Don\'t publish blocked testcases" activated'.format(TESTRAIL_PREFIX))
+            blocked_tests_list = [
+                test.get('case_id') for test in self.get_tests(testrun_id)
+                if test.get('status_id') == TESTRAIL_TEST_STATUS["blocked"]
+            ]
+            print('[{}] Blocked testcases excluded: {}'.format(TESTRAIL_PREFIX,
+                                                               ', '.join(str(elt) for elt in blocked_tests_list)))
+            self.results = [result for result in self.results if result.get('case_id') not in blocked_tests_list]
 
         # Publish results
         for result in self.results:
@@ -276,8 +297,8 @@ class PyTestRailPlugin(object):
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
                                                                               testrun_name,
                                                                               self.testrun_id))
-            
-    
+
+
     def close_test_run(self, testrun_id):
         """
         Closes testrun.
@@ -293,8 +314,8 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to close test run: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             print('[{}] Test run with ID={} was closed'.format(TESTRAIL_PREFIX, self.testrun_id))
-    
-    
+
+
     def close_test_plan(self, testplan_id):
         """
         Closes testrun.
@@ -310,8 +331,8 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to close test plan: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             print('[{}] Test plan with ID={} was closed'.format(TESTRAIL_PREFIX, self.testplan_id))
-    
-    
+
+
     def is_testrun_available(self):
         """
         Ask if testrun is available in TestRail.
@@ -365,3 +386,18 @@ class PyTestRailPlugin(object):
                     if not run['is_completed']:
                         testruns_list.append(run['id'])
         return testruns_list
+
+    def get_tests(self, run_id):
+        """
+        :return: the list of tests containing in a testrun.
+
+        """
+        response = self.client.send_get(
+            GET_TESTS_URL.format(run_id),
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
+            return None
+        return response
