@@ -13,7 +13,7 @@ setup(
     version='1.1.4',
     author='Allan Kilpatrick',
     author_email='allanklp@gmail.com',
-    url='http://github.com/allankppytest-testrail/',
+    url='http://github.com/allankp/pytest-testrail/',
     packages=[
         'pytest_testrail',
     ],
