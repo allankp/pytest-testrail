@@ -91,7 +91,9 @@ def test_clean_test_ids():
 
 
 def test_get_testrail_keys(pytest_test_items, testdir):
-    assert plugin.get_testrail_keys(pytest_test_items) == [1234, 5678, 8765, 4321]
+    items = plugin.get_testrail_keys(pytest_test_items)
+    assert list(items[0][1]) == [1234, 5678]
+    assert list(items[1][1]) == [8765, 4321]
 
 
 def test_add_result(tr_plugin):
@@ -318,3 +320,41 @@ def test_dont_publish_blocked(api_client):
     expected_data = {'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0'}
     len(api_client.send_post.call_args_list) == 1
     api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
+
+
+def test_skip_missing_only_one_test(api_client, pytest_test_items):
+    my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID,
+                                 SUITE_ID, True, TR_NAME,
+                                 run_id=10,
+                                 version='1.0.0.0',
+                                 publish_blocked=False,
+                                 skip_missing=True)
+
+    api_client.send_get.return_value = [
+        {"case_id": 1234}, {"case_id": 5678}
+    ]
+    my_plugin.is_testrun_available = lambda: True
+
+    my_plugin.pytest_collection_modifyitems(None, None, pytest_test_items)
+
+    assert not pytest_test_items[0].get_marker('skip')
+    assert pytest_test_items[1].get_marker('skip')
+
+
+def test_skip_missing_correlation_tests(api_client, pytest_test_items):
+    my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID,
+                                 SUITE_ID, True, TR_NAME,
+                                 run_id=10,
+                                 version='1.0.0.0',
+                                 publish_blocked=False,
+                                 skip_missing=True)
+
+    api_client.send_get.return_value = [
+        {"case_id": 1234}, {"case_id": 8765}
+    ]
+    my_plugin.is_testrun_available = lambda: True
+
+    my_plugin.pytest_collection_modifyitems(None, None, pytest_test_items)
+
+    assert not pytest_test_items[0].get_marker('skip')
+    assert not pytest_test_items[1].get_marker('skip')
