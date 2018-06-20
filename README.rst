@@ -116,6 +116,8 @@ All available options
       --tr-dont-publish-blocked
                             Do not publish results of "blocked" testcases in
                             TestRail
+      --tr-skip-missing     Skip test cases that are not present in testrun
+
 
 .. |Build Status| image:: https://travis-ci.org/dubner/pytest-testrail.svg?branch=master
    :target: https://travis-ci.org/allankp/pytest-testrail

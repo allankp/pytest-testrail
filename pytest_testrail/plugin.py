@@ -101,13 +101,16 @@ def clean_test_ids(test_ids):
 
 
 def get_testrail_keys(items):
-    """Return TestRail ids from pytests markers"""
+    """Return Tuple of Pytest nodes and TestRail ids from pytests markers"""
     testcaseids = []
     for item in items:
         if item.get_marker(TESTRAIL_PREFIX):
-            testcaseids.extend(
-                clean_test_ids(
-                    item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
+            testcaseids.append(
+                (
+                    item,
+                    clean_test_ids(
+                        item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
+                    )
                 )
             )
     return testcaseids
@@ -115,7 +118,7 @@ def get_testrail_keys(items):
 
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0,
-                 version='', close_on_complete=False, publish_blocked=True):
+                 version='', close_on_complete=False, publish_blocked=True, skip_missing=False):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -128,6 +131,7 @@ class PyTestRailPlugin(object):
         self.version = version
         self.close_on_complete = close_on_complete
         self.publish_blocked = publish_blocked
+        self.skip_missing = skip_missing
 
     # pytest hooks
 
@@ -144,12 +148,21 @@ class PyTestRailPlugin(object):
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
-        tr_keys = get_testrail_keys(items)
+        items_with_tr_keys = get_testrail_keys(items)
+        tr_keys = [item[1] for item in items_with_tr_keys]
 
         if self.testplan_id and self.is_testplan_available():
             self.testrun_id = 0
         elif self.testrun_id and self.is_testrun_available():
             self.testplan_id = 0
+            if self.skip_missing:
+                tests_list = [
+                    test.get('case_id') for test in self.get_tests(self.testrun_id)
+                ]
+                for item, case_id in items_with_tr_keys:
+                    if not set(case_id).intersection(set(tests_list)):
+                        mark = pytest.mark.skip('Test is not present in testrun.')
+                        item.add_marker(mark)
         else:
             if self.testrun_name is None:
                 self.testrun_name = testrun_name()

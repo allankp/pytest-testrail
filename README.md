@@ -110,4 +110,5 @@ py.test --testrail --tr-config=<settings file>.cfg
   --tr-dont-publish-blocked
                         Do not publish results of "blocked" testcases in
                         TestRail
+  --tr-skip-missing     Skip test cases that are not present in testrun
 ```
