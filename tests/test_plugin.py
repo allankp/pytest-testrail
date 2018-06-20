@@ -16,12 +16,17 @@ FAKE_NOW = datetime(2015, 1, 31, 19, 5, 42)
 PROJECT_ID = 4
 PYTEST_FILE = """
     from pytest_testrail.plugin import testrail, pytestrail
+    import pytest
     @testrail('C1234', 'C5678')
     def test_func():
         pass
     @pytestrail.case('C8765', 'C4321')
     def test_other_func():
         pass
+    @pytest.mark.skip(reason="My only reason")
+    @pytestrail.case('C8778', 'C4334')
+    def test_other_func_2():
+        pass 
 """
 SUITE_ID = 1
 TR_NAME = None
@@ -155,6 +160,46 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
             'case_id': 5678,
             'status_id': TESTRAIL_TEST_STATUS["failed"],
             'comment': "An error",
+            'duration': 2
+        }
+    ]
+    assert tr_plugin.results == expected_results
+
+
+def test_pytest_runtest_makereport_with_skipped(pytest_test_items, tr_plugin, testdir):
+
+    # --------------------------------
+    # This part of code is a little tricky: it fakes the execution of pytest_runtest_makereport (generator)
+    # by artificially send a stub object (Outcome)
+    class Outcome:
+        def __init__(self):
+            testdir.makepyfile(PYTEST_FILE)
+            self.result = testdir.runpytest()
+            self.result.duration = 2
+
+        def get_result(self):
+            return self.result
+
+    outcome = Outcome()
+    f = tr_plugin.pytest_runtest_makereport(pytest_test_items[2], None)
+    f.send(None)
+    try:
+        f.send(outcome)
+    except StopIteration:
+        pass
+    # --------------------------------
+
+    expected_results = [
+        {
+            'case_id': 8778,
+            'status_id': TESTRAIL_TEST_STATUS["blocked"],
+            'comment': "My only reason",
+            'duration': 2
+        },
+        {
+            'case_id': 4334,
+            'status_id': TESTRAIL_TEST_STATUS["blocked"],
+            'comment': "My only reason",
             'duration': 2
         }
     ]
