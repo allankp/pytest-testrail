@@ -149,7 +149,7 @@ class PyTestRailPlugin(object):
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         items_with_tr_keys = get_testrail_keys(items)
-        tr_keys = [item[1] for item in items_with_tr_keys]
+        tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
         if self.testplan_id and self.is_testplan_available():
             self.testrun_id = 0
