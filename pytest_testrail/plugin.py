@@ -97,7 +97,7 @@ def clean_test_ids(test_ids):
     :param list test_ids: list of test_ids.
     :return list ints: contains list of test_ids as ints.
     """
-    return map(int, [re.search('(?P<test_id>[0-9]+$)', test_id).groupdict().get('test_id') for test_id in test_ids])
+    return [int(re.search('(?P<test_id>[0-9]+$)', test_id).groupdict().get('test_id')) for test_id in test_ids]
 
 
 def get_testrail_keys(items):
@@ -149,7 +149,7 @@ class PyTestRailPlugin(object):
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         items_with_tr_keys = get_testrail_keys(items)
-        tr_keys = [item[1] for item in items_with_tr_keys]
+        tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
         if self.testplan_id and self.is_testplan_available():
             self.testrun_id = 0
