@@ -48,6 +48,10 @@ def pytest_addoption(parser):
         action='store',
         help='ID of the test suite containing the test cases (config file: suite_id in TESTRUN section)')
     group.addoption(
+        '--tr-testrun-suite-include-all',
+        action='store_true',
+        help='Include all test cases in specified test suite when creating test run (config file: include_all in TESTRUN section)')
+    group.addoption(
         '--tr-testrun-name',
         action='store',
         default=None,
@@ -106,6 +110,7 @@ def pytest_configure(config):
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
                 cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', default=True),
+                include_all=config_manager.getoption('tr-testrun-suite-include-all', 'include_all', 'TESTRUN', default=False),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id'),
