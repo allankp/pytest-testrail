@@ -117,7 +117,8 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPlugin(object):
-    def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, run_id=0,                   plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False):
+    def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, run_id=0,
+                 plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
