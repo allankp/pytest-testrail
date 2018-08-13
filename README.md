@@ -91,6 +91,10 @@ py.test --testrail --tr-config=<settings file>.cfg
   --tr-testrun-suite-id=TR_TESTRUN_SUITE_ID
                         ID of the test suite containing the test cases (config
                         file: suite_id in TESTRUN section)
+  --tr-testrun-suite-include-all
+                        Include all test cases in specified test suite when
+                        creating test run (config file: include_all in TESTRUN
+                        section)
   --tr-testrun-name=TR_TESTRUN_NAME
                         Name given to testrun, that appears in TestRail
                         (config file: name in TESTRUN section)
