@@ -180,7 +180,18 @@ class PyTestRailPlugin(object):
         """ Collect result and associated testcases (TestRail) of an execution """
         outcome = yield
         rep = outcome.get_result()
-        if item.get_marker(TESTRAIL_PREFIX):
+        if item.get_marker('skip') and item.get_marker(TESTRAIL_PREFIX):
+            testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
+            print(rep.ret)
+            if testcaseids:
+                self.add_result(
+                    clean_test_ids(testcaseids),
+                    get_test_outcome('skipped'),
+                    comment=item.get_marker('skip').kwargs.get('reason'),
+                    duration=rep.duration
+                )
+        
+        elif item.get_marker(TESTRAIL_PREFIX):
             testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
 
             if rep.when == 'call' and testcaseids:
