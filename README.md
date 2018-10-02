@@ -1,7 +1,7 @@
 pytest-testrail
 ===============
 
-[![Build Status](https://travis-ci.org/dubner/pytest-testrail.svg?branch=master)](https://travis-ci.org/dubner/pytest-testrail)
+[![Build Status](https://travis-ci.org/dubner/pytest-testrail.svg?branch=master)](https://travis-ci.org/allankp/pytest-testrail)
 
 
 This is a pytest plugin for creating/editing testplans or testruns based on pytest markers.
@@ -107,3 +107,8 @@ py.test --testrail --tr-config=<settings file>.cfg
                         host
   --tr-close-on-complete
                         Close a test plan or test run on completion.
+  --tr-dont-publish-blocked
+                        Do not publish results of "blocked" testcases in
+                        TestRail
+  --tr-skip-missing     Skip test cases that are not present in testrun
+```

@@ -80,7 +80,16 @@ def pytest_addoption(parser):
         default=False,
         required=False,
         help='Close a test run on completion')
-
+    group.addoption(
+        '--tr-dont-publish-blocked',
+        action='store_true',
+        required=False,
+        help='Determine if results of "blocked" testcases (in TestRail) are published or not')
+    group.addoption(
+        '--tr-skip-missing',
+        action='store_true',
+        required=False,
+        help='Skip test cases that are not present in testrun')
 
 def pytest_configure(config):
     if config.getoption('--testrail'):
@@ -101,7 +110,9 @@ def pytest_configure(config):
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id'),
                 version=config.getoption('--tr-version'),
-                close_on_complete=config.getoption('--tr-close-on-complete')
+                close_on_complete=config.getoption('--tr-close-on-complete'),
+                publish_blocked=config.getoption('--tr-dont-publish-blocked'),
+                skip_missing=config.getoption('--tr-skip-missing')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

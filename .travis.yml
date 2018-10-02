@@ -13,4 +13,4 @@ deploy:
   on:
     branch: master
     distributions: sdist bdist_wheel
-    repo: dubner/pytest-testrail
+    repo: allankp/pytest-testrail

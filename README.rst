@@ -112,8 +112,12 @@ All available options
                             Do not check for valid SSL certificate on TestRail
                             host
       --tr-close-on-complete
-                           Close a test plan or test run on completion.
+                            Close a test plan or test run on completion.
+      --tr-dont-publish-blocked
+                            Do not publish results of "blocked" testcases in
+                            TestRail
+      --tr-skip-missing     Skip test cases that are not present in testrun
 
 
 .. |Build Status| image:: https://travis-ci.org/dubner/pytest-testrail.svg?branch=master
-   :target: https://travis-ci.org/dubner/pytest-testrail
+   :target: https://travis-ci.org/allankp/pytest-testrail
