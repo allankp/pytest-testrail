@@ -241,6 +241,12 @@ class PyTestRailPlugin(object):
         :param testrun_id: Id of the testrun to feed
 
         """
+        # unicode converter for compatibility of python 2 and 3
+        converter = None
+        try:
+            converter = unicode
+        except NameError:
+            converter = str
         # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
         self.results.sort(key=itemgetter('status_id'))
         self.results.sort(key=itemgetter('case_id'))
@@ -266,7 +272,7 @@ class PyTestRailPlugin(object):
                 # Indent text to avoid string formatting by TestRail. Limit size of comment.
                 data['comment'] = "# Pytest result: #\n"
                 data['comment'] += 'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else ''
-                data['comment'] += "    " + unicode(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
+                data['comment'] += "    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
