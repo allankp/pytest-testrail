@@ -272,7 +272,7 @@ class PyTestRailPlugin(object):
                 # Indent text to avoid string formatting by TestRail. Limit size of comment.
                 data['comment'] = u"# Pytest result: #\n"
                 data['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
-                data['comment'] += u"    {}" + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
+                data['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
