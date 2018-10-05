@@ -242,11 +242,10 @@ class PyTestRailPlugin(object):
 
         """
         # unicode converter for compatibility of python 2 and 3
-        converter = None
         try:
             converter = unicode
         except NameError:
-            converter = str
+            converter = lambda s, c: str(bytes(s, "utf-8"), c)
         # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
         self.results.sort(key=itemgetter('status_id'))
         self.results.sort(key=itemgetter('case_id'))
