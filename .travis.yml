@@ -5,6 +5,7 @@ python:
 install: pip install tox
 script: make test
 deploy:
+  skip_cleanup: true
   provider: pypi
   user: allanklp
   password:
