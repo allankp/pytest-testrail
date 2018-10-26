@@ -9,8 +9,8 @@ deploy:
   user: allanklp
   password:
     secure: BYCQdLIp5suyWNwADiwwIndT4jpVYxgeN/XXr7BzYQOS3wdtTPStwMXmuZgHSJy+nByil10YZ7HnyRqROoSI6mvfji4riscvuGoYvSrIaHtYtWc4Tn+Oi6iSlqWraVOtEOhXhw23ZK+IRfjWtbX5RbUWloWW5fa2FTAx0mkrkptJrdx8WjVU6fWlHwq89fRishhWF6mYJjC8LDL74XXC+zHN20qYxC5yAIJ9aCADpRkz6zo008t9T37mqZKh2+82Wgrj8iozRqdmVWeUDItZU1Ff37G/NewQ62DOuTn/gXm0QHwQLxuuY0eVyTFT1wdl8UaPZY83H78qJNHZPYIZoZ1qJA1AdDMYRwSRs+pcyKrCBLZIIw/SiMKmYQTawmT+Lq60jK3i30BJJfm2HG0mkp4n9g83s3aczy4LfC9r3HyuHinqAv9W4zZkXlVBLAyi8r6elpNxje3cctFLK3nKrHWYtugcfLHL/AVL3N34R8gSCrPJCe2D8xVManFsZ2CaAbl5MiuU0m9Bg7//9inv5Wo/JgadxneeAHqhh2RlMzEAnJq/Y6wuZghOZqKUlKtXOmm2ilyEbAstJTIDJdA/MF6f9qmw88NQuQcdIpckYjj1dxB3IKTcoxVHC/n785zNK64+1BVKL9jvKghnzN8IdSsnkhe2y2S5UIKu7U4q21s=
-  skip_cleanup: true
   on:
     branch: master
+    tags: true
     distributions: sdist bdist_wheel
     repo: allankp/pytest-testrail
