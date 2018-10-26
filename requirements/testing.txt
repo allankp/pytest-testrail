@@ -1,5 +1,6 @@
 -r base.txt
 
+bumpversion==0.5.3
 flake8==3.5.0
 freezegun==0.3.2
 mock==1.3.0
