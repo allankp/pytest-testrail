@@ -2,6 +2,7 @@ pytest-testrail
 ===============
 
 [![Build Status](https://travis-ci.org/allankp/pytest-testrail.svg?branch=master)](https://travis-ci.org/allankp/pytest-testrail)
+[![PyPI version](https://badge.fury.io/py/pytest-testrail.svg)](https://badge.fury.io/py/pytest-testrail)
 
 
 This is a pytest plugin for creating/editing testplans or testruns based on pytest markers.
