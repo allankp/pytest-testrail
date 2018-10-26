@@ -48,6 +48,11 @@ def pytest_addoption(parser):
         action='store',
         help='ID of the test suite containing the test cases (config file: suite_id in TESTRUN section)')
     group.addoption(
+        '--tr-testrun-suite-include-all',
+        action='store_true',
+        default=None,
+        help='Include all test cases in specified test suite when creating test run (config file: include_all in TESTRUN section)')
+    group.addoption(
         '--tr-testrun-name',
         action='store',
         default=None,
@@ -73,6 +78,7 @@ def pytest_addoption(parser):
     group.addoption(
         '--tr-no-ssl-cert-check',
         action='store_false',
+        default=None,
         help='Do not check for valid SSL certificate on TestRail host')
     group.addoption(
         '--tr-close-on-complete',
@@ -105,7 +111,8 @@ def pytest_configure(config):
                 assign_user_id=config_manager.getoption('tr-testrun-assignedto-id', 'assignedto_id', 'TESTRUN'),
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
-                cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', default=True),
+                include_all=config_manager.getoption('tr-testrun-suite-include-all', 'include_all', 'TESTRUN', is_bool=True, default=False),
+                cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', is_bool=True, default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id'),
@@ -137,10 +144,21 @@ class ConfigManager(object):
 
         self.config = config
 
-    def getoption(self, flag, cfg_name, section=None, default=None):
+    def getoption(self, flag, cfg_name, section=None, is_bool=False, default=None):
+        # priority: cli > config file > default
+
+        # 1. return cli option (if set)
         value = self.config.getoption('--{}'.format(flag))
         if value is not None:
             return value
+
+        # 2. return default if not config file path is specified
         if section is None or self.cfg_file is None:
-            return None
-        return self.cfg_file.get(section, cfg_name)
+            return default
+
+        if self.cfg_file.has_option(section, cfg_name):
+            # 3. return config file value
+            return self.cfg_file.getboolean(section, cfg_name) if is_bool else self.cfg_file.get(section, cfg_name)
+        else:
+            # 4. if entry not found in config file
+            return default

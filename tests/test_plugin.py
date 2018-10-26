@@ -68,7 +68,7 @@ def api_client():
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME, version='1.0.0.0')
+    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, False, True, TR_NAME, version='1.0.0.0')
 
 
 @pytest.fixture
@@ -256,18 +256,19 @@ def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
                                          expected_data_5678, cert_check=True)
 
 
-def test_create_test_run(api_client, tr_plugin):
+@pytest.mark.parametrize('include_all', [True, False])
+def test_create_test_run(api_client, tr_plugin, include_all):
     expected_tr_keys = [3453, 234234, 12]
     expect_name = 'testrun_name'
 
-    tr_plugin.create_test_run(ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, expect_name, expected_tr_keys)
+    tr_plugin.create_test_run(ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys)
 
     expected_uri = plugin.ADD_TESTRUN_URL.format(PROJECT_ID)
     expected_data = {
         'suite_id': SUITE_ID,
         'name': expect_name,
         'assignedto_id': ASSIGN_USER_ID,
-        'include_all': False,
+        'include_all': include_all,
         'case_ids': expected_tr_keys
     }
     check_cert = True
@@ -341,7 +342,7 @@ def test_close_test_plan(api_client, tr_plugin):
 
 def test_dont_publish_blocked(api_client):
     """ Case: one test is blocked"""
-    my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, True, TR_NAME,
+    my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, False, True, TR_NAME,
                      version='1.0.0.0',
                      publish_blocked=False
                      )
@@ -369,7 +370,7 @@ def test_dont_publish_blocked(api_client):
 
 def test_skip_missing_only_one_test(api_client, pytest_test_items):
     my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID,
-                                 SUITE_ID, True, TR_NAME,
+                                 SUITE_ID, False, True, TR_NAME,
                                  run_id=10,
                                  version='1.0.0.0',
                                  publish_blocked=False,
@@ -388,7 +389,7 @@ def test_skip_missing_only_one_test(api_client, pytest_test_items):
 
 def test_skip_missing_correlation_tests(api_client, pytest_test_items):
     my_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID,
-                                 SUITE_ID, True, TR_NAME,
+                                 SUITE_ID, False, True, TR_NAME,
                                  run_id=10,
                                  version='1.0.0.0',
                                  publish_blocked=False,

@@ -117,14 +117,15 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPlugin(object):
-    def __init__(self, client, assign_user_id, project_id, suite_id, cert_check, tr_name, run_id=0, plan_id=0,
-                 version='', close_on_complete=False, publish_blocked=True, skip_missing=False):
+    def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, run_id=0,
+                 plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
         self.project_id = project_id
         self.results = []
         self.suite_id = suite_id
+        self.include_all = include_all
         self.testrun_name = tr_name
         self.testrun_id = run_id
         self.testplan_id = plan_id
@@ -171,6 +172,7 @@ class PyTestRailPlugin(object):
                 self.assign_user_id,
                 self.project_id,
                 self.suite_id,
+                self.include_all,
                 self.testrun_name,
                 tr_keys
             )
@@ -272,6 +274,10 @@ class PyTestRailPlugin(object):
                                                                ', '.join(str(elt) for elt in blocked_tests_list)))
             self.results = [result for result in self.results if result.get('case_id') not in blocked_tests_list]
 
+        # prompt enabling include all test cases from test suite when creating test run
+        if self.include_all:
+            print('[{}] Option "Include all testcases from test suite for test run" activated'.format(TESTRAIL_PREFIX))
+
         # Publish results
         for result in self.results:
             data = {'status_id': result['status_id']}
@@ -299,7 +305,7 @@ class PyTestRailPlugin(object):
                                                                                                 error))
 
     def create_test_run(
-            self, assign_user_id, project_id, suite_id, testrun_name, tr_keys):
+            self, assign_user_id, project_id, suite_id, include_all, testrun_name, tr_keys):
         """
         Create testrun with ids collected from markers.
 
@@ -309,7 +315,7 @@ class PyTestRailPlugin(object):
             'suite_id': suite_id,
             'name': testrun_name,
             'assignedto_id': assign_user_id,
-            'include_all': False,
+            'include_all': include_all,
             'case_ids': tr_keys,
         }
 
