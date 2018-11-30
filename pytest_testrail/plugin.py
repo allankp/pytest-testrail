@@ -104,12 +104,12 @@ def get_testrail_keys(items):
     """Return Tuple of Pytest nodes and TestRail ids from pytests markers"""
     testcaseids = []
     for item in items:
-        if item.get_marker(TESTRAIL_PREFIX):
+        if item.get_closest_marker(TESTRAIL_PREFIX):
             testcaseids.append(
                 (
                     item,
                     clean_test_ids(
-                        item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
+                        item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
                     )
                 )
             )
@@ -182,13 +182,13 @@ class PyTestRailPlugin(object):
         """ Collect result and associated testcases (TestRail) of an execution """
         outcome = yield
         rep = outcome.get_result()
-        if item.get_marker(TESTRAIL_PREFIX):
-            testcaseids = item.get_marker(TESTRAIL_PREFIX).kwargs.get('ids')
+        if item.get_closest_marker(TESTRAIL_PREFIX):
+            testcaseids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
 
             if rep.when == 'call' and testcaseids:
                 self.add_result(
                     clean_test_ids(testcaseids),
-                    get_test_outcome(outcome.result.outcome),
+                    get_test_outcome(outcome.get_result().outcome),
                     comment=rep.longrepr,
                     duration=rep.duration
                 )
