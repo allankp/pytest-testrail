@@ -338,8 +338,8 @@ def test_skip_missing_only_one_test(api_client, pytest_test_items):
 
     my_plugin.pytest_collection_modifyitems(None, None, pytest_test_items)
 
-    assert not pytest_test_items[0].get_marker('skip')
-    assert pytest_test_items[1].get_marker('skip')
+    assert not pytest_test_items[0].get_closest_marker('skip')
+    assert pytest_test_items[1].get_closest_marker('skip')
 
 
 def test_skip_missing_correlation_tests(api_client, pytest_test_items):
@@ -357,5 +357,5 @@ def test_skip_missing_correlation_tests(api_client, pytest_test_items):
 
     my_plugin.pytest_collection_modifyitems(None, None, pytest_test_items)
 
-    assert not pytest_test_items[0].get_marker('skip')
-    assert not pytest_test_items[1].get_marker('skip')
+    assert not pytest_test_items[0].get_closest_marker('skip')
+    assert not pytest_test_items[1].get_closest_marker('skip')
