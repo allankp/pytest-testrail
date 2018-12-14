@@ -322,8 +322,9 @@ def test_dont_publish_blocked(api_client):
                                                 cert_check=True)
     expected_uri = plugin.ADD_RESULT_URL.format(my_plugin.testrun_id, 1234)
     expected_data = {'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0'}
-    len(api_client.send_post.call_args_list) == 1
-    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
+    assert len(api_client.send_post.call_args_list) == 1
+    assert api_client.send_post.call_args_list[0] == \
+        call(expected_uri, expected_data, cert_check=True)
 
 
 def test_skip_missing_only_one_test(api_client, pytest_test_items):
