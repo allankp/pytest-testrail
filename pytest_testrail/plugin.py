@@ -102,18 +102,12 @@ def clean_test_ids(test_ids):
 
 def get_testrail_keys(items):
     """Return Tuple of Pytest nodes and TestRail ids from pytests markers"""
-    testcaseids = []
-    for item in items:
-        if item.get_closest_marker(TESTRAIL_PREFIX):
-            testcaseids.append(
-                (
-                    item,
-                    clean_test_ids(
-                        item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
-                    )
-                )
-            )
-    return testcaseids
+    return [
+        (item, clean_test_ids(
+            item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')))
+        for item in items
+        if item.get_closest_marker(TESTRAIL_PREFIX)
+    ]
 
 
 class PyTestRailPlugin(object):
