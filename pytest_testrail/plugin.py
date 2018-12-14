@@ -97,7 +97,7 @@ def clean_test_ids(test_ids):
     :param list test_ids: list of test_ids.
     :return list ints: contains list of test_ids as ints.
     """
-    return [int(re.search('(?P<test_id>[0-9]+$)', test_id).groupdict().get('test_id')) for test_id in test_ids]
+    return [int(re.search('[0-9]+$', test_id).group(0)) for test_id in test_ids]
 
 
 def get_testrail_keys(items):
