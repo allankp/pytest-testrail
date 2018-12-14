@@ -173,16 +173,19 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 1234)
     expected_data = {'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
+    assert api_client.send_post.call_args_list[0] == \
+        call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 1234)
     expected_data = {'status_id': TESTRAIL_TEST_STATUS["failed"], 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, cert_check=True)
+    assert api_client.send_post.call_args_list[1] == \
+        call(expected_uri, expected_data, cert_check=True)
 
     expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 5678)
     expected_data = {'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0', 'elapsed': '1s',
                      'comment': "# Pytest result: #\n    An error"}
-    api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, cert_check=True)
+    assert api_client.send_post.call_args_list[2] == \
+        call(expected_uri, expected_data, cert_check=True)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
