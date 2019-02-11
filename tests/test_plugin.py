@@ -171,18 +171,14 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
 
     tr_plugin.pytest_sessionfinish(None, 0)
 
-    expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 1234)
-    expected_data = {'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
+    expected_data = {'results': [
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'version': '1.0.0.0', 'elapsed': '3s'},
+        {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0', 'elapsed': '1s',
+         'comment': "# Pytest result: #\n    An error"}
+    ]}
 
-    expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 1234)
-    expected_data = {'status_id': TESTRAIL_TEST_STATUS["failed"], 'version': '1.0.0.0', 'elapsed': '3s'}
-    api_client.send_post.call_args_list[1] == call(expected_uri, expected_data, cert_check=True)
-
-    expected_uri = plugin.ADD_RESULT_URL.format(tr_plugin.testrun_id, 5678)
-    expected_data = {'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0', 'elapsed': '1s',
-                     'comment': "# Pytest result: #\n    An error"}
-    api_client.send_post.call_args_list[2] == call(expected_uri, expected_data, cert_check=True)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(tr_plugin.testrun_id), expected_data, cert_check=True)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
@@ -195,20 +191,17 @@ def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
 
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
-    expected_data_1234 = {'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'}
-    expected_data_5678 = {'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0', 'elapsed': '1s',
-                          'comment': "# Pytest result: #\n    An error"}
-
+    expected_data = {'results': [
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'},
+        {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0', 'elapsed': '1s',
+         'comment': "# Pytest result: #\n    An error"}
+    ]}
     print(api_client.send_post.call_args_list)
 
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 1234),
-                                         expected_data_1234, cert_check=True)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(59, 5678),
-                                         expected_data_5678, cert_check=True)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 1234),
-                                         expected_data_1234, cert_check=True)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULT_URL.format(61, 5678),
-                                         expected_data_5678, cert_check=True)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(59, 1234),
+                                         expected_data, cert_check=True)
+    api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(61, 5678),
+                                         expected_data, cert_check=True)
 
 
 @pytest.mark.parametrize('include_all', [True, False])
@@ -276,7 +269,7 @@ def test_close_test_run(api_client, tr_plugin):
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_uri = plugin.CLOSE_TESTRUN_URL.format(tr_plugin.testrun_id)
-    api_client.send_post.call_args_list[3] = call(expected_uri, {}, cert_check=True)
+    api_client.send_post.call_args_list[1] = call(expected_uri, {}, cert_check=True)
 
 
 def test_close_test_plan(api_client, tr_plugin):
@@ -292,7 +285,7 @@ def test_close_test_plan(api_client, tr_plugin):
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_uri = plugin.CLOSE_TESTPLAN_URL.format(tr_plugin.testplan_id)
-    api_client.send_post.call_args_list[3] = call(expected_uri, {}, cert_check=True)
+    api_client.send_post.call_args_list[1] = call(expected_uri, {}, cert_check=True)
 
 
 def test_dont_publish_blocked(api_client):
@@ -317,8 +310,8 @@ def test_dont_publish_blocked(api_client):
 
     api_client.send_get.assert_called_once_with(plugin.GET_TESTS_URL.format(my_plugin.testrun_id),
                                                 cert_check=True)
-    expected_uri = plugin.ADD_RESULT_URL.format(my_plugin.testrun_id, 1234)
-    expected_data = {'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0'}
+    expected_uri = plugin.ADD_RESULTS_URL.format(my_plugin.testrun_id)
+    expected_data = {'results': [{'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0'}]}
     len(api_client.send_post.call_args_list) == 1
     api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
 
