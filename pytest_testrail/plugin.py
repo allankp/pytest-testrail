@@ -27,11 +27,13 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULTS_URL = 'add_results_for_cases/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
+ADD_PLANENTRY_URL = '/add_plan_entry/{}'
 CLOSE_TESTRUN_URL = 'close_run/{}'
 CLOSE_TESTPLAN_URL = 'close_plan/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 GET_TESTS_URL = 'get_tests/{}'
+GET_SUITES = 'get_suites/{}'
 
 COMMENT_SIZE_LIMIT = 4000
 
@@ -153,7 +155,18 @@ class PyTestRailPlugin(object):
         tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
         if self.testplan_id and self.is_testplan_available():
-            self.testrun_id = 0
+            if self.testrun_name is None:
+                self.testrun_name = testrun_name()
+
+            self.add_plan_entry(
+                self.testplan_id,
+                self.assign_user_id,
+                self.project_id,
+                self.suite_id,
+                self.include_all,
+                self.testrun_name,
+                tr_keys
+            )
         elif self.testrun_id and self.is_testrun_available():
             self.testplan_id = 0
             if self.skip_missing:
@@ -322,7 +335,44 @@ class PyTestRailPlugin(object):
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
                                                                               testrun_name,
                                                                               self.testrun_id))
+    def add_plan_entry(
+            self, test_plan_id, assign_user_id, project_id, suite_id, include_all, testrun_name, tr_keys):
+        """
+        Create testrun in testplan with ids collected from markers.
 
+        :param tr_keys: collected testrail ids.
+        """
+        if not suite_id:
+            # suite_id is required for add_plan_entry API call (but not for similar add_run)
+            response = self.client.send_get(GET_SUITES.format(project_id))
+            error = self.client.get_error(response)
+            if error:
+                print('[{}] Failed to find suite_id with project_id={}: "{}"'.format(project_id))
+            else:
+                suite_id = str(response[0]['id'])
+
+        data = {
+            'suite_id': suite_id,
+            'name': testrun_name,
+            'assignedto_id': assign_user_id,
+            'include_all': include_all,
+            'case_ids': tr_keys,
+        }
+
+        response = self.client.send_post(
+            ADD_PLANENTRY_URL.format(test_plan_id),
+            data,
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to create testrun in test_plan_id={}: "{}"'.format(TESTRAIL_PREFIX, test_plan_id, error))
+        else:
+            self.testrun_id = str(response['runs'][0]['id'])
+            print('[{}] New testrun created in  test_plan_id={} with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
+                                                                              test_plan_id,
+                                                                              testrun_name,
+                                                                              self.testrun_id))
 
     def close_test_run(self, testrun_id):
         """
