@@ -246,7 +246,7 @@ def test_add_plan_entry(api_client, tr_plugin, include_all):
 
     tr_plugin.add_plan_entry(testplan_id, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys)
 
-    expected_uri = plugin.ADD_PLANENTRY_URL.format(testplan_id)
+    expected_uri = plugin.ADD_PLAN_ENTRY_URL.format(testplan_id)
     expected_data = {
         'suite_id': SUITE_ID,
         'name': expect_name,
