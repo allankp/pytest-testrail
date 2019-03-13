@@ -237,6 +237,27 @@ def test_is_testrun_available(api_client, tr_plugin):
     assert tr_plugin.is_testrun_available() is False
 
 
+@pytest.mark.parametrize('include_all', [True, False])
+def test_add_plan_entry(api_client, tr_plugin, include_all):
+    expected_tr_keys = [3453, 234234, 12]
+    expect_name = 'testrun_name'
+    testplan_id = TESTPLAN['id']
+    tr_plugin.testplan_id = testplan_id
+
+    tr_plugin.add_plan_entry(testplan_id, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys)
+
+    expected_uri = plugin.ADD_PLANENTRY_URL.format(testplan_id)
+    expected_data = {
+        'suite_id': SUITE_ID,
+        'name': expect_name,
+        'assignedto_id': ASSIGN_USER_ID,
+        'include_all': include_all,
+        'case_ids': expected_tr_keys
+    }
+    check_cert = True
+    api_client.send_post.assert_called_once_with(expected_uri, expected_data, cert_check=check_cert)
+
+
 def test_is_testplan_available(api_client, tr_plugin):
     """ Test of method `is_testplan_available` """
     tr_plugin.testplan_id = 100
