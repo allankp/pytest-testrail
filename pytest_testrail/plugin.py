@@ -27,13 +27,13 @@ TESTRAIL_PREFIX = 'testrail'
 
 ADD_RESULTS_URL = 'add_results_for_cases/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
-ADD_PLANENTRY_URL = '/add_plan_entry/{}'
+ADD_PLANENTRY_URL = 'add_plan_entry/{}'
 CLOSE_TESTRUN_URL = 'close_run/{}'
 CLOSE_TESTPLAN_URL = 'close_plan/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 GET_TESTS_URL = 'get_tests/{}'
-GET_SUITES = 'get_suites/{}'
+GET_SUITES_URL = 'get_suites/{}'
 
 COMMENT_SIZE_LIMIT = 4000
 
@@ -344,7 +344,7 @@ class PyTestRailPlugin(object):
         """
         if not suite_id:
             # suite_id is required for add_plan_entry API call (but not for similar add_run)
-            response = self.client.send_get(GET_SUITES.format(project_id))
+            response = self.client.send_get(GET_SUITES_URL.format(project_id))
             error = self.client.get_error(response)
             if error:
                 print('[{}] Failed to find suite_id with project_id={}: "{}"'.format(project_id))
