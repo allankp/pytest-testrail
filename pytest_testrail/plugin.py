@@ -30,10 +30,10 @@ ADD_TESTRUN_URL = 'add_run/{}'
 ADD_PLAN_ENTRY_URL = 'add_plan_entry/{}'
 CLOSE_TESTRUN_URL = 'close_run/{}'
 CLOSE_TESTPLAN_URL = 'close_plan/{}'
+GET_SUITES_URL = 'get_suites/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 GET_TESTS_URL = 'get_tests/{}'
-GET_SUITES_URL = 'get_suites/{}'
 
 COMMENT_SIZE_LIMIT = 4000
 
