@@ -154,21 +154,25 @@ class PyTestRailPlugin(object):
         items_with_tr_keys = get_testrail_keys(items)
         tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
-        if self.testplan_id and self.is_testplan_available():
+        if self.testrun_id and self.is_testrun_available():
+            if self.testplan_id and self.is_testplan_available():
+                testruns = self.get_available_testruns(self.testplan_id)
+                if int(self.testrun_id) not in testruns:
+                    print('[{}] Info: test-run-id={} not found in test-plan-id={}'.format(TESTRAIL_PREFIX, self.testrun_id, self.testplan_id))
+        elif self.testplan_id and self.is_testplan_available():
             if self.testrun_name is None:
                 self.testrun_name = testrun_name()
+            if str(self.testrun_id).lower() == 'new':
+                self.add_plan_entry(
+                    self.testplan_id,
+                    self.assign_user_id,
+                    self.project_id,
+                    self.suite_id,
+                    self.include_all,
+                    self.testrun_name,
+                    tr_keys
+                )
 
-            self.add_plan_entry(
-                self.testplan_id,
-                self.assign_user_id,
-                self.project_id,
-                self.suite_id,
-                self.include_all,
-                self.testrun_name,
-                tr_keys
-            )
-        elif self.testrun_id and self.is_testrun_available():
-            self.testplan_id = 0
             if self.skip_missing:
                 tests_list = [
                     test.get('case_id') for test in self.get_tests(self.testrun_id)
