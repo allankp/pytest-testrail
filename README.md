@@ -110,6 +110,7 @@ py.test --testrail --tr-config=<settings file>.cfg
                         If no option "--tr-run-id" is provided, all runs in the plan 
                             which include the test cases selected will be updated, 
                             no new tests will be added to the test runs. 
+                            If provided, option "--tr-testrun-name" will be ignored                       
                         If option "--tr-run-id" is provided, just that run will be updated, 
                             if the run is not in the testplan, an info message will print,
                             but the run will be updated with any results for tests it has. 
