@@ -420,6 +420,8 @@ class PyTestRailPlugin(object):
 
         :return: True if testrun exists AND is open
         """
+        if str(self.testrun_id).lower() == 'new':
+            return False
         response = self.client.send_get(
             GET_TESTRUN_URL.format(self.testrun_id),
             cert_check=self.cert_check
