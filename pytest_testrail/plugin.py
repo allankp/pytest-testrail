@@ -426,16 +426,8 @@ class PyTestRailPlugin(object):
         """
         if str(self.testrun_id).lower() == 'new':
             return False
-        response = self.client.send_get(
-            GET_TESTRUN_URL.format(self.testrun_id),
-            cert_check=self.cert_check
-        )
-        error = self.client.get_error(response)
-        if error:
-            print('[{}] Failed to retrieve testrun: "{}"'.format(TESTRAIL_PREFIX, error))
-            return False
 
-        return response['is_completed'] is False
+        return self.get_testrun(self.testrun_id)['is_completed'] is False
 
     def is_testplan_available(self):
         """
@@ -473,6 +465,26 @@ class PyTestRailPlugin(object):
                     if not run['is_completed']:
                         testruns_list.append(run['id'])
         return testruns_list
+
+    def get_testrun(self, testrun_id):
+        """
+        Returns details of a testrun that may be available in TestRail.
+
+        :return: dictionary for test run
+        """
+        if str(self.testrun_id).lower() == 'new':
+            return False
+        response = self.client.send_get(
+            GET_TESTRUN_URL.format(testrun_id),
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to retrieve testrun: "{}"'.format(TESTRAIL_PREFIX, error))
+            return None
+
+        return response
+
 
     def get_tests(self, run_id):
         """
