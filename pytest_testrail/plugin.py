@@ -310,6 +310,11 @@ class PyTestRailPlugin(object):
         error = self.client.get_error(response)
         if error:
             print('[{}] Info: Testcases not published for following reason: "{}"'.format(TESTRAIL_PREFIX, error))
+        else:
+            testrun_updated = self.get_testrun(testrun_id)
+            print('[{}] Info: {} Testcase(s) published to test-run-id={}, "{}"'.
+                  format(TESTRAIL_PREFIX, len(self.results), testrun_id, testrun_updated['name']))
+
 
     def create_test_run(
             self, assign_user_id, project_id, suite_id, include_all, testrun_name, tr_keys):
