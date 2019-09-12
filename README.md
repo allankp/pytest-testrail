@@ -117,4 +117,5 @@ py.test --testrail --tr-config=<settings file>.cfg
                         Do not publish results of "blocked" testcases in
                         TestRail
   --tr-skip-missing     Skip test cases that are not present in testrun
+  --tr-milestone-id     Identifier of milestone to be assigned to run
 ```
