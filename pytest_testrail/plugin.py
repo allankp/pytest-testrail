@@ -141,7 +141,7 @@ def get_testrail_keys(items):
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, tr_description='', run_id=0,
                  plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False,
-                 milestone_id=None):
+                 milestone_id=None, custom_comment=None):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -158,6 +158,7 @@ class PyTestRailPlugin(object):
         self.publish_blocked = publish_blocked
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
+        self.comment = custom_comment
 
     # pytest hooks
 
@@ -317,11 +318,19 @@ class PyTestRailPlugin(object):
                 entry['version'] = self.version
             comment = result.get('comment', '')
             if comment:
-                # Indent text to avoid string formatting by TestRail. Limit size of comment.
-                entry['comment'] = u"# Pytest result: #\n"
-                entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
-                entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n',
-                                                                                                             '\n    ')
+                if self.comment:
+                    entry['comment'] = self.comment + '\n'
+                    # Indent text to avoid string formatting by TestRail. Limit size of comment.
+                    entry['comment'] += u"# Pytest result: #\n"
+                    entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
+                    entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
+                else:
+                    # Indent text to avoid string formatting by TestRail. Limit size of comment.
+                    entry['comment'] = u"# Pytest result: #\n"
+                    entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
+                    entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
+            elif comment == '':
+                entry['comment'] = self.comment
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds

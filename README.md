@@ -65,6 +65,9 @@ project_id = 2
 suite_id = 3
 plan_id = 4
 description = 'This is an example description'
+
+[TESTCASE]
+custom_comment = 'This is a custom comment'
 ```
 
 Or
@@ -104,3 +107,4 @@ py.test --testrail --tr-config=<settings file>.cfg
 | --tr-dont-publish-blocked      | Do not publish results of "blocked" testcases in TestRail                                                           |
 | --tr-skip-missing              | Skip test cases that are not present in testrun                                                                     |
 |  --tr-milestone-id             | Identifier of milestone to be assigned to run                                                                       |
+| --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section) |
