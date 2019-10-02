@@ -68,7 +68,7 @@ def pytest_addoption(parser):
         action='store',
         default=0,
         required=False,
-        help='Identifier of testplan, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored')
+        help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section). If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
         '--tr-version',
         action='store',
@@ -115,7 +115,7 @@ def pytest_configure(config):
                 cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', is_bool=True, default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
-                plan_id=config.getoption('--tr-plan-id'),
+                plan_id=config.getoption('--tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),

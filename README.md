@@ -54,6 +54,7 @@ password = <api_key>
 assignedto_id = 1
 project_id = 2
 suite_id = 3
+plan_id = 4
 ```
 
 Or
