@@ -96,6 +96,13 @@ def pytest_addoption(parser):
         action='store_true',
         required=False,
         help='Skip test cases that are not present in testrun')
+    group.addoption(
+        '--tr-milestone-id',
+        action='store',
+        default=None,
+        required=False,
+        help='Identifier of milestone, to be used in run creation (config file: milestone_id in TESTRUN section)'
+    )
 
 def pytest_configure(config):
     if config.getoption('--testrail'):
@@ -119,7 +126,8 @@ def pytest_configure(config):
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
-                skip_missing=config.getoption('--tr-skip-missing')
+                skip_missing=config.getoption('--tr-skip-missing'),
+                milestone_id=config_manager.getoption('tr-milestone-id', 'milestone_id', 'TESTRUN')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

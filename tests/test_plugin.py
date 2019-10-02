@@ -13,6 +13,7 @@ pytest_plugins = "pytester"
 
 ASSIGN_USER_ID = 3
 FAKE_NOW = datetime(2015, 1, 31, 19, 5, 42)
+MILESTONE_ID = 5
 PROJECT_ID = 4
 PYTEST_FILE = """
     from pytest_testrail.plugin import testrail, pytestrail
@@ -63,7 +64,8 @@ def api_client():
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, False, True, TR_NAME, version='1.0.0.0')
+    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, False, True, TR_NAME, version='1.0.0.0',
+                            milestone_id=MILESTONE_ID)
 
 
 @pytest.fixture
@@ -209,7 +211,8 @@ def test_create_test_run(api_client, tr_plugin, include_all):
     expected_tr_keys = [3453, 234234, 12]
     expect_name = 'testrun_name'
 
-    tr_plugin.create_test_run(ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys)
+    tr_plugin.create_test_run(ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys,
+                              MILESTONE_ID)
 
     expected_uri = plugin.ADD_TESTRUN_URL.format(PROJECT_ID)
     expected_data = {
@@ -217,7 +220,8 @@ def test_create_test_run(api_client, tr_plugin, include_all):
         'name': expect_name,
         'assignedto_id': ASSIGN_USER_ID,
         'include_all': include_all,
-        'case_ids': expected_tr_keys
+        'case_ids': expected_tr_keys,
+        'milestone_id': MILESTONE_ID
     }
     check_cert = True
     api_client.send_post.assert_called_once_with(expected_uri, expected_data, cert_check=check_cert)
