@@ -36,6 +36,10 @@ def pytest_addoption(parser):
         action='store',
         help='Password for the account on the TestRail server (config file: password in API section)')
     group.addoption(
+        '--tr-timeout',
+        action='store',
+        help='Set timeout for connecting to TestRail server')
+    group.addoption(
         '--tr-testrun-assignedto-id',
         action='store',
         help='ID of the user assigned to the test run (config file: assignedto_id in TESTRUN section)')
@@ -110,7 +114,8 @@ def pytest_configure(config):
         config_manager = ConfigManager(cfg_file_path, config)
         client = APIClient(config_manager.getoption('tr-url', 'url', 'API'),
                            config_manager.getoption('tr-email', 'email', 'API'),
-                           config_manager.getoption('tr-password', 'password', 'API'))
+                           config_manager.getoption('tr-password', 'password', 'API'),
+                           timeout=config_manager.getoption('tr-timeout', 'timeout', 'API'))
 
         config.pluginmanager.register(
             PyTestRailPlugin(
