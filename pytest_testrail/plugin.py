@@ -252,7 +252,8 @@ class PyTestRailPlugin(object):
         except NameError:
             converter = lambda s, c: str(bytes(s, "utf-8"), c)
         # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
-        self.results.sort(key=itemgetter('status_id'))
+        # Comment sort by status_id due to issue with pytest-rerun failures, for details refer to issue https://github.com/allankp/pytest-testrail/issues/100
+        # self.results.sort(key=itemgetter('status_id'))
         self.results.sort(key=itemgetter('case_id'))
 
         # Manage case of "blocked" testcases
