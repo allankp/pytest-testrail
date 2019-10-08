@@ -24,7 +24,7 @@ PYTEST_TO_TESTRAIL_STATUS = {
 DT_FORMAT = '%d-%m-%Y %H:%M:%S'
 
 TESTRAIL_PREFIX = 'testrail'
-
+TESTRAIL_DEFECTS_PREFIX = 'testrail_defects'
 ADD_RESULTS_URL = 'add_results_for_cases/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
 CLOSE_TESTRUN_URL = 'close_run/{}'
@@ -59,19 +59,31 @@ class pytestrail(object):
         """
         return pytest.mark.testrail(ids=ids)
 
+    @staticmethod
+    def defect(*defect_ids):
+        """
+                Decorator to mark defects with defect ids.
 
-def testrail(*ids):
-    """
-    Decorator to mark tests with testcase ids.
+                ie. @pytestrail.defect('PF-513', 'BR-3255')
 
-    ie. @testrail('C123', 'C12345')
+                :return pytest.mark:
+                """
+        return pytest.mark.testrail_defects(defect_ids=defect_ids)
 
-    :return pytest.mark:
-    """
-    deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
-            '@pytestrail.case decorator instead.')
-    warnings.warn(deprecation_msg, DeprecatedTestDecorator)
-    return pytestrail.case(*ids)
+
+# def testrail(*ids):
+#     """
+#     Decorator to mark tests with testcase ids.
+#
+#     ie. @testrail('C123', 'C12345')
+#
+#     :return pytest.mark:
+#     """
+#     deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
+#             '@pytestrail.case decorator instead.')
+#     warnings.warn(deprecation_msg, DeprecatedTestDecorator)
+#     return pytestrail.case(*ids)
+
 
 
 def get_test_outcome(outcome):
@@ -98,6 +110,16 @@ def clean_test_ids(test_ids):
     :return list ints: contains list of test_ids as ints.
     """
     return [int(re.search('(?P<test_id>[0-9]+$)', test_id).groupdict().get('test_id')) for test_id in test_ids]
+
+def clean_test_defects(defect_ids):
+    """
+        Clean pytest marker containing testrail testcase ids.
+
+        :param list defect_ids: list of defect_ids.
+        :return list ints: contains list of defect_ids as ints.
+        """
+    return [(re.search('(?P<defect_id>.*)',defect_id).groupdict().get('defect_id')) for defect_id in defect_ids]
+
 
 
 def get_testrail_keys(items):
@@ -185,16 +207,28 @@ class PyTestRailPlugin(object):
         """ Collect result and associated testcases (TestRail) of an execution """
         outcome = yield
         rep = outcome.get_result()
+        defectids = None
+        if item.get_closest_marker(TESTRAIL_DEFECTS_PREFIX):
+            defectids = item.get_closest_marker(TESTRAIL_DEFECTS_PREFIX).kwargs.get('defect_ids')
         if item.get_closest_marker(TESTRAIL_PREFIX):
             testcaseids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
-
             if rep.when == 'call' and testcaseids:
-                self.add_result(
-                    clean_test_ids(testcaseids),
-                    get_test_outcome(outcome.get_result().outcome),
-                    comment=rep.longrepr,
-                    duration=rep.duration
+                if defectids!= None:
+                    self.add_result(
+                        clean_test_ids(testcaseids),
+                        get_test_outcome(outcome.get_result().outcome),
+                        comment=rep.longrepr,
+                        duration=rep.duration,
+                        defects=str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'",'')
                 )
+                else:
+                    self.add_result(
+                        clean_test_ids(testcaseids),
+                        get_test_outcome(outcome.get_result().outcome),
+                        comment=rep.longrepr,
+                        duration=rep.duration
+                    )
+
 
     def pytest_sessionfinish(self, session, exitstatus):
         """ Publish results in TestRail """
@@ -221,10 +255,11 @@ class PyTestRailPlugin(object):
 
     # plugin
 
-    def add_result(self, test_ids, status, comment='', duration=0):
+    def add_result(self, test_ids, status, comment='', duration=0, defects=None):
         """
         Add a new result to results dict to be submitted at the end.
 
+        :param defects: Add defects to test result
         :param list test_ids: list of test_ids.
         :param int status: status code of test (pass or fail).
         :param comment: None or a failure representation.
@@ -235,7 +270,8 @@ class PyTestRailPlugin(object):
                 'case_id': test_id,
                 'status_id': status,
                 'comment': comment,
-                'duration': duration
+                'duration': duration,
+                'defects': defects
             }
             self.results.append(data)
 
@@ -252,7 +288,7 @@ class PyTestRailPlugin(object):
         except NameError:
             converter = lambda s, c: str(bytes(s, "utf-8"), c)
         # Results are sorted by 'case_id' and by 'status_id' (worst result at the end)
-        # Comment sort by status_id due to issue with pytest-rerun failures, for details refer to issue https://github.com/allankp/pytest-testrail/issues/100
+        # Comment sort by status_id due to issue with pytest-rerun failures, for details refer to issue
         # self.results.sort(key=itemgetter('status_id'))
         self.results.sort(key=itemgetter('case_id'))
 
@@ -274,7 +310,7 @@ class PyTestRailPlugin(object):
         # Publish results
         data = {'results': []}
         for result in self.results:
-            entry = {'status_id': result['status_id'], 'case_id': result['case_id']}
+            entry = {'status_id': result['status_id'], 'case_id': result['case_id'], 'defects': result['defects']}
             if self.version:
                 entry['version'] = self.version
             comment = result.get('comment', '')

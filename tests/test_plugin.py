@@ -107,13 +107,15 @@ def test_add_result(tr_plugin):
             'case_id': 1,
             'status_id': status,
             'comment': "ERROR!",
-            'duration': 3600
+            'duration': 3600,
+            'defects': None
         },
         {
             'case_id': 2,
             'status_id': status,
             'comment': "ERROR!",
-            'duration': 3600
+            'duration': 3600,
+            'defects': None
         }
     ]
 
