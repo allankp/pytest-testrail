@@ -48,6 +48,7 @@ class pytestrail(object):
     An alternative to using the testrail function as a decorator for test cases, since py.test may confuse it as a test
     function since it has the 'test' prefix
     '''
+
     @staticmethod
     def case(*ids):
         """
@@ -85,7 +86,6 @@ class pytestrail(object):
 #     return pytestrail.case(*ids)
 
 
-
 def get_test_outcome(outcome):
     """
     Return numerical value of test outcome.
@@ -111,6 +111,7 @@ def clean_test_ids(test_ids):
     """
     return [int(re.search('(?P<test_id>[0-9]+$)', test_id).groupdict().get('test_id')) for test_id in test_ids]
 
+
 def clean_test_defects(defect_ids):
     """
         Clean pytest marker containing testrail testcase ids.
@@ -118,8 +119,7 @@ def clean_test_defects(defect_ids):
         :param list defect_ids: list of defect_ids.
         :return list ints: contains list of defect_ids as ints.
         """
-    return [(re.search('(?P<defect_id>.*)',defect_id).groupdict().get('defect_id')) for defect_id in defect_ids]
-
+    return [(re.search('(?P<defect_id>.*)', defect_id).groupdict().get('defect_id')) for defect_id in defect_ids]
 
 
 def get_testrail_keys(items):
@@ -213,14 +213,14 @@ class PyTestRailPlugin(object):
         if item.get_closest_marker(TESTRAIL_PREFIX):
             testcaseids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
             if rep.when == 'call' and testcaseids:
-                if defectids!= None:
+                if defectids != None:
                     self.add_result(
                         clean_test_ids(testcaseids),
                         get_test_outcome(outcome.get_result().outcome),
                         comment=rep.longrepr,
                         duration=rep.duration,
-                        defects=str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'",'')
-                )
+                        defects=str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", '')
+                    )
                 else:
                     self.add_result(
                         clean_test_ids(testcaseids),
@@ -228,7 +228,6 @@ class PyTestRailPlugin(object):
                         comment=rep.longrepr,
                         duration=rep.duration
                     )
-
 
     def pytest_sessionfinish(self, session, exitstatus):
         """ Publish results in TestRail """
@@ -266,13 +265,22 @@ class PyTestRailPlugin(object):
         :param duration: Time it took to run just the test.
         """
         for test_id in test_ids:
-            data = {
-                'case_id': test_id,
-                'status_id': status,
-                'comment': comment,
-                'duration': duration,
-                'defects': defects
-            }
+            if defects:
+                data = {
+                    'case_id': test_id,
+                    'status_id': status,
+                    'comment': comment,
+                    'duration': duration,
+                    'defects': defects
+                }
+            else:
+                data = {
+                    'case_id': test_id,
+                    'status_id': status,
+                    'comment': comment,
+                    'duration': duration,
+                    'defects': defects
+                }
             self.results.append(data)
 
     def add_results(self, testrun_id):
@@ -318,7 +326,8 @@ class PyTestRailPlugin(object):
                 # Indent text to avoid string formatting by TestRail. Limit size of comment.
                 entry['comment'] = u"# Pytest result: #\n"
                 entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
-                entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
+                entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n',
+                                                                                                             '\n    ')
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
@@ -361,9 +370,8 @@ class PyTestRailPlugin(object):
         else:
             self.testrun_id = response['id']
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
-                                                                              testrun_name,
-                                                                              self.testrun_id))
-
+                                                                             testrun_name,
+                                                                             self.testrun_id))
 
     def close_test_run(self, testrun_id):
         """
@@ -381,7 +389,6 @@ class PyTestRailPlugin(object):
         else:
             print('[{}] Test run with ID={} was closed'.format(TESTRAIL_PREFIX, self.testrun_id))
 
-
     def close_test_plan(self, testplan_id):
         """
         Closes testrun.
@@ -397,7 +404,6 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to close test plan: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             print('[{}] Test plan with ID={} was closed'.format(TESTRAIL_PREFIX, self.testplan_id))
-
 
     def is_testrun_available(self):
         """
