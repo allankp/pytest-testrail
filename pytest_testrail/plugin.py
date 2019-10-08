@@ -72,18 +72,18 @@ class pytestrail(object):
         return pytest.mark.testrail_defects(defect_ids=defect_ids)
 
 
-# def testrail(*ids):
-#     """
-#     Decorator to mark tests with testcase ids.
-#
-#     ie. @testrail('C123', 'C12345')
-#
-#     :return pytest.mark:
-#     """
-#     deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
-#             '@pytestrail.case decorator instead.')
-#     warnings.warn(deprecation_msg, DeprecatedTestDecorator)
-#     return pytestrail.case(*ids)
+def testrail(*ids):
+    """
+    Decorator to mark tests with testcase ids.
+
+    ie. @testrail('C123', 'C12345')
+
+    :return pytest.mark:
+    """
+    deprecation_msg = ('pytest_testrail: the @testrail decorator is deprecated and will be removed. Please use the '
+            '@pytestrail.case decorator instead.')
+    warnings.warn(deprecation_msg, DeprecatedTestDecorator)
+    return pytestrail.case(*ids)
 
 
 def get_test_outcome(outcome):
@@ -119,7 +119,7 @@ def clean_test_defects(defect_ids):
         :param list defect_ids: list of defect_ids.
         :return list ints: contains list of defect_ids as ints.
         """
-    return [(re.search('(?P<defect_id>.*)', defect_id).groupdict().get('defect_id')) for defect_id in defect_ids]
+    return [(re.search('(?P<defect_id>.*)',defect_id).groupdict().get('defect_id')) for defect_id in defect_ids]
 
 
 def get_testrail_keys(items):
@@ -214,6 +214,7 @@ class PyTestRailPlugin(object):
             testcaseids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
             if rep.when == 'call' and testcaseids:
                 if defectids != None:
+                    print('HAAAAAAAAAAAA Defects are :', str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", ''))
                     self.add_result(
                         clean_test_ids(testcaseids),
                         get_test_outcome(outcome.get_result().outcome),
@@ -265,16 +266,7 @@ class PyTestRailPlugin(object):
         :param duration: Time it took to run just the test.
         """
         for test_id in test_ids:
-            if defects:
-                data = {
-                    'case_id': test_id,
-                    'status_id': status,
-                    'comment': comment,
-                    'duration': duration,
-                    'defects': defects
-                }
-            else:
-                data = {
+            data = {
                     'case_id': test_id,
                     'status_id': status,
                     'comment': comment,
