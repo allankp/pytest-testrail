@@ -21,7 +21,7 @@ setup(
     install_requires=[
         'pytest>=3.6',
         'requests>=2.20.0',
-        'simplejson', 'freezegun', 'mock'
+        'simplejson'
     ],
     include_package_data=True,
     entry_points={'pytest11': ['pytest-testrail = pytest_testrail.conftest']},
