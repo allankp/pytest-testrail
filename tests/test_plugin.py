@@ -22,6 +22,7 @@ PYTEST_FILE = """
     def test_func():
         pass
     @pytestrail.case('C8765', 'C4321')
+    @pytestrail.defect('PF-418', 'PF-517')
     def test_other_func():
         pass
 """
@@ -102,7 +103,7 @@ def test_get_testrail_keys(pytest_test_items, testdir):
 
 def test_add_result(tr_plugin):
     status = TESTRAIL_TEST_STATUS["passed"]
-    tr_plugin.add_result([1, 2], status, comment='ERROR!', duration=3600)
+    tr_plugin.add_result([1, 2], status, comment='ERROR!', duration=3600, defects='PF-456')
 
     expected_results = [
         {
@@ -110,14 +111,14 @@ def test_add_result(tr_plugin):
             'status_id': status,
             'comment': "ERROR!",
             'duration': 3600,
-            'defects': None
+            'defects': 'PF-456'
         },
         {
             'case_id': 2,
             'status_id': status,
             'comment': "ERROR!",
             'duration': 3600,
-            'defects': None
+            'defects': 'PF-456'
         }
     ]
 
@@ -170,17 +171,17 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'duration': 2.6, 'defects':None},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'duration': 2.6, 'defects':'PF-516'},
         {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'comment': "An error", 'duration': 0.1, 'defects':None},
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'duration': 2.6, 'defects':None}
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'duration': 2.6, 'defects': ['PF-517', 'PF-113']}
     ]
     tr_plugin.testrun_id = 10
 
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_data = {'results': [
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'defects':None, 'version': '1.0.0.0', 'elapsed': '3s'},
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'defects':None, 'version': '1.0.0.0', 'elapsed': '3s'},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'defects':'PF-516', 'version': '1.0.0.0', 'elapsed': '3s'},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'defects':['PF-517', 'PF-113'], 'version': '1.0.0.0', 'elapsed': '3s'},
         {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'defects':None, 'version': '1.0.0.0', 'elapsed': '1s',
          'comment': "# Pytest result: #\n    An error"}
     ]}

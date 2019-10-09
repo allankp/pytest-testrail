@@ -114,7 +114,7 @@ def clean_test_ids(test_ids):
 
 def clean_test_defects(defect_ids):
     """
-        Clean pytest marker containing testrail testcase ids.
+        Clean pytest marker containing testrail defects ids.
 
         :param list defect_ids: list of defect_ids.
         :return list ints: contains list of defect_ids as ints.
@@ -214,7 +214,6 @@ class PyTestRailPlugin(object):
             testcaseids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
             if rep.when == 'call' and testcaseids:
                 if defectids != None:
-                    print('HAAAAAAAAAAAA Defects are :', str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", ''))
                     self.add_result(
                         clean_test_ids(testcaseids),
                         get_test_outcome(outcome.get_result().outcome),
