@@ -9,7 +9,7 @@ from pytest_testrail import plugin
 from pytest_testrail.plugin import PyTestRailPlugin, TESTRAIL_TEST_STATUS
 from pytest_testrail.testrail_api import APIClient
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 pytest_plugins = "pytester"
 
 ASSIGN_USER_ID = 3
