@@ -3,8 +3,6 @@ from datetime import datetime
 from freezegun import freeze_time
 from mock import call, create_autospec
 import pytest
-import sys
-import os
 from pytest_testrail import plugin
 from pytest_testrail.plugin import PyTestRailPlugin, TESTRAIL_TEST_STATUS
 from pytest_testrail.testrail_api import APIClient
