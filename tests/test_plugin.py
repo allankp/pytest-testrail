@@ -26,6 +26,7 @@ PYTEST_FILE = """
 """
 SUITE_ID = 1
 TR_NAME = None
+DESCRIPTION = 'This is a test description'
 TESTPLAN = {
     "id": 58,
     "is_completed": False,
@@ -65,7 +66,7 @@ def api_client():
 
 @pytest.fixture
 def tr_plugin(api_client):
-    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, False, True, TR_NAME, version='1.0.0.0',
+    return PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, False, True, TR_NAME, DESCRIPTION, version='1.0.0.0', 
                             milestone_id=MILESTONE_ID)
 
 
@@ -217,12 +218,13 @@ def test_create_test_run(api_client, tr_plugin, include_all):
     expect_name = 'testrun_name'
 
     tr_plugin.create_test_run(ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys,
-                              MILESTONE_ID)
+                              MILESTONE_ID, DESCRIPTION)
 
     expected_uri = plugin.ADD_TESTRUN_URL.format(PROJECT_ID)
     expected_data = {
         'suite_id': SUITE_ID,
         'name': expect_name,
+        'description': DESCRIPTION,
         'assignedto_id': ASSIGN_USER_ID,
         'include_all': include_all,
         'case_ids': expected_tr_keys,

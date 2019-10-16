@@ -61,6 +61,11 @@ def pytest_addoption(parser):
         default=None,
         help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
     group.addoption(
+        '--tr-testrun-description',
+        action='store',
+        default=None,
+        help='Description given to testrun, that appears in TestRail (config file: description in TESTRUN section)')
+    group.addoption(
         '--tr-run-id',
         action='store',
         default=0,
@@ -128,6 +133,7 @@ def pytest_configure(config):
                 cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', is_bool=True,
                                                     default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
+                tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),

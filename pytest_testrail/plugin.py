@@ -139,7 +139,7 @@ def get_testrail_keys(items):
 
 
 class PyTestRailPlugin(object):
-    def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, run_id=0,
+    def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, tr_description='', run_id=0,
                  plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False,
                  milestone_id=None):
         self.assign_user_id = assign_user_id
@@ -150,6 +150,7 @@ class PyTestRailPlugin(object):
         self.suite_id = suite_id
         self.include_all = include_all
         self.testrun_name = tr_name
+        self.testrun_description = tr_description
         self.testrun_id = run_id
         self.testplan_id = plan_id
         self.version = version
@@ -199,7 +200,8 @@ class PyTestRailPlugin(object):
                 self.include_all,
                 self.testrun_name,
                 tr_keys,
-                self.milestone_id
+                self.milestone_id,
+                self.testrun_description
             )
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -335,7 +337,7 @@ class PyTestRailPlugin(object):
             print('[{}] Info: Testcases not published for following reason: "{}"'.format(TESTRAIL_PREFIX, error))
 
     def create_test_run(
-            self, assign_user_id, project_id, suite_id, include_all, testrun_name, tr_keys, milestone_id):
+            self, assign_user_id, project_id, suite_id, include_all, testrun_name, tr_keys, milestone_id, description=''):
         """
         Create testrun with ids collected from markers.
 
@@ -344,6 +346,7 @@ class PyTestRailPlugin(object):
         data = {
             'suite_id': suite_id,
             'name': testrun_name,
+            'description': description,
             'assignedto_id': assign_user_id,
             'include_all': include_all,
             'case_ids': tr_keys,
