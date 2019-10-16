@@ -175,8 +175,8 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_data = {'results': [
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'},
         {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'version': '1.0.0.0', 'elapsed': '3s'},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'version': '1.0.0.0', 'elapsed': '3s'},
         {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0', 'elapsed': '1s',
          'comment': "# Pytest result: #\n    An error"}
     ]}
