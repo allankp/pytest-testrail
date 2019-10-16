@@ -55,6 +55,7 @@ assignedto_id = 1
 project_id = 2
 suite_id = 3
 plan_id = 4
+description = 'This is an example description'
 ```
 
 Or
@@ -101,6 +102,9 @@ py.test --testrail --tr-config=<settings file>.cfg
   --tr-testrun-name=TR_TESTRUN_NAME
                         Name given to testrun, that appears in TestRail
                         (config file: name in TESTRUN section)
+  --tr-testrun-description=TR_TESTRUN_DESCRIPTION
+                        Description given to testrun, that appears in TestRail 
+                        (config file: description in TESTRUN section)
   --tr-run-id=TR_RUN_ID
                         Identifier of testrun, that appears in TestRail. If
                         provided, option "--tr-testrun-name" will be ignored
