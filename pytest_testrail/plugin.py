@@ -254,7 +254,7 @@ class PyTestRailPlugin(object):
 
     # plugin
 
-    def add_result(self, test_ids, status, comment='', duration=0, defects=None):
+    def add_result(self, test_ids, status, comment='', defects=None, duration=0):
         """
         Add a new result to results dict to be submitted at the end.
 

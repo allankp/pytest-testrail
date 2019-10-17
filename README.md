@@ -38,6 +38,17 @@ def test_bar():
     # test code goes here
 ```
 
+Or if you want to add defects to testcase result:
+
+```python
+
+from pytest_testrail.plugin import pytestrail
+
+@pytestrail.defect('PF-524', 'BR-543')
+def test_bar():
+    # test code goes here
+```
+
 See a [more detailed example here](tests/livetest/livetest.py).
 
 ### Config for TestRail
