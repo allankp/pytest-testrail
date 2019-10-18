@@ -171,8 +171,8 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
 
 def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.results = [
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'duration': 2.6, 'defects':'PF-516'},
-        {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'comment': "An error", 'duration': 0.1, 'defects':None},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'duration': 2.6, 'defects':'PF-516' },
+        {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'comment': "An error", 'duration': 0.1, 'defects':None },
         {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'duration': 2.6, 'defects': ['PF-517', 'PF-113']}
     ]
     tr_plugin.testrun_id = 10
@@ -180,16 +180,14 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_data = {'results': [
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'defects':'PF-516', 'version': '1.0.0.0', 'elapsed': '3s',
-         'comment': CUSTOM_COMMENT},
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'defects':['PF-517', 'PF-113'], 'version': '1.0.0.0', 'elapsed': '3s',
-         'comment': CUSTOM_COMMENT},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'defects':'PF-516', 'version': '1.0.0.0', 'elapsed': '3s', 'comment': CUSTOM_COMMENT},
+        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'defects':['PF-517', 'PF-113'], 'version': '1.0.0.0', 'elapsed': '3s', 'comment': CUSTOM_COMMENT},
         {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'defects':None, 'version': '1.0.0.0', 'elapsed': '1s',
-         'comment': u'{}\n# Pytest result: #\n    An error'.format(CUSTOM_COMMENT)}
+        'comment': u'{}\n# Pytest result: #\n    An error'.format(CUSTOM_COMMENT)}
     ]}
 
     api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(tr_plugin.testrun_id), expected_data,
-                                         cert_check=True)
+                                        cert_check=True)
 
 
 def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
