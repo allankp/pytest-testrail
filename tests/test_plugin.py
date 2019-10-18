@@ -180,19 +180,12 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
     tr_plugin.pytest_sessionfinish(None, 0)
 
     expected_data = {'results': [
-<<<<<<< HEAD
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'defects':'PF-516', 'version': '1.0.0.0', 'elapsed': '3s'},
-        {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'defects':['PF-517', 'PF-113'], 'version': '1.0.0.0', 'elapsed': '3s'},
-        {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'defects':None, 'version': '1.0.0.0', 'elapsed': '1s',
-         'comment': "# Pytest result: #\n    An error"}
-=======
         {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["passed"], 'defects':'PF-516', 'version': '1.0.0.0', 'elapsed': '3s',
          'comment': CUSTOM_COMMENT},
         {'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["failed"], 'defects':['PF-517', 'PF-113'], 'version': '1.0.0.0', 'elapsed': '3s',
          'comment': CUSTOM_COMMENT},
         {'case_id': 5678, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'defects':None, 'version': '1.0.0.0', 'elapsed': '1s',
          'comment': u'{}\n# Pytest result: #\n    An error'.format(CUSTOM_COMMENT)}
->>>>>>> add the ability to extend the comment of test case
     ]}
 
     api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(tr_plugin.testrun_id), expected_data,
