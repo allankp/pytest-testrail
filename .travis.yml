@@ -4,7 +4,7 @@ python:
 install:
 - pip install -r requirements/test.txt
 script:
-- pytest -v tests/
+- pytest -v tests/test_plugin.py
 deploy:
   skip_cleanup: true
   provider: pypi
