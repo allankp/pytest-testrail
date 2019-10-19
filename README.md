@@ -135,3 +135,10 @@ py.test --testrail --tr-config=<settings file>.cfg
   --tr-skip-missing     Skip test cases that are not present in testrun
   --tr-milestone-id     Identifier of milestone to be assigned to run
 ```
+
+## Development
+This repo uses a [bake](https://github.com/kennethreitz/bake) file, to use the commands install it via
+
+`pip install bake-cli`
+
+Once installed run `bake` to see commands
