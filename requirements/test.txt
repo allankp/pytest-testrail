@@ -1,0 +1,7 @@
+-r base.txt
+
+bump2version==0.5.10
+flake8==3.5.0
+freezegun==0.3.2
+mock==1.3.0
+pytest-cov==2.5.1
