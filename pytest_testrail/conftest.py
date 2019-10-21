@@ -1,15 +1,14 @@
 # -*- coding: UTF-8 -*-
 import os
 import sys
+from .plugin import PyTestRailPlugin
+from .testrail_api import APIClient
 if sys.version_info.major == 2:
     # python2
     import ConfigParser as configparser
 else:
     # python3
     import configparser
-
-from .plugin import PyTestRailPlugin
-from .testrail_api import APIClient
 
 
 def pytest_addoption(parser):
@@ -62,6 +61,11 @@ def pytest_addoption(parser):
         default=None,
         help='Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)')
     group.addoption(
+        '--tr-testrun-description',
+        action='store',
+        default=None,
+        help='Description given to testrun, that appears in TestRail (config file: description in TESTRUN section)')
+    group.addoption(
         '--tr-run-id',
         action='store',
         default=0,
@@ -108,6 +112,7 @@ def pytest_addoption(parser):
         help='Identifier of milestone, to be used in run creation (config file: milestone_id in TESTRUN section)'
     )
 
+
 def pytest_configure(config):
     if config.getoption('--testrail'):
         cfg_file_path = config.getoption('--tr-config')
@@ -123,9 +128,12 @@ def pytest_configure(config):
                 assign_user_id=config_manager.getoption('tr-testrun-assignedto-id', 'assignedto_id', 'TESTRUN'),
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
-                include_all=config_manager.getoption('tr-testrun-suite-include-all', 'include_all', 'TESTRUN', is_bool=True, default=False),
-                cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', is_bool=True, default=True),
+                include_all=config_manager.getoption('tr-testrun-suite-include-all', 'include_all', 'TESTRUN',
+                                                     is_bool=True, default=False),
+                cert_check=config_manager.getoption('tr-no-ssl-cert-check', 'no_ssl_cert_check', 'API', is_bool=True,
+                                                    default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
+                tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config.getoption('--tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
