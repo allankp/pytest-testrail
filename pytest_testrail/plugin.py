@@ -158,7 +158,7 @@ class PyTestRailPlugin(object):
         self.publish_blocked = publish_blocked
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
-        self.comment = custom_comment
+        self.custom_comment = custom_comment
 
     # pytest hooks
 
@@ -318,8 +318,8 @@ class PyTestRailPlugin(object):
                 entry['version'] = self.version
             comment = result.get('comment', '')
             if comment:
-                if self.comment:
-                    entry['comment'] = self.comment + '\n'
+                if self.custom_comment:
+                    entry['comment'] = self.custom_comment + '\n'
                     # Indent text to avoid string formatting by TestRail. Limit size of comment.
                     entry['comment'] += u"# Pytest result: #\n"
                     entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
@@ -330,7 +330,7 @@ class PyTestRailPlugin(object):
                     entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
                     entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             elif comment == '':
-                entry['comment'] = self.comment
+                entry['comment'] = self.custom_comment
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
