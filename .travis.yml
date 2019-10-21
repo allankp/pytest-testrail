@@ -12,6 +12,7 @@ deploy:
     secure: xcV8AB1tXxtyLPfRpgkeq3cKEpH1tAPC+S1i1xXmbYHCcH28HSoJ0I26waQ03D6/IkWHsA3Vlju60ZCQiMRxjMaY0YOtZM/eNzh106koSO522jx4R/pyaSn9C4wnzeTViwJr9TJ0EIxK/XVSgjfASh+kZn/dvazkOmCE5IUCtvjCbWtAyX1uyNH11UnFbg2Llgl5tLngSIofOUEHDdbpnVzdCVoyCZvf9j7XWNepxD/vJNWf+2OY9M8TJtv5/+u+CeXNhPwAGUwBepl20BMhMZdU5+CmJ1ieZMiooxzzpsEQWa9aAoaQM+xTGbNofQvOIxYPPT3QoV70w67wD8WRP7xIMNhL/i4PAHkeWUQp+ui0xX7uXFAWgAULtgPw/cQYuRTKDSM+tthWLeOkyv8sFN/adedXPDzz69jr6at/TJX4wzq/btLj0F+aOF5GgtLZTKsL/dBH5xN6eNztpFwNOG8yBBaB58HmSnR+uvYN4NrbX9PsCgf6KTJZxq47arxAMtmKN1CrafGXCfFk1TcRWQXxd+e6A47DuXah+5jImnp2P4+lUOCvlEzQ5xpftFHnlCCAwtkaOdXClYkuOSCH4AsnetnIjCMElszS5Vpv0UbN/KNPHuXihVNLzefL+lLHmvqHYE80Q3gCra6a7tnmAuPzATlFTqSin5MGSu3rgBo=
   on:
     python: '3.4'
+    tags: true
     branch: master
     distributions: sdist bdist_wheel
     repo: allankp/pytest-testrail
