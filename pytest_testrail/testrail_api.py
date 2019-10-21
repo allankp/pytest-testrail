@@ -110,6 +110,8 @@ class APIClient:
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
         timeout = kwargs.get('timeout', self.timeout)
+        if timeout is not None:
+            timeout = float(timeout)
         url = self._url + uri
         r = requests.post(
             url,
