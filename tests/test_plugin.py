@@ -1,7 +1,5 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
-from unittest.mock import MagicMock
-
 from freezegun import freeze_time
 from mock import call, create_autospec
 import pytest
