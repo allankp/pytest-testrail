@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
+from unittest.mock import MagicMock
+
 from freezegun import freeze_time
 from mock import call, create_autospec
 import pytest
@@ -366,17 +368,23 @@ def test_skip_missing_correlation_tests(api_client, pytest_test_items):
     assert not pytest_test_items[1].get_closest_marker('skip')
 
 
-def test_check_timeout_convert_string():
-    timeout_list = ['60', 50, 60.0, None]
-    timeout_list_after = []
-    for timeout_item in timeout_list:
-        if timeout_item is not None:
-            timeout_item = isinstance(timeout_item, float) if False else float(timeout_item)
-            timeout_list_after.append(timeout_item)
-    assert timeout_list_after == [60.0, 50.0, 60.0]
+def test_api_client_timeout(api_client):
+    api_client.send_get.return_value = {"timeout": 50.0}
+    api_client.send_get('/timeout', timeout='50')
+    api_client.send_get.assert_called_with('/timeout', timeout='50')
 
+    api_client.send_get('/timeout', timeout=50.0)
+    api_client.send_get.assert_called_with('/timeout', timeout=50.0)
 
+    api_client.send_get('/timeout', timeout=None)
+    api_client.send_get.assert_called_with('/timeout', timeout=None)
 
+    api_client.send_post_return_value = {"timeout": 50.0}
+    api_client.send_post('/timeout', data={"body": "body"}, timeout='50')
+    api_client.send_post.assert_called_with('/timeout', data={"body": "body"}, timeout='50')
 
+    api_client.send_post('/timeout', data={"body": "body"}, timeout=50.0)
+    api_client.send_post.assert_called_with('/timeout', data={"body": "body"}, timeout=50.0)
 
-
+    api_client.send_post('/timeout', data={"body": "body"}, timeout=None)
+    api_client.send_post.assert_called_with('/timeout', data={"body": "body"}, timeout=None)
