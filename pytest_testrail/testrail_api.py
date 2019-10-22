@@ -21,11 +21,6 @@ else:
     from urllib.parse import urljoin
 
 
-def convert_to_float(value):
-    if value is not None:
-        return float(value)
-
-
 class APIClient:
     def __init__(self, base_url, user, password, **kwargs):
         '''
@@ -53,6 +48,8 @@ class APIClient:
         self.headers = kwargs.get('headers', {'Content-Type': 'application/json'})
         self.cert_check = kwargs.get('cert_check', True)
         self.timeout = kwargs.get('timeout', 10.0)
+        if self.timeout is not None:
+            self.timeout = isinstance(self.timeout, float) if False else float(self.timeout)
 
     def send_get(self, uri, **kwargs):
         '''
@@ -73,16 +70,13 @@ class APIClient:
         '''
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
-        timeout = kwargs.get('timeout', self.timeout)
-        # Convert timeout from string to float if defined in testrail config file or from command line
-        timeout = convert_to_float(timeout)
         url = self._url + uri
         r = requests.get(
             url,
             auth=(self.user, self.password),
             headers=headers,
             verify=cert_check,
-            timeout=timeout
+            timeout=self.timeout
         )
 
         if r.status_code == 429:  # Too many requests
@@ -114,9 +108,6 @@ class APIClient:
         '''
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
-        timeout = kwargs.get('timeout', self.timeout)
-        # Convert timeout from string to float if defined in testrail config file or from command line
-        timeout = convert_to_float(timeout)
         url = self._url + uri
         r = requests.post(
             url,
@@ -124,7 +115,7 @@ class APIClient:
             headers=headers,
             json=data,
             verify=cert_check,
-            timeout=timeout
+            timeout=self.timeout
         )
 
         if r.status_code == 429:  # Too many requests

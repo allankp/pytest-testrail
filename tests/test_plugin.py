@@ -5,7 +5,7 @@ from mock import call, create_autospec
 import pytest
 from pytest_testrail import plugin
 from pytest_testrail.plugin import PyTestRailPlugin, TESTRAIL_TEST_STATUS
-from pytest_testrail.testrail_api import APIClient, convert_to_float
+from pytest_testrail.testrail_api import APIClient
 
 pytest_plugins = "pytester"
 
@@ -366,11 +366,15 @@ def test_skip_missing_correlation_tests(api_client, pytest_test_items):
     assert not pytest_test_items[1].get_closest_marker('skip')
 
 
-def test_convert_to_float():
-    assert convert_to_float('50') == 50.0
-    assert convert_to_float(None) is None
-    assert convert_to_float(50) == 50.0
-    assert convert_to_float(50.0) == 50.0
+def test_check_timeout_convert_string():
+    timeout_list = ['60', 50, 60.0, None]
+    timeout_list_after = []
+    for timeout_item in timeout_list:
+        if timeout_item is not None:
+            timeout_item = isinstance(timeout_item, float) if False else float(timeout_item)
+            timeout_list_after.append(timeout_item)
+    assert timeout_list_after == [60.0, 50.0, 60.0]
+
 
 
 
