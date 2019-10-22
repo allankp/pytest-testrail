@@ -7,7 +7,6 @@ from pytest_testrail import plugin
 from pytest_testrail.plugin import PyTestRailPlugin, TESTRAIL_TEST_STATUS
 from pytest_testrail.testrail_api import APIClient
 
-
 pytest_plugins = "pytester"
 
 ASSIGN_USER_ID = 3
@@ -365,3 +364,25 @@ def test_skip_missing_correlation_tests(api_client, pytest_test_items):
 
     assert not pytest_test_items[0].get_closest_marker('skip')
     assert not pytest_test_items[1].get_closest_marker('skip')
+
+
+def test_api_client_timeout(api_client):
+    api_client.send_get.return_value = {"timeout": 50.0}
+    api_client.send_get('/timeout', timeout='50')
+    api_client.send_get.assert_called_with('/timeout', timeout='50')
+
+    api_client.send_get('/timeout', timeout=50.0)
+    api_client.send_get.assert_called_with('/timeout', timeout=50.0)
+
+    api_client.send_get('/timeout', timeout=None)
+    api_client.send_get.assert_called_with('/timeout', timeout=None)
+
+    api_client.send_post_return_value = {"timeout": 50.0}
+    api_client.send_post('/timeout', data={"body": "body"}, timeout='50')
+    api_client.send_post.assert_called_with('/timeout', data={"body": "body"}, timeout='50')
+
+    api_client.send_post('/timeout', data={"body": "body"}, timeout=50.0)
+    api_client.send_post.assert_called_with('/timeout', data={"body": "body"}, timeout=50.0)
+
+    api_client.send_post('/timeout', data={"body": "body"}, timeout=None)
+    api_client.send_post.assert_called_with('/timeout', data={"body": "body"}, timeout=None)
