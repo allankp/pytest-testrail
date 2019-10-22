@@ -21,6 +21,11 @@ else:
     from urllib.parse import urljoin
 
 
+def convert_to_float(value):
+    if value is not None:
+        return float(value)
+
+
 class APIClient:
     def __init__(self, base_url, user, password, **kwargs):
         '''
@@ -69,8 +74,8 @@ class APIClient:
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
         timeout = kwargs.get('timeout', self.timeout)
-        if timeout is not None:
-            timeout = float(timeout)
+        # Convert timeout from string to float if defined in testrail config file or from command line
+        timeout = convert_to_float(timeout)
         url = self._url + uri
         r = requests.get(
             url,
@@ -110,8 +115,8 @@ class APIClient:
         cert_check = kwargs.get('cert_check', self.cert_check)
         headers = kwargs.get('headers', self.headers)
         timeout = kwargs.get('timeout', self.timeout)
-        if timeout is not None:
-            timeout = float(timeout)
+        # Convert timeout from string to float if defined in testrail config file or from command line
+        timeout = convert_to_float(timeout)
         url = self._url + uri
         r = requests.post(
             url,

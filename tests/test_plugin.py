@@ -5,8 +5,7 @@ from mock import call, create_autospec
 import pytest
 from pytest_testrail import plugin
 from pytest_testrail.plugin import PyTestRailPlugin, TESTRAIL_TEST_STATUS
-from pytest_testrail.testrail_api import APIClient
-
+from pytest_testrail.testrail_api import APIClient, convert_to_float
 
 pytest_plugins = "pytester"
 
@@ -363,3 +362,15 @@ def test_skip_missing_correlation_tests(api_client, pytest_test_items):
 
     assert not pytest_test_items[0].get_closest_marker('skip')
     assert not pytest_test_items[1].get_closest_marker('skip')
+
+
+def test_convert_to_float():
+    assert convert_to_float('50') == 50.0
+    assert convert_to_float(None) is None
+    assert convert_to_float(50) == 50.0
+    assert convert_to_float(50.0) == 50.0
+
+
+
+
+
