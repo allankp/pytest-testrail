@@ -4,7 +4,7 @@ pytest-testrail
 [![Build Status](https://travis-ci.org/allankp/pytest-testrail.svg?branch=master)](https://travis-ci.org/allankp/pytest-testrail)
 [![PyPI version](https://badge.fury.io/py/pytest-testrail.svg)](https://badge.fury.io/py/pytest-testrail)
 [![Downloads](https://pepy.tech/badge/pytest-testrail)](https://pepy.tech/project/pytest-testrail)
-
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/83b960043527429a8310cced2d8defcb)](https://www.codacy.com/manual/allankp/pytest-testrail?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=allankp/pytest-testrail&amp;utm_campaign=Badge_Grade)
 
 This is a pytest plugin for creating/editing testplans or testruns based on pytest markers.
 The results of the collected tests will be updated against the testplan/testrun in TestRail.
@@ -14,7 +14,6 @@ Installation
 
     pip install pytest-testrail
 
-
 Configuration
 -------------
 
@@ -23,30 +22,30 @@ Configuration
 Add a marker to the tests that will be picked up to be added to the run.
 
 ```python
-from pytest_testrail.plugin import testrail
+    from pytest_testrail.plugin import testrail
 
-@testrail('C1234', 'C5678')
-def test_foo():
-    # test code goes here
+    @testrail('C1234', 'C5678')
+    def test_foo():
+        # test code goes here
 
-# OR	
+    # OR	
 
-from pytest_testrail.plugin import pytestrail
+    from pytest_testrail.plugin import pytestrail
 
-@pytestrail.case('C1234', 'C5678')
-def test_bar():
-    # test code goes here
+    @pytestrail.case('C1234', 'C5678')
+    def test_bar():
+        # test code goes here
 ```
 
 Or if you want to add defects to testcase result:
 
 ```python
 
-from pytest_testrail.plugin import pytestrail
+    from pytest_testrail.plugin import pytestrail
 
-@pytestrail.defect('PF-524', 'BR-543')
-def test_bar():
-    # test code goes here
+    @pytestrail.defect('PF-524', 'BR-543')
+    def test_bar():
+        # test code goes here
 ```
 
 ### Config for TestRail
@@ -54,20 +53,20 @@ def test_bar():
 * Settings file template config:
 
 ```ini
-[API]
-url = https://yoururl.testrail.net/
-email = user@email.com
-password = <api_key>
+    [API]
+    url = https://yoururl.testrail.net/
+    email = user@email.com
+    password = <api_key>
 
-[TESTRUN]
-assignedto_id = 1
-project_id = 2
-suite_id = 3
-plan_id = 4
-description = 'This is an example description'
+    [TESTRUN]
+    assignedto_id = 1
+    project_id = 2
+    suite_id = 3
+    plan_id = 4
+    description = 'This is an example description'
 
-[TESTCASE]
-custom_comment = 'This is a custom comment'
+    [TESTCASE]
+    custom_comment = 'This is a custom comment'
 ```
 
 Or
@@ -81,7 +80,7 @@ Basically, the following command will create a testrun in TestRail, add all mark
 Once the all tests are finished they will be updated in TestRail:
 
 ```bash
-py.test --testrail --tr-config=<settings file>.cfg
+    py.test --testrail --tr-config=<settings file>.cfg
 ```
 
 ### All available options
@@ -106,5 +105,5 @@ py.test --testrail --tr-config=<settings file>.cfg
 | --tr-close-on-complete         | Close a test plan or test run on completion.                                                                        |
 | --tr-dont-publish-blocked      | Do not publish results of "blocked" testcases in TestRail                                                           |
 | --tr-skip-missing              | Skip test cases that are not present in testrun                                                                     |
-|  --tr-milestone-id             | Identifier of milestone to be assigned to run                                                                       |
-| --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section) |
+| --tr-milestone-id              | Identifier of milestone to be assigned to run                                                                       |
+| --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)   |
