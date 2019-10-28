@@ -320,8 +320,7 @@ def test_dont_publish_blocked(api_client):
 
     my_plugin.pytest_sessionfinish(None, 0)
 
-    api_client.send_get.assert_called_once_with(plugin.GET_TESTS_URL.format(my_plugin.testrun_id),
-                                                cert_check=True)
+    api_client.send_get.assert_called_once_with(plugin.GET_TESTS_URL.format(my_plugin.testrun_id))
     expected_uri = plugin.ADD_RESULTS_URL.format(my_plugin.testrun_id)
     expected_data = {'results': [{'case_id': 1234, 'status_id': TESTRAIL_TEST_STATUS["blocked"], 'version': '1.0.0.0'}]}
     assert len(api_client.send_post.call_args_list) == 1
