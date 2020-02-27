@@ -74,7 +74,6 @@ def pytest_addoption(parser):
     group.addoption(
         '--tr-plan-id',
         action='store',
-        default=0,
         required=False,
         help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section). If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
@@ -142,7 +141,7 @@ def pytest_configure(config):
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
-                plan_id=config.getoption('--tr-plan-id', 'plan_id', 'TESTRUN'),
+                plan_id=config_manager.getoption('tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),

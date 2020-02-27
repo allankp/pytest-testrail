@@ -99,7 +99,7 @@ Once the all tests are finished they will be updated in TestRail:
 | --tr-testrun-name              | Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)                              |
 | --tr-testrun-description       | Description given to testrun, that appears in TestRail (config file: description in TESTRUN section)                |
 | --tr-run-id                    | Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored            |
-| --tr-plan-id                   | Identifier of testplan, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored           |
+| --tr-plan-id                   | Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section) If provided, option "--tr-testrun-name" will be ignored |
 | --tr-version                   | Indicate a version in Test Case result.                                                                             |
 | --tr-no-ssl-cert-check         | Do not check for valid SSL certificate on TestRail host                                                             |
 | --tr-close-on-complete         | Close a test plan or test run on completion.                                                                        |
