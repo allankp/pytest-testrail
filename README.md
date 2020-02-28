@@ -107,3 +107,4 @@ Once the all tests are finished they will be updated in TestRail:
 | --tr-skip-missing              | Skip test cases that are not present in testrun                                                                     |
 | --tr-milestone-id              | Identifier of milestone to be assigned to run                                                                       |
 | --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)   |
+| --tr-plan-regex                | Regex to find an existing testplan that appears in TestRail (config file: plan_regex in TESTRUN section)            |

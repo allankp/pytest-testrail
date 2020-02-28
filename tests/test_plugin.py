@@ -262,6 +262,16 @@ def test_is_testplan_available(api_client, tr_plugin):
     api_client.send_get.return_value = {'is_completed': True}
     assert tr_plugin.is_testplan_available() is False
 
+    tr_plugin.testplan_id = 0
+    tr_plugin.testplan_regex = 'my test plan'
+    api_client.send_get.return_value = [{'name': 'no test plan', 'id': 5}]
+    assert tr_plugin.is_testplan_available() is False
+
+    tr_plugin.testplan_id = 0
+    tr_plugin.testplan_regex = 'my test plan'
+    api_client.send_get.side_effect = [[{'name': 'my test plan for milestone 1', 'id': 5}, {'name': 'my test plan for milestone 2', 'id': 7}], {'is_completed': False}]
+    assert tr_plugin.is_testplan_available() is True
+
 
 def test_get_available_testruns(api_client, tr_plugin):
     """ Test of method `get_available_testruns` """
@@ -269,6 +279,21 @@ def test_get_available_testruns(api_client, tr_plugin):
     api_client.send_get.return_value = TESTPLAN
     assert tr_plugin.get_available_testruns(testplan_id) == [59, 61]
 
+
+def test_find_available_testplan(api_client, tr_plugin):
+    """ Test of method `find_available_testplan` """
+    tr_plugin.testplan_regex = 'my \w+ plan'
+    api_client.send_get.return_value = [{'name': 'my test plan for milestone 1', 'id': 5}, {'name': 'my test plan for milestone 2', 'id': 7}]
+    assert tr_plugin.find_available_testplan() == 5
+
+    api_client.send_get.return_value = [{'name': 'my test plan for milestone 1', 'id': 5}]
+    assert tr_plugin.find_available_testplan() == 5
+
+    api_client.send_get.return_value = [{'name': 'no matching', 'id': 10}]
+    assert tr_plugin.find_available_testplan() is None
+
+    api_client.send_get.return_value = []
+    assert tr_plugin.find_available_testplan() is None
 
 def test_close_test_run(api_client, tr_plugin):
     tr_plugin.results = [

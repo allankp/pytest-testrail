@@ -32,6 +32,7 @@ CLOSE_TESTPLAN_URL = 'close_plan/{}'
 GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 GET_TESTS_URL = 'get_tests/{}'
+GET_ACTIVE_TESTPLANS_URL = 'get_plans/{}&is_completed=0'
 
 COMMENT_SIZE_LIMIT = 4000
 
@@ -141,7 +142,7 @@ def get_testrail_keys(items):
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name, tr_description='', run_id=0,
                  plan_id=0, version='', close_on_complete=False, publish_blocked=True, skip_missing=False,
-                 milestone_id=None, custom_comment=None):
+                 milestone_id=None, custom_comment=None, plan_regex=None):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -159,6 +160,7 @@ class PyTestRailPlugin(object):
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
         self.custom_comment = custom_comment
+        self.testplan_regex = plan_regex
 
     # pytest hooks
 
@@ -167,6 +169,8 @@ class PyTestRailPlugin(object):
         message = 'pytest-testrail: '
         if self.testplan_id:
             message += 'existing testplan #{} selected'.format(self.testplan_id)
+        elif self.testplan_regex:
+            message += 'existing testplan based on regex {} selected'.format(self.testplan_regex)
         elif self.testrun_id:
             message += 'existing testrun #{} selected'.format(self.testrun_id)
         else:
@@ -178,7 +182,7 @@ class PyTestRailPlugin(object):
         items_with_tr_keys = get_testrail_keys(items)
         tr_keys = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
-        if self.testplan_id and self.is_testplan_available():
+        if (self.testplan_id or self.testplan_regex) and self.is_testplan_available():
             self.testrun_id = 0
         elif self.testrun_id and self.is_testrun_available():
             self.testplan_id = 0
@@ -432,6 +436,13 @@ class PyTestRailPlugin(object):
 
         :return: True if testplan exists AND is open
         """
+        if self.testplan_regex:
+            result = self.find_available_testplan()
+            if result:
+              self.testplan_id = result
+            else:
+              print('[{}] Failed to retrieve testplan matching regex: "{}"'.format(TESTRAIL_PREFIX, self.testplan_regex))
+              return False
         response = self.client.send_get(
             GET_TESTPLAN_URL.format(self.testplan_id),
             cert_check=self.cert_check
@@ -477,3 +488,21 @@ class PyTestRailPlugin(object):
             print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
             return None
         return response
+
+    def find_available_testplan(self):
+        """
+        :return: id of first testplan that matches self.testplan_regex or None if none matches
+        """
+        response = self.client.send_get(
+            GET_ACTIVE_TESTPLANS_URL.format(self.project_id),
+            cert_check=self.cert_check
+        )
+        error = self.client.get_error(response)
+        if error:
+            print('[{}] Failed to get testplans: "{}"'.format(TESTRAIL_PREFIX, error))
+            return None
+        for entry in response:
+          result = re.search(self.testplan_regex, entry['name'])
+          if result:
+              return entry['id']
+        return None

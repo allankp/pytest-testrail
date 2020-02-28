@@ -78,6 +78,11 @@ def pytest_addoption(parser):
         required=False,
         help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section). If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
+        '--tr-plan-regex',
+        action='store',
+        required=False,
+        help='Regex to find an existing testplan, that appears in TestRail (config file: plan_regex in TESTRUN section). If provided, option "--tr-testrun-name" will be ignored')
+    group.addoption(
         '--tr-version',
         action='store',
         default='',
@@ -148,7 +153,8 @@ def pytest_configure(config):
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
                 skip_missing=config.getoption('--tr-skip-missing'),
                 milestone_id=config_manager.getoption('tr-milestone-id', 'milestone_id', 'TESTRUN'),
-                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE')
+                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE'),
+                plan_regex=config_manager.getoption('tr-plan-regex', 'plan_regex', 'TESTRUN')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"
