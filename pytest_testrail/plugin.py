@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
 from operator import itemgetter
+from pathlib import Path
 
 import pytest
 import re
@@ -339,12 +340,22 @@ class PyTestRailPlugin(object):
 
         response = self.client.send_post(
             ADD_RESULTS_URL.format(testrun_id),
-            data,
+            data=data,
             cert_check=self.cert_check
         )
         error = self.client.get_error(response)
         if error:
             print('[{}] Info: Testcases not published for following reason: "{}"'.format(TESTRAIL_PREFIX, error))
+        else:
+            for result in response:
+                comment = result.get('comment', '')
+                screenshot = re.search(r'Screenshot:.*\.png', comment) if comment else None
+                if screenshot:
+                    screenshot_path = screenshot.group(0).split('file://')[1]
+                    file = screenshot_path if isinstance(screenshot_path, Path) else Path(screenshot_path)
+                    with file.open("rb") as attachment:
+                        self.client.send_post(f'add_attachment_to_result/{result["id"]}',
+                                              files={'attachment': attachment})
 
     def create_test_run(
             self, assign_user_id, project_id, suite_id, include_all, testrun_name, tr_keys, milestone_id, description=''):
@@ -365,7 +376,7 @@ class PyTestRailPlugin(object):
 
         response = self.client.send_post(
             ADD_TESTRUN_URL.format(project_id),
-            data,
+            data=data,
             cert_check=self.cert_check
         )
         error = self.client.get_error(response)
