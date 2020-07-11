@@ -211,6 +211,11 @@ class PyTestRailPlugin(object):
         outcome = yield
         rep = outcome.get_result()
         defectids = None
+        if 'callspec' in dir(item):
+            test_parametrize = item.callspec.params
+        else:
+            test_parametrize = None
+        comment = rep.longrepr
         if item.get_closest_marker(TESTRAIL_DEFECTS_PREFIX):
             defectids = item.get_closest_marker(TESTRAIL_DEFECTS_PREFIX).kwargs.get('defect_ids')
         if item.get_closest_marker(TESTRAIL_PREFIX):
@@ -220,16 +225,18 @@ class PyTestRailPlugin(object):
                     self.add_result(
                         clean_test_ids(testcaseids),
                         get_test_outcome(outcome.get_result().outcome),
-                        comment=rep.longrepr,
+                        comment=comment,
                         duration=rep.duration,
-                        defects=str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", '')
+                        defects=str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", ''),
+                        test_parametrize = test_parametrize
                     )
                 else:
                     self.add_result(
                         clean_test_ids(testcaseids),
                         get_test_outcome(outcome.get_result().outcome),
-                        comment=rep.longrepr,
-                        duration=rep.duration
+                        comment=comment,
+                        duration=rep.duration,
+                        test_parametrize=test_parametrize
                     )
 
     def pytest_sessionfinish(self, session, exitstatus):
@@ -257,10 +264,11 @@ class PyTestRailPlugin(object):
 
     # plugin
 
-    def add_result(self, test_ids, status, comment='', defects=None, duration=0):
+    def add_result(self, test_ids, status, comment='', defects=None, duration=0, test_parametrize=None):
         """
         Add a new result to results dict to be submitted at the end.
 
+        :param list test_parametrize: Add test parametrize to test result
         :param defects: Add defects to test result
         :param list test_ids: list of test_ids.
         :param int status: status code of test (pass or fail).
@@ -273,7 +281,8 @@ class PyTestRailPlugin(object):
                     'status_id': status,
                     'comment': comment,
                     'duration': duration,
-                    'defects': defects
+                    'defects': defects,
+                    'test_parametrize': test_parametrize
                 }
             self.results.append(data)
 
@@ -317,16 +326,21 @@ class PyTestRailPlugin(object):
             if self.version:
                 entry['version'] = self.version
             comment = result.get('comment', '')
+            test_parametrize = result.get('test_parametrize', '')
+            entry['comment'] = u''
+            if test_parametrize:
+                entry['comment'] += u"# Test parametrize: #\n"
+                entry['comment'] += str(test_parametrize) + u'\n\n'
             if comment:
                 if self.custom_comment:
-                    entry['comment'] = self.custom_comment + '\n'
+                    entry['comment'] += self.custom_comment + '\n'
                     # Indent text to avoid string formatting by TestRail. Limit size of comment.
                     entry['comment'] += u"# Pytest result: #\n"
                     entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
                     entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
                 else:
                     # Indent text to avoid string formatting by TestRail. Limit size of comment.
-                    entry['comment'] = u"# Pytest result: #\n"
+                    entry['comment'] += u"# Pytest result: #\n"
                     entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
                     entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n', '\n    ')
             elif comment == '':
