@@ -216,20 +216,16 @@ class PyTestRailPlugin(object):
         if item.get_closest_marker(TESTRAIL_PREFIX):
             testcaseids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
             if rep.when == 'call' and testcaseids:
-                if defectids != None:
-                    self.add_result(
-                        clean_test_ids(testcaseids),
-                        get_test_outcome(outcome.get_result().outcome),
-                        comment=rep.longrepr,
+                cleantestids = clean_test_ids(testcaseids)
+                testoutcome = get_test_outcome(outcome.get_result().outcome)
+                testcomment = rep.longrepr if testoutcome != TESTRAIL_TEST_STATUS["passed"] else rep.capstdout
+                testdefects = str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", '') if defectids != None else None
+                self.add_result(
+                        cleantestids,
+                        testoutcome,
+                        comment=testcomment,
                         duration=rep.duration,
-                        defects=str(clean_test_defects(defectids)).replace('[', '').replace(']', '').replace("'", '')
-                    )
-                else:
-                    self.add_result(
-                        clean_test_ids(testcaseids),
-                        get_test_outcome(outcome.get_result().outcome),
-                        comment=rep.capstdout,
-                        duration=rep.duration
+                        defects=testdefects
                     )
 
     def pytest_sessionfinish(self, session, exitstatus):
