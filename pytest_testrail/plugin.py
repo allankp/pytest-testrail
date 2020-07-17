@@ -228,7 +228,7 @@ class PyTestRailPlugin(object):
                     self.add_result(
                         clean_test_ids(testcaseids),
                         get_test_outcome(outcome.get_result().outcome),
-                        comment=rep.longrepr,
+                        comment=rep.capstdout,
                         duration=rep.duration
                     )
 
