@@ -110,14 +110,16 @@ def test_add_result(tr_plugin):
             'status_id': status,
             'comment': "ERROR!",
             'duration': 3600,
-            'defects': 'PF-456'
+            'defects': 'PF-456',
+            'test_parametrize': None
         },
         {
             'case_id': 2,
             'status_id': status,
             'comment': "ERROR!",
             'duration': 3600,
-            'defects': 'PF-456'
+            'defects': 'PF-456',
+            'test_parametrize': None
         }
     ]
 
@@ -155,14 +157,16 @@ def test_pytest_runtest_makereport(pytest_test_items, tr_plugin, testdir):
             'status_id': TESTRAIL_TEST_STATUS["failed"],
             'comment': "An error",
             'duration': 2,
-            'defects': None
+            'defects': None,
+            'test_parametrize': None
         },
         {
             'case_id': 5678,
             'status_id': TESTRAIL_TEST_STATUS["failed"],
             'comment': "An error",
             'duration': 2,
-            'defects': None
+            'defects': None,
+            'test_parametrize': None
         }
     ]
     assert tr_plugin.results == expected_results
