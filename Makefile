@@ -32,7 +32,7 @@ README.rst: README.md
 	pandoc --from=markdown --to=rst --output=README.rst README.md
 
 release:
-	bump2version $(type)
+	bump2version part $(type)
 	git push origin master --tags
 
 requirements: .requirements.txt
