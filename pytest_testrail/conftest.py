@@ -54,7 +54,8 @@ def pytest_addoption(parser):
         '--tr-testrun-suite-include-all',
         action='store_true',
         default=None,
-        help='Include all test cases in specified test suite when creating test run (config file: include_all in TESTRUN section)')
+        help='Include all test cases in specified test suite when creating test run \
+              (config file: include_all in TESTRUN section)')
     group.addoption(
         '--tr-testrun-name',
         action='store',
@@ -70,12 +71,14 @@ def pytest_addoption(parser):
         action='store',
         default=0,
         required=False,
-        help='Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored')
+        help='Identifier of testrun, that appears in TestRail. If provided, \
+              option "--tr-testrun-name" will be ignored')
     group.addoption(
         '--tr-plan-id',
         action='store',
         required=False,
-        help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section). If provided, option "--tr-testrun-name" will be ignored')
+        help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
+              If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
         '--tr-version',
         action='store',
@@ -115,7 +118,8 @@ def pytest_addoption(parser):
         action='store',
         default=None,
         required=False,
-        help='Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)'
+        help='Custom comment, to be appended to default comment for test case \
+              (config file: custom_comment in TESTCASE section)'
     )
 
 
@@ -157,8 +161,8 @@ def pytest_configure(config):
 class ConfigManager(object):
     def __init__(self, cfg_file_path, config):
         '''
-        Handles retrieving configuration values. Config options set in flags are given preferance over options set in the
-        config file.
+        Handles retrieving configuration values.
+        Config options set in flags are given preferance over options set in the config file.
 
         :param cfg_file_path: Path to the config file containing information about the TestRail server.
         :type cfg_file_path: str or None
