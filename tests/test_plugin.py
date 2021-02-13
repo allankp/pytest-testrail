@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
 from datetime import datetime
+from operator import itemgetter
+
 from freezegun import freeze_time
 from mock import call, create_autospec
 import pytest
@@ -123,6 +125,47 @@ def test_add_result(tr_plugin):
             'test_parametrize': None
         }
     ]
+
+    assert tr_plugin.results == expected_results
+
+
+def test_add_results_sort_by_status_id(api_client):
+    tr_plugin = PyTestRailPlugin(api_client, ASSIGN_USER_ID, PROJECT_ID, SUITE_ID,
+                                 False, False, TR_NAME, sort_by_status_id=True)
+    tr_plugin.results = [
+        {
+            'case_id': 1234,
+            'status_id': TESTRAIL_TEST_STATUS["blocked"],
+            'duration': 2.6,
+            'defects': None,
+            'comment': 'this is comment'
+        },
+        {
+            'case_id': 1234,
+            'status_id': TESTRAIL_TEST_STATUS["failed"],
+            'duration': 1,
+            'defects': 'PF-516',
+            'comment': 'this is comment'
+        },
+        {
+            'case_id': 5678,
+            'status_id': TESTRAIL_TEST_STATUS["blocked"],
+            'duration': 0.1,
+            'defects': None,
+            'comment': 'this is comment'
+        },
+        {
+            'case_id': 1234,
+            'status_id': TESTRAIL_TEST_STATUS["passed"],
+            'duration': 0.3,
+            'defects': ['PF-517', 'PF-113'],
+            'comment': 'this is comment'
+        }
+    ]
+
+    expected_results = sorted(tr_plugin.results, key=itemgetter("case_id", "status_id"))
+
+    tr_plugin.add_results(testrun_id=10)
 
     assert tr_plugin.results == expected_results
 

@@ -107,3 +107,4 @@ Once the all tests are finished they will be updated in TestRail:
 | --tr-skip-missing              | Skip test cases that are not present in testrun                                                                                                    |
 | --tr-milestone-id              | Identifier of milestone to be assigned to run                                                                                                      |
 | --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)                                  |
+| --tr-sort-by-status-id         | Test results are sorted by status_id, so that worst test result of parametrized test becomes final test status in TestRail                         |

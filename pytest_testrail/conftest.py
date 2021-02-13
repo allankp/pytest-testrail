@@ -121,6 +121,13 @@ def pytest_addoption(parser):
         help='Custom comment, to be appended to default comment for test case \
               (config file: custom_comment in TESTCASE section)'
     )
+    group.addoption(
+        '--tr-sort-by-status-id',
+        action='store_true',
+        default=False,
+        required=False,
+        help='Sort test results by status_id, so the worst test result is final test status in TestRail'
+    )
 
 
 def pytest_configure(config):
@@ -151,7 +158,8 @@ def pytest_configure(config):
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
                 skip_missing=config.getoption('--tr-skip-missing'),
                 milestone_id=config_manager.getoption('tr-milestone-id', 'milestone_id', 'TESTRUN'),
-                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE')
+                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE'),
+                sort_by_status_id=config.getoption('--tr-sort-by-status-id')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"
