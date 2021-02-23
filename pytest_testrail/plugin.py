@@ -141,7 +141,7 @@ def get_testrail_keys(items):
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name,
                  tr_description='', run_id=0, plan_id=0, version='', close_on_complete=False,
-                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None):
+                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None, refs=None):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -159,6 +159,7 @@ class PyTestRailPlugin(object):
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
         self.custom_comment = custom_comment
+        self.refs = refs
 
     # pytest hooks
 
@@ -202,7 +203,8 @@ class PyTestRailPlugin(object):
                 self.testrun_name,
                 tr_keys,
                 self.milestone_id,
-                self.testrun_description
+                self.testrun_description,
+                self.refs
             )
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -362,7 +364,7 @@ class PyTestRailPlugin(object):
             print('[{}] Info: Testcases not published for following reason: "{}"'.format(TESTRAIL_PREFIX, error))
 
     def create_test_run(self, assign_user_id, project_id, suite_id, include_all,
-                        testrun_name, tr_keys, milestone_id, description=''):
+                        testrun_name, tr_keys, milestone_id, description='', refs=''):
         """
         Create testrun with ids collected from markers.
 
@@ -375,7 +377,8 @@ class PyTestRailPlugin(object):
             'assignedto_id': assign_user_id,
             'include_all': include_all,
             'case_ids': tr_keys,
-            'milestone_id': milestone_id
+            'milestone_id': milestone_id,
+            'refs': refs,
         }
 
         response = self.client.send_post(

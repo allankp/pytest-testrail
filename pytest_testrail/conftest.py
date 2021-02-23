@@ -121,6 +121,13 @@ def pytest_addoption(parser):
         help='Custom comment, to be appended to default comment for test case \
               (config file: custom_comment in TESTCASE section)'
     )
+    group.addoption(
+        '--tr-refs',
+        action='store',
+        default=None,
+        required=False,
+        help='Identifier of References, to be used in run creation (config file: refs in TESTRUN section)'
+    )
 
 
 def pytest_configure(config):
@@ -151,7 +158,8 @@ def pytest_configure(config):
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
                 skip_missing=config.getoption('--tr-skip-missing'),
                 milestone_id=config_manager.getoption('tr-milestone-id', 'milestone_id', 'TESTRUN'),
-                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE')
+                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE'),
+                refs=config_manager.getoption('tr-refs', 'refs', 'TESTRUN')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

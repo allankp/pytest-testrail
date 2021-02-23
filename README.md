@@ -107,3 +107,4 @@ Once the all tests are finished they will be updated in TestRail:
 | --tr-skip-missing              | Skip test cases that are not present in testrun                                                                                                    |
 | --tr-milestone-id              | Identifier of milestone to be assigned to run                                                                                                      |
 | --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)                                  |
+| --tr-refs                      | References to Jira tickets in Test Run. The TR results will be displayed on your Jira ticket (if your TestRail has configured Jira integration)    |
