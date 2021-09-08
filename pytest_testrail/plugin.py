@@ -5,6 +5,7 @@ from operator import itemgetter
 import pytest
 import re
 import warnings
+import os
 
 # Reference: http://docs.gurock.com/testrail-api2/reference-statuses
 TESTRAIL_TEST_STATUS = {
@@ -141,7 +142,8 @@ def get_testrail_keys(items):
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name,
                  tr_description='', run_id=0, plan_id=0, version='', close_on_complete=False,
-                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None):
+                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None,
+                 tr_generate_testrun_link=None):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -159,6 +161,7 @@ class PyTestRailPlugin(object):
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
         self.custom_comment = custom_comment
+        self.tr_generate_testrun_link = tr_generate_testrun_link
 
     # pytest hooks
 
@@ -391,6 +394,9 @@ class PyTestRailPlugin(object):
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
                                                                              testrun_name,
                                                                              self.testrun_id))
+            if self.tr_generate_testrun_link:
+                testrun_url = f"{self.client.base_url}/index.php?/runs/view/{self.testrun_id}"
+                os.environ["PYTEST_TESTRAIL_TESTRUN_LINK"] = testrun_url
 
     def close_test_run(self, testrun_id):
         """

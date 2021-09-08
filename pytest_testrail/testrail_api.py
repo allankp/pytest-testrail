@@ -44,6 +44,7 @@ class APIClient:
         '''
         self.user = user
         self.password = password
+        self.base_url = base_url
         self._url = urljoin(base_url, 'index.php?/api/v2/')
         self.headers = kwargs.get('headers', {'Content-Type': 'application/json'})
         self.cert_check = kwargs.get('cert_check', True)
