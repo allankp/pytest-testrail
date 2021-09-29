@@ -483,12 +483,28 @@ class PyTestRailPlugin(object):
         :return: the list of tests containing in a testrun.
 
         """
-        response = self.client.send_get(
-            GET_TESTS_URL.format(run_id),
-            cert_check=self.cert_check
-        )
-        error = self.client.get_error(response)
-        if error:
-            print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
-            return None
-        return response
+        from urllib.parse import parse_qsl, urlencode
+
+        master_test_list = []
+        repeat = True
+        params = None
+
+        while repeat:
+            uri = GET_TESTS_URL.format(run_id)
+            if params:
+                uri = uri + params
+            response = self.client.send_get(uri, cert_check=self.cert_check)
+
+            error = self.client.get_error(response)
+            if error:
+                print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
+                return None
+
+            test_list = [item for item in response['tests']]
+            master_test_list.extend(test_list)
+
+            repeat = response['_links']['next']
+            if repeat:
+                params = f'&{urlencode(parse_qsl(repeat))}'
+
+        return master_test_list
