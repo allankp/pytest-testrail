@@ -256,10 +256,10 @@ class PyTestRailPlugin(object):
             else:
                 print('[{}] No data published'.format(TESTRAIL_PREFIX))
 
-            if self.close_on_complete and self.testrun_id:
-                self.close_test_run(self.testrun_id)
-            elif self.close_on_complete and self.testplan_id:
-                self.close_test_plan(self.testplan_id)
+        if self.close_on_complete and self.testrun_id:
+            self.close_test_run(self.testrun_id)
+        elif self.close_on_complete and self.testplan_id:
+            self.close_test_plan(self.testplan_id)
         print('[{}] End publishing'.format(TESTRAIL_PREFIX))
 
     # plugin
