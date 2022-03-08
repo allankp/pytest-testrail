@@ -129,7 +129,7 @@ class APIClient:
     @staticmethod
     def get_error(json_response):
         """ Extract error contained in a API response.
-            If no error occured, return None
+            If no error occurred, return None
 
             :param json_response: json response of request
             :return: String of the error
