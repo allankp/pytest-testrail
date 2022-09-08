@@ -144,14 +144,15 @@ def pytest_configure(config):
                                                     default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
-                run_id=config.getoption('--tr-run-id'),
+                run_id=config.getoption('tr-run-id', 'run-id'),
                 plan_id=config_manager.getoption('tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
                 close_on_complete=config.getoption('--tr-close-on-complete'),
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
                 skip_missing=config.getoption('--tr-skip-missing'),
                 milestone_id=config_manager.getoption('tr-milestone-id', 'milestone_id', 'TESTRUN'),
-                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE')
+                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE'),
+                custom_git_tag=config_manager.getoption('tc-custom-git-tag', 'custom-git-tag')
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

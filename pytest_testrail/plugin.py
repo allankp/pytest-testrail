@@ -141,7 +141,8 @@ def get_testrail_keys(items):
 class PyTestRailPlugin(object):
     def __init__(self, client, assign_user_id, project_id, suite_id, include_all, cert_check, tr_name,
                  tr_description='', run_id=0, plan_id=0, version='', close_on_complete=False,
-                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None):
+                 publish_blocked=True, skip_missing=False, milestone_id=None, custom_comment=None,
+                 custom_git_tag=None):
         self.assign_user_id = assign_user_id
         self.cert_check = cert_check
         self.client = client
@@ -159,6 +160,7 @@ class PyTestRailPlugin(object):
         self.skip_missing = skip_missing
         self.milestone_id = milestone_id
         self.custom_comment = custom_comment
+        self.custom_git_tag = custom_git_tag
 
     # pytest hooks
 
@@ -350,6 +352,8 @@ class PyTestRailPlugin(object):
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
                 entry['elapsed'] = str(duration) + 's'
+            if self.custom_git_tag:
+                entry['custom_git_tag'] = self.custom_git_tag
             data['results'].append(entry)
 
         response = self.client.send_post(
