@@ -85,25 +85,26 @@ Once the all tests are finished they will be updated in TestRail:
 
 ### All available options
 
-| option                         | description                                                                                                                                        |
-| -------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| --testrail                     | Create and update testruns with TestRail                                                                                                           |
-| --tr-config                    | Path to the config file containing information about the TestRail server (defaults to testrail.cfg)                                                |
-| --tr-url                       | TestRail address you use to access TestRail with your web browser (config file: url in API section)                                                |
-| --tr-email                     | Email for the account on the TestRail server (config file: email in API section)                                                                   |
-| --tr-password                  | Password for the account on the TestRail server (config file: password in API section)                                                             |
-| --tr-testrun-assignedto-id     | ID of the user assigned to the test run (config file:assignedto_id in TESTRUN section)                                                             |
-| --tr-testrun-project-id        | ID of the project the test run is in (config file: project_id in TESTRUN section)                                                                  |
-| --tr-testrun-suite-id          | ID of the test suite containing the test cases (config file: suite_id in TESTRUN section)                                                          |
-| --tr-testrun-suite-include-all | Include all test cases in specified test suite when creating test run (config file: include_all in TESTRUN section)                                |
-| --tr-testrun-name              | Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)                                                             |
-| --tr-testrun-description       | Description given to testrun, that appears in TestRail (config file: description in TESTRUN section)                                               |
-| --tr-run-id                    | Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored                                           |
-| --tr-plan-id                   | Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section) If provided, option "--tr-testrun-name" will be ignored |
-| --tr-version                   | Indicate a version in Test Case result.                                                                                                            |
-| --tr-no-ssl-cert-check         | Do not check for valid SSL certificate on TestRail host                                                                                            |
-| --tr-close-on-complete         | Close a test plan or test run on completion.                                                                                                       |
-| --tr-dont-publish-blocked      | Do not publish results of "blocked" testcases in TestRail                                                                                          |
-| --tr-skip-missing              | Skip test cases that are not present in testrun                                                                                                    |
-| --tr-milestone-id              | Identifier of milestone to be assigned to run                                                                                                      |
-| --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)                                  |
+| option                         | description                                                                                                                                                               |
+| -------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --testrail                     | Create and update testruns with TestRail                                                                                                                                  |
+| --tr-config                    | Path to the config file containing information about the TestRail server (defaults to testrail.cfg)                                                                       |
+| --tr-url                       | TestRail address you use to access TestRail with your web browser (config file: url in API section)                                                                       |
+| --tr-email                     | Email for the account on the TestRail server (config file: email in API section)                                                                                          |
+| --tr-password                  | Password for the account on the TestRail server (config file: password in API section)                                                                                    |
+| --tr-testrun-assignedto-id     | ID of the user assigned to the test run (config file:assignedto_id in TESTRUN section)                                                                                    |
+| --tr-testrun-project-id        | ID of the project the test run is in (config file: project_id in TESTRUN section)                                                                                         |
+| --tr-testrun-suite-id          | ID of the test suite containing the test cases (config file: suite_id in TESTRUN section)                                                                                 |
+| --tr-testrun-suite-include-all | Include all test cases in specified test suite when creating test run (config file: include_all in TESTRUN section)                                                       |
+| --tr-testrun-name              | Name given to testrun, that appears in TestRail (config file: name in TESTRUN section)                                                                                    |
+| --tr-testrun-description       | Description given to testrun, that appears in TestRail (config file: description in TESTRUN section)                                                                      |
+| --tr-run-id                    | Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored                                                                  |
+| --tr-plan-id                   | Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section) If provided, option "--tr-testrun-name" will be ignored                        |
+| --tr-version                   | Indicate a version in Test Case result.                                                                                                                                   |
+| --tr-no-ssl-cert-check         | Do not check for valid SSL certificate on TestRail host                                                                                                                   |
+| --tr-close-on-complete         | Close a test plan or test run on completion.                                                                                                                              |
+| --tr-dont-publish-blocked      | Do not publish results of "blocked" testcases in TestRail                                                                                                                 |
+| --tr-skip-missing              | Skip test cases that are not present in testrun                                                                                                                           |
+| --tr-milestone-id              | Identifier of milestone to be assigned to run                                                                                                                             |
+| --tc-custom-comment            | Custom comment, to be appended to default comment for test case (config file: custom_comment in TESTCASE section)                                                         |
+| --tr-generate-testrun-link     | Set PYTEST_TESTRAIL_TESTRUN_LINK environment variable that contains link to generated TESTRUN for external usage (i.e. can be used in test reports or notifications)      |
