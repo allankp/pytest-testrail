@@ -532,7 +532,7 @@ class PyTestRailPlugin(TestrailActions):
             self.testrail_data.testrun_id = session.config.workerinput["test_run_id"]
         else:
             if self.testrail_data.testplan_id and (self.testrail_data.testrun_id and self.is_testrun_available()):
-                self.testrail_data.testplan_id = 0
+                pass
             elif self.testrail_data.testplan_id and self.is_testplan_available():
                 self.testrail_data.testrun_id = 0
             elif self.testrail_data.testrun_id and self.is_testrun_available():
