@@ -83,10 +83,38 @@ Once the all tests are finished they will be updated in TestRail:
     py.test --testrail --tr-config=<settings file>.cfg
 ```
 
+Examples:
+-----
+
+
+TestRun will be created automatically
+```bash
+    py.test --testrail --tr-testrun-suite-id=XXXX
+```
+
+TestRun will be created automatically with testrun-name
+```bash
+    py.test --testrail --tr-testrun-name='TestRunName' --tr-testrun-suite-id=XXXX
+```
+
+TestPlan will be created automatically with testplan-name, TestRun will be added automatically
+```bash
+    py.test --testrail --tr-testplan-name='NameTestPlan' --tr-testrun-suite-id=XXXX
+```
+
+TestRun in TestPlan will be created automatically
+```bash
+    py.test --testrail --tr-plan-id=XXXXXX --tr-testrun-suite-id=XXXX
+```
+
+Update TestRun (XXXXXX) in TestPlan (ZZZZZ)
+```bash
+    py.test --testrail --tr-plan-id=ZZZZZZ --tr-plan-id=XXXXXX --tr-testrun-suite-id=XXXX
+```
 ### All available options
 
 | option                         | description                                                                                                                                        |
-| -------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | --testrail                     | Create and update testruns with TestRail                                                                                                           |
 | --tr-config                    | Path to the config file containing information about the TestRail server (defaults to testrail.cfg)                                                |
 | --tr-url                       | TestRail address you use to access TestRail with your web browser (config file: url in API section)                                                |
@@ -100,6 +128,8 @@ Once the all tests are finished they will be updated in TestRail:
 | --tr-testrun-description       | Description given to testrun, that appears in TestRail (config file: description in TESTRUN section)                                               |
 | --tr-run-id                    | Identifier of testrun, that appears in TestRail. If provided, option "--tr-testrun-name" will be ignored                                           |
 | --tr-plan-id                   | Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section) If provided, option "--tr-testrun-name" will be ignored |
+| --tr-testplan-name             | Name given to testplan                                                                                                                             |
+| --tr-testplan-description      | Description given to testplan                                                                                                                             |
 | --tr-version                   | Indicate a version in Test Case result.                                                                                                            |
 | --tr-no-ssl-cert-check         | Do not check for valid SSL certificate on TestRail host                                                                                            |
 | --tr-close-on-complete         | Close a test plan or test run on completion.                                                                                                       |

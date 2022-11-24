@@ -16,7 +16,10 @@ class TestRailModel:
     testrun_name: str = None
     testrun_description: str = None
     testrun_id: int = None
+    testplan_entry_id: str = None
     testplan_id: int = None
+    testplan_name: int = None
+    testplan_description: str = None
     version: str = None
     close_on_complete: bool = None
     publish_blocked: bool = None
