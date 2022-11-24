@@ -80,6 +80,16 @@ def pytest_addoption(parser):
         help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
               If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
+        '--tr-testplan-name',
+        action='store',
+        default=None,
+        help='Name given to testplan, that appears in TestRail (config file: name in TESTRUN section)')
+    group.addoption(
+        '--tr-testplan-description',
+        action='store',
+        default='Test Plan was created via AutoTest',
+        help='Name given to testplan, that appears in TestRail (config file: name in TESTRUN section)')
+    group.addoption(
         '--tr-version',
         action='store',
         default='',
@@ -147,6 +157,8 @@ def pytest_configure(config):
                                                     default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
+                testplan_name=config_manager.getoption('tr-testplan-name', 'name', 'TESTRUN'),
+                testplan_description=config_manager.getoption('tr-testplan-description', 'description', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config_manager.getoption('tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
