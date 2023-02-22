@@ -98,19 +98,13 @@ class PyTestRailPlugin(TestrailActions):
             print(f"In pytest run have testcases that not exist in suite({self.testrail_data.suite_id})\n"
                   f"Diff: {self.diff_case_ids}")
 
-        if not self.testrail_data.testrun_id:
+        if self.testrail_data.testplan_id and not self.testrail_data.testrun_id:
+            self._create_test_plan_entry()
+        elif not self.testrail_data.testrun_id:
             self._create_test_run()
 
         if self.testrail_data.testplan_id and not self.testrail_data.testplan_entry_id:
             self.get_testplan_entry_id(self.testrail_data.testplan_id, self.testrail_data.testrun_id)
-
-        # if self.testrail_data.testplan_id and not self.testrail_data.testrun_id:
-        #     self._create_test_plan_entry()
-        # elif not self.testrail_data.testrun_id:
-        #     self._create_test_run()
-        #
-        # if self.testrail_data.testplan_id and not self.testrail_data.testplan_entry_id:
-        #     self.get_testplan_entry_id(self.testrail_data.testplan_id, self.testrail_data.testrun_id)
 
         if self.testrail_data.skip_missing:
             tests_list = [
