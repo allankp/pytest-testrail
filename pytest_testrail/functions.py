@@ -112,7 +112,7 @@ def get_case_list(tests: list):
     :param list tests: list of tests from get_tests
     """
     testcaseids = []
-    for test in tests:
+    for test in tests or []:
         testcaseids.append(test['case_id'])
     return testcaseids
 

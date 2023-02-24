@@ -179,7 +179,7 @@ class TestrailActions:
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to create testplane entry: "{}"'.format(TESTRAIL_PREFIX, error))
+            print('[{}] Failed to create testplan entry: "{}"'.format(TESTRAIL_PREFIX, error))
             return 0
         else:
             self.testrail_data.testplan_entry_id = response['id']
@@ -246,6 +246,7 @@ class TestrailActions:
     def update_testplan_entry(self, plan_id: int, entry_id: str, run_id: int, tr_keys: list, save_previous: bool = True):
 
         current_tests = []
+
         if save_previous:
             current_tests = get_case_list(self.get_tests(run_id=run_id))
 
