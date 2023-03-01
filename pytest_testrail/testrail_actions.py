@@ -38,6 +38,8 @@ class TestrailActions:
         :param testrun_id: Id of the testrun to feed
 
         """
+
+
         # unicode converter for compatibility of python 2 and 3
         try:
             converter = unicode
@@ -115,11 +117,11 @@ class TestrailActions:
 
             if testrail_data.testrun_id:
                 self._add_results(self.testrail_data.testrun_id, results)
-            elif self.testrail_data.testplan_id:
-                testruns = self.get_available_testruns(self.testrail_data.testplan_id)
-                print('[{}] Testruns to update: {}'.format(TESTRAIL_PREFIX, ', '.join([str(elt) for elt in testruns])))
-                for testrun_id in testruns:
-                    self._add_results(testrun_id, results)
+            # elif self.testrail_data.testplan_id:
+            #     testruns = self.get_available_testruns(self.testrail_data.testplan_id)
+            #     print('[{}] Testruns to update: {}'.format(TESTRAIL_PREFIX, ', '.join([str(elt) for elt in testruns])))
+            #     for testrun_id in testruns:
+            #         self._add_results(testrun_id, results)
             else:
                 print('[{}] No data published'.format(TESTRAIL_PREFIX))
 
@@ -128,6 +130,17 @@ class TestrailActions:
             elif self.testrail_data.close_on_complete and self.testrail_data.testplan_id:
                 self.close_test_plan(self.testrail_data.testplan_id)
         print('[{}] End publishing'.format(TESTRAIL_PREFIX))
+
+        if self.testrail_data.testplan_id:
+            print('[{}] Test Plan ID: {}'.format(TESTRAIL_PREFIX, self.testrail_data.testplan_id))
+            print('[{}] Test Plan URL: {}/index.php?/plans/view/{}'.format(
+                TESTRAIL_PREFIX, self.testrail_data.tr_url, self.testrail_data.testplan_id)
+            )
+        if self.testrail_data.testrun_id:
+            print('[{}] Test Run ID: {}'.format(TESTRAIL_PREFIX, self.testrail_data.testrun_id))
+            print('[{}] Test Plan URL: {}/index.php?/runs/view/{}'.format(
+                TESTRAIL_PREFIX, self.testrail_data.tr_url, self.testrail_data.testrun_id)
+            )
 
     def create_test_run(self, assign_user_id, project_id, suite_id, include_all,
                         testrun_name, tr_keys, milestone_id, description=''):
@@ -343,7 +356,7 @@ class TestrailActions:
         error = self.testrail_data.client.get_error(response)
         if error:
             print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
-            return None
+            return []
         return response
 
     def get_plan(self, plan_id):
