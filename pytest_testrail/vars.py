@@ -17,6 +17,7 @@ DT_FORMAT = '%d-%m-%Y %H:%M:%S'
 
 TESTRAIL_PREFIX = 'testrail'
 TESTRAIL_DEFECTS_PREFIX = 'testrail_defects'
+TESTRAIL_SUITES_PREFIX = "testrail_suites"
 ADD_RESULTS_URL = 'add_results_for_cases/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
 ADD_TESTPLAN_ENTRY_URL = 'add_plan_entry/{}'

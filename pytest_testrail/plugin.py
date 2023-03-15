@@ -5,7 +5,7 @@ from pytest_testrail.TestrailModel import TestRailModel
 from pytest_testrail.testrail_actions import TestrailActions
 from pytest_testrail.vars import TESTRAIL_DEFECTS_PREFIX, TESTRAIL_PREFIX
 from pytest_testrail.functions import get_testrail_keys, testrun_name, testplan_name, clean_test_ids, \
-    get_test_outcome, clean_test_defects, is_xdist_worker, pytestrail, testrail
+    get_test_outcome, clean_test_defects, is_xdist_worker, get_testrail_suite_ids
 
 
 class PyTestRailPlugin(TestrailActions):
@@ -84,7 +84,8 @@ class PyTestRailPlugin(TestrailActions):
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
         items_with_tr_keys = get_testrail_keys(items)
-
+        suite_ids = get_testrail_suite_ids(items)
+        print(f"[Debug] suite_ids => {suite_ids}")
         pytest_case_ids = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
         suite_case_ids = [test.get('id') for test in self.get_cases(self.testrail_data.project_id,

@@ -3,7 +3,7 @@ import warnings
 
 import pytest
 from datetime import datetime
-from pytest_testrail.vars import PYTEST_TO_TESTRAIL_STATUS, DT_FORMAT, TESTRAIL_PREFIX
+from pytest_testrail.vars import PYTEST_TO_TESTRAIL_STATUS, DT_FORMAT, TESTRAIL_PREFIX, TESTRAIL_SUITES_PREFIX
 
 
 class DeprecatedTestDecorator(DeprecationWarning):
@@ -29,6 +29,17 @@ class pytestrail(object):
         :return pytest.mark:
         """
         return pytest.mark.testrail(ids=ids)
+
+    @staticmethod
+    def suite(*ids):
+        """
+        Decorator to mark tests with testcase ids.
+
+        ie. @pytestrail.case('C123', 'C12345')
+
+        :return pytest.mark:
+        """
+        return pytest.mark.testrail_suite(ids=ids)
 
     @staticmethod
     def defect(*defect_ids):
@@ -105,6 +116,14 @@ def clean_test_defects(defect_ids):
         """
     return [(re.search('(?P<defect_id>.*)', defect_id).groupdict().get('defect_id')) for defect_id in defect_ids]
 
+def clean_suite_ids(suite_ids):
+    """
+        Clean pytest marker containing testrail suite ids.
+
+        :param list suite_ids: list of suite_ids.
+        :return list ints: contains list of suite_ids as ints.
+        """
+    return [int(re.search('(?P<suite_id>[0-9]+$)', suite_id).groupdict().get('suite_id')) for suite_id in suite_ids]
 
 def get_case_list(tests: list):
     """
@@ -132,6 +151,18 @@ def get_testrail_keys(items):
             )
     return testcaseids
 
+def get_testrail_suite_ids(items)-> list:
+    suite_ids = []
+    for item in items:
+        if item.get_closest_marker(TESTRAIL_SUITES_PREFIX):
+            suite_ids.append(
+                (
+                    item,
+                    clean_suite_ids(item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids'))
+                )
+            )
+
+    return suite_ids
 
 def filter_publish_results(results, ignore_cases):
     clear_results = []
