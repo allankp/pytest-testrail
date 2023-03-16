@@ -139,7 +139,6 @@ class PyTestRailPlugin(TestrailActions):
                 if set(case_id).intersection(set(self.diff_case_ids)):
                     mark = pytest.mark.skip('Test {} is not present in testrun.'.format(case_id))
                     item.add_marker(mark)
-        breakpoint()
         for suite_id in suite_ids:
             if self.testrail_data.testplan_id:
                 self.update_testplan_entry(plan_id=self.testrail_data.testplan_id,
