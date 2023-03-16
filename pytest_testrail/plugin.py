@@ -86,7 +86,7 @@ class PyTestRailPlugin(TestrailActions):
 
     @pytest.hookimpl(trylast=True)
     def pytest_collection_modifyitems(self, session, config, items):
-        # получили все тесты с тестномерами из прогона
+        # получили все тесты с тест-номерами из прогона
         items_with_tr_keys = get_testrail_keys(items)
 
         # ---------------------------------------------
@@ -100,7 +100,7 @@ class PyTestRailPlugin(TestrailActions):
             items_with_suite_ids = get_testrail_suite_ids(items)
             suite_ids = {suite for item in items_with_suite_ids for suite in item[1]}
 
-        # получили список тест-сьютов с соответсвующими тест-кейсами из тестрейла
+        # получили список тест-сьютов с соответствующими тест-кейсами из тестрейла
         for suite_id in suite_ids:
             list_of_suites_and_cases[suite_id] = \
                 [test.get('id') for test in self.get_cases(self.testrail_data.project_id, suite_id)]
@@ -115,18 +115,18 @@ class PyTestRailPlugin(TestrailActions):
         # получили список тест-кейсов которые нужно запустить
         self.testrail_data.tr_keys = [case for case in pytest_case_ids if case in suite_case_ids]
 
-        # получили список тест-кейсов, которых нет в прогоне
-        self.diff_case_ids = list(set(pytest_case_ids).difference(suite_case_ids))
-
         # получили список тест-сьютов с участвующими тест-кейсами в прогоне
         for suite_id in suite_ids:
             self.testrail_data.actual_suites_with_case_ids[suite_id] = list(
                 set(pytest_case_ids).intersection(list_of_suites_and_cases[suite_id]))
 
+        # получили список тест-кейсов, которых нет в прогоне
+        self.diff_case_ids = list(set(pytest_case_ids).difference(suite_case_ids))
+
         # вывели список тест-кейсов которых нет в тест-сьютах
         if self.diff_case_ids:
-            print(f"In pytest run have testcases that not exist in suites\n"
-                  f"Diff: {self.diff_case_ids}")
+            print(f"[{TESTRAIL_PREFIX}] In pytest run have testcases that not exist in suites\n"
+                  f"[{TESTRAIL_PREFIX}] Diff: {self.diff_case_ids}")
         # создаем тест-ран для каждого сьюта
         for suite_id in list_of_suites_and_cases.keys():
             if self.testrail_data.testplan_id:
@@ -135,41 +135,21 @@ class PyTestRailPlugin(TestrailActions):
                 self._create_test_run(suite_id=suite_id)
 
         if self.testrail_data.skip_missing:
-            tests_list = [
-                test.get('case_id') for test in self.get_tests(self.testrail_data.testrun_id)
-            ]
             for item, case_id in items_with_tr_keys:
-                if not set(case_id).intersection(set(tests_list)):
+                if set(case_id).intersection(set(self.diff_case_ids)):
                     mark = pytest.mark.skip('Test {} is not present in testrun.'.format(case_id))
                     item.add_marker(mark)
         breakpoint()
-        # suite_case_ids = [test.get('id') for test in self.get_cases(self.testrail_data.project_id,
-        #                                                             self.testrail_data.suite_id)]
-        # self.testrail_data.tr_keys = [case for case in pytest_case_ids if case in suite_case_ids]
-        #
-        # self.diff_case_ids = list(set(pytest_case_ids).difference(suite_case_ids))
-        # if self.diff_case_ids:
-        #     print(f"In pytest run have testcases that not exist in suite({self.testrail_data.suite_id})\n"
-        #           f"Diff: {self.diff_case_ids}")
-        #
-        # for suite_id in self.testrail_data.list_of_suites_and_cases.keys():
-        #     if self.testrail_data.testplan_id:
-        #         self._create_test_plan_entry(suite_id=suite_id)
-        #     else:
-        #         self._create_test_run(suite_id=suite_id)
-        # ???????
-        # if self.testrail_data.testplan_id and not self.testrail_data.testplan_entry_id:
-        #     self.get_testplan_entry_id(self.testrail_data.testplan_id, self.testrail_data.testrun_id)
-        # -----------------------------------
-        #
-        # if self.testrail_data.testplan_id:
-        #     self.update_testplan_entry(plan_id=self.testrail_data.testplan_id,
-        #                                entry_id=self.testrail_data.testplan_entry_id,
-        #                                run_id=self.testrail_data.testrun_id,
-        #                                tr_keys=list(set(self.testrail_data.tr_keys)))
-        # else:
-        #     self.update_testrun(testrun_id=self.testrail_data.testrun_id,
-        #                         tr_keys=list(set(self.testrail_data.tr_keys)))
+        for suite_id in suite_ids:
+            if self.testrail_data.testplan_id:
+                self.update_testplan_entry(plan_id=self.testrail_data.testplan_id,
+                                           entry_id=self.testrail_data.plan_entry_storage[suite_id]["testplan_entry_id"],
+                                           run_id=self.testrail_data.plan_entry_storage[suite_id]["testrun_id"],
+                                           tr_keys=list(set(self.testrail_data.tr_keys)))
+            else:
+                self.update_testrun(testrun_id=self.testrail_data.plan_entry_storage[suite_id]["testrun_id"],
+                                    tr_keys=list(set(self.testrail_data.tr_keys)))
+
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
