@@ -39,7 +39,7 @@ class pytestrail(object):
 
         :return pytest.mark:
         """
-        return pytest.mark.testrail_suite(ids=ids)
+        return pytest.mark.testrail_suites(ids=ids)
 
     @staticmethod
     def defect(*defect_ids):
@@ -158,7 +158,7 @@ def get_testrail_suite_ids(items)-> list:
             suite_ids.append(
                 (
                     item,
-                    clean_suite_ids(item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids'))
+                    clean_suite_ids(item.get_closest_marker(TESTRAIL_SUITES_PREFIX).kwargs.get('ids'))
                 )
             )
 

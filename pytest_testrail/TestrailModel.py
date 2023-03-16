@@ -28,3 +28,9 @@ class TestRailModel:
     custom_comment: str = None
     test_run_flag: bool = False
     tr_keys: list = None
+    actual_suites_with_case_ids: dict = None
+    plan_entry_storage: dict = None
+
+@dataclass()
+class Store:
+    pass

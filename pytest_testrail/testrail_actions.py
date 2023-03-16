@@ -138,7 +138,7 @@ class TestrailActions:
             )
         if self.testrail_data.testrun_id:
             print('[{}] Test Run ID: {}'.format(TESTRAIL_PREFIX, self.testrail_data.testrun_id))
-            print('[{}] Test Plan URL: {}/index.php?/runs/view/{}'.format(
+            print('[{}] Test Run URL: {}/index.php?/runs/view/{}'.format(
                 TESTRAIL_PREFIX, self.testrail_data.tr_url, self.testrail_data.testrun_id)
             )
 
@@ -195,15 +195,17 @@ class TestrailActions:
             print('[{}] Failed to create testplan entry: "{}"'.format(TESTRAIL_PREFIX, error))
             return 0
         else:
-            self.testrail_data.testplan_entry_id = response['id']
-            self.testrail_data.testrun_id = response['runs'][0]['id']
+            self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": response['id'],
+                                                               "testrun_id": response['runs'][0]['id']}
+            # self.testrail_data.testplan_entry_id = response['id']       # TODO remove
+            # self.testrail_data.testrun_id = response['runs'][0]['id']   # TODO remove
             print('[{}] New TestPlan entry created with name "{}" and ID={}, entry_id={}'
                   .format(TESTRAIL_PREFIX,
                           testrun_name,
-                          self.testrail_data.testrun_id,
-                          self.testrail_data.testplan_entry_id))
+                          self.testrail_data.plan_entry_storage[suite_id]["testrun_id"],
+                          self.testrail_data.plan_entry_storage[suite_id]["testplan_entry_id"]))
 
-            return self.testrail_data.testrun_id
+            return self.testrail_data.plan_entry_storage[suite_id]["testrun_id"]
 
     def create_plan(self, project_id, plan_name, milestone_id, description=''):
         data = {
@@ -341,7 +343,7 @@ class TestrailActions:
         error = self.testrail_data.client.get_error(response)
         if error:
             print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
-            return None
+            return []
         return response
 
     def get_tests(self, run_id):
