@@ -30,6 +30,7 @@ class TestRailModel:
     tr_keys: list = None
     actual_suites_with_case_ids: dict = None
     plan_entry_storage: dict = None
+    diff_case_ids: list = None
 
 @dataclass()
 class Store:

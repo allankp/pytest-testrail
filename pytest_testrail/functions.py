@@ -172,3 +172,9 @@ def filter_publish_results(results, ignore_cases):
             clear_results.append(result)
             test_case_ids_list.append(str(result['case_id']))
     return clear_results, test_case_ids_list
+
+def get_suite_by_case(case, suites):
+    for suite, cases in suites.items():
+        if case in cases:
+            return suite
+    return 0
