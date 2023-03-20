@@ -85,7 +85,7 @@ class TestrailActions:
                 entry['comment'] += u"# Pytest result: #\n"
                 entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
                 entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n',
-                                                                                                             '\n    ')  # noqa                                                                                               '\n    ')  # noqa
+                                                                                                             '\n    ')  # noqa
             elif comment == '':
                 entry['comment'] = self.testrail_data.custom_comment
             duration = result.get('duration')
@@ -111,7 +111,7 @@ class TestrailActions:
             print('[{}] Testcases to publish: {}'.format(TESTRAIL_PREFIX, ', '.join(set(tests_list))))
 
             if self.testrail_data.diff_case_ids:
-                print(f"[{TESTRAIL_PREFIX}] Not found following testcases in Suite ID={self.testrail_data.suite_id}")
+                print(f"[{TESTRAIL_PREFIX}] Not found following testcases in suiteID={self.testrail_data.suite_id}")
                 print(f"[{TESTRAIL_PREFIX}] Testcases will be ignored: {self.testrail_data.diff_case_ids}")
 
             results_by_run = defaultdict(list)
@@ -208,8 +208,6 @@ class TestrailActions:
             self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": response['id'],
                                                                "testrun_id": response['runs'][0]['id'],
                                                                "case_ids": tr_keys}
-            # self.testrail_data.testplan_entry_id = response['id']       # TODO remove
-            # self.testrail_data.testrun_id = response['runs'][0]['id']   # TODO remove
             print('[{}] New TestPlan entry created with name "{}" and ID={}, entry_id={}'
                   .format(TESTRAIL_PREFIX,
                           testrun_name,
@@ -353,7 +351,7 @@ class TestrailActions:
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
+            print(f'[{TESTRAIL_PREFIX}] Failed to get tests: "{error} for suite: {suit_id}"')
             return []
         return response
 
@@ -368,7 +366,7 @@ class TestrailActions:
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
+            print(f'[{TESTRAIL_PREFIX}] Failed to get tests: "{error}"')
             return []
         return response
 
@@ -383,7 +381,7 @@ class TestrailActions:
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to retrieve testplan: "{}"'.format(TESTRAIL_PREFIX, error))
+            print(f'[{TESTRAIL_PREFIX}] Failed to retrieve testplan: "{error}"')
         return response
 
     def get_testplan_entry_id(self, plan_id, run_id):
