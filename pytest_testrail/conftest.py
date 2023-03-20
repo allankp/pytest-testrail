@@ -142,6 +142,8 @@ def pytest_configure(config):
                            config_manager.getoption('tr-password', 'password', 'API'),
                            timeout=config_manager.getoption('tr-timeout', 'timeout', 'API'))
 
+        config.addinivalue_line("markers", "testrail_suites: mark for test suite (example: @pytestrail.suite('S11111'))")
+
         config.pluginmanager.register(
             PyTestRailPlugin(
                 client=client,
