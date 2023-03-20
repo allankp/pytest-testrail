@@ -28,6 +28,7 @@ GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 GET_TESTS_URL = 'get_tests/{}'
 GET_TESTCASES_URL = 'get_cases/{}&suite_id={}&limit=99999'
+GET_SUITES_URL = 'get_suites/{}'
 UPDATE_RUN_URL = 'update_run/{}'
 UPDATE_TESTPLAN_ENTRY = "/update_plan_entry/{}/{}"
 

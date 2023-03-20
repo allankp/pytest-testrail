@@ -4,7 +4,7 @@ from pytest_testrail.TestrailModel import TestRailModel
 from pytest_testrail.functions import get_case_list, filter_publish_results
 from pytest_testrail.vars import TESTRAIL_PREFIX, TESTRAIL_TEST_STATUS, COMMENT_SIZE_LIMIT, ADD_RESULTS_URL, \
     ADD_TESTRUN_URL, ADD_TESTPLAN_ENTRY_URL, UPDATE_RUN_URL, GET_TESTRUN_URL, CLOSE_TESTRUN_URL, CLOSE_TESTPLAN_URL, \
-    GET_TESTPLAN_URL, GET_TESTCASES_URL, GET_TESTS_URL, UPDATE_TESTPLAN_ENTRY, ADD_TESTPLAN_URL
+    GET_TESTPLAN_URL, GET_TESTCASES_URL, GET_TESTS_URL, UPDATE_TESTPLAN_ENTRY, ADD_TESTPLAN_URL, GET_SUITES_URL
 
 
 class TestrailActions:
@@ -343,8 +343,8 @@ class TestrailActions:
 
     def get_cases(self, project_id, suit_id):
         """
-       :return: the list of tests containing in a testrun.
-       """
+        :return: the list of tests containing in a testrun.
+        """
         response = self.testrail_data.client.send_get(
             GET_TESTCASES_URL.format(project_id, suit_id),
             cert_check=self.testrail_data.cert_check
@@ -352,6 +352,20 @@ class TestrailActions:
         error = self.testrail_data.client.get_error(response)
         if error:
             print(f'[{TESTRAIL_PREFIX}] Failed to get tests: "{error} for suite: {suit_id}"')
+            return []
+        return response
+
+    def get_suites(self, project_id):
+        """
+        :return: The list of suite_ids
+        """
+        response = self.testrail_data.client.send_get(
+            GET_SUITES_URL.format(project_id),
+            cert_check=self.testrail_data.cert_check
+        )
+        error = self.testrail_data.client.get_error(response)
+        if error:
+            print(f'[{TESTRAIL_PREFIX}] Failed to get suites: "{error} for project id: {project_id}"')
             return []
         return response
 

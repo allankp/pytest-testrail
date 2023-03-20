@@ -50,9 +50,9 @@ class PyTestRailPlugin(TestrailActions):
                          self.testrail_data.milestone_id,
                          self.testrail_data.testplan_description)
 
-    def _create_test_plan_entry(self, suite_id=None):
+    def _create_test_plan_entry(self, suite_id=None, test_run_name=None):
         self.create_plan_entry(suite_id=suite_id if suite_id else self.testrail_data.suite_id,
-                               testrun_name=self.testrail_data.testrun_name or testplan_name(),
+                               testrun_name=self.testrail_data.testrun_name or test_run_name or testplan_name(),
                                assign_user_id=self.testrail_data.assign_user_id,
                                plan_id=self.testrail_data.testplan_id,
                                include_all=self.testrail_data.include_all,
@@ -92,7 +92,7 @@ class PyTestRailPlugin(TestrailActions):
 
         # ---------------------------------------------
         testrail_list_of_suites_and_cases = {}
-
+        available_suite_ids = {}
         # получили список тест-сьютов [11234,34234,123213]
         if self.testrail_data.suite_id:
             suite_ids = {int(self.testrail_data.suite_id)}
@@ -100,6 +100,13 @@ class PyTestRailPlugin(TestrailActions):
             # получили все тесты с тест-сьютами из прогона
             items_with_suite_ids = get_testrail_suite_ids(items)
             suite_ids = {suite for item in items_with_suite_ids for suite in item[1]}
+
+            available_suite_ids = self.get_suites(project_id=self.testrail_data.project_id)
+            available_suite_ids = {suite['id']: suite['name'] for suite in available_suite_ids}
+            for suite_id in suite_ids:
+                if suite_id not in available_suite_ids.keys():
+                    print(f"[{TESTRAIL_PREFIX}] Test suite ({suite_id}) not available "
+                          f"for project_id: {self.testrail_data.project_id}")
 
         # получили список тест-сьютов с соответствующими тест-кейсами из тестрейла
         for suite_id in suite_ids:
@@ -120,7 +127,7 @@ class PyTestRailPlugin(TestrailActions):
         for suite_id in suite_ids:
             self.testrail_data.actual_suites_with_case_ids[suite_id] = list(
                 set(pytest_case_ids).intersection(testrail_list_of_suites_and_cases[suite_id]))
-        print(f"pytest cases: {pytest_case_ids}")
+        print(f"[{TESTRAIL_PREFIX}] PyTest cases: {pytest_case_ids}")
         # получили список тест-кейсов, которых нет в прогоне
         self.testrail_data.diff_case_ids = list(set(pytest_case_ids).difference(suite_case_ids))
 
@@ -134,7 +141,7 @@ class PyTestRailPlugin(TestrailActions):
                 print(f"[{TESTRAIL_PREFIX}] No testcases for suite {suite_id}! Testrun not created")
                 continue
             if self.testrail_data.testplan_id:
-                self._create_test_plan_entry(suite_id=suite_id)
+                self._create_test_plan_entry(suite_id=suite_id, test_run_name=available_suite_ids.get(suite_id))
             else:
                 self._create_test_run(suite_id=suite_id)
 
