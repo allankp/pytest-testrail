@@ -134,6 +134,11 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    # Registration marks
+    config.addinivalue_line("markers", "testrail: pytestrail mark (example: @pytestrail")
+    config.addinivalue_line("markers", "testrail_defects: mark for defects")
+    config.addinivalue_line("markers", "testrail_suites: mark for test suite (example: @pytestrail.suite('S11111'))")
+
     if config.getoption('--testrail'):
         cfg_file_path = config.getoption('--tr-config')
         config_manager = ConfigManager(cfg_file_path, config)
@@ -141,11 +146,6 @@ def pytest_configure(config):
                            config_manager.getoption('tr-email', 'email', 'API'),
                            config_manager.getoption('tr-password', 'password', 'API'),
                            timeout=config_manager.getoption('tr-timeout', 'timeout', 'API'))
-
-        # Registration marks
-        config.addinivalue_line("markers", "testrail: pytestrail mark (example: @pytestrail")
-        config.addinivalue_line("markers", "testrail_defects: mark for defects")
-        config.addinivalue_line("markers", "testrail_suites: mark for test suite (example: @pytestrail.suite('S11111'))")
 
         config.pluginmanager.register(
             PyTestRailPlugin(
