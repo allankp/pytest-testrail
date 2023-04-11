@@ -235,11 +235,12 @@ class TestrailActions:
                                                                                self.testrail_data.testplan_id))
             return self.testrail_data.testplan_id
 
-    def update_testrun(self, testrun_id: int, tr_keys: list, save_previous: bool = True) -> None:
+    def update_testrun(self, testrun_id: int, tr_keys: list, suite_id: int, save_previous: bool = True) -> None:
         """
         Updates an existing test run
         :param testrun_id: testrun id
         :param tr_keys: collected testrail ids
+        :param suite_id:
         :param save_previous: collected testrail ids
         """
         current_tests = []
@@ -257,6 +258,9 @@ class TestrailActions:
             cert_check=self.testrail_data.cert_check
         )
         error = self.testrail_data.client.get_error(response)
+        self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": None,
+                                                           "testrun_id": testrun_id,
+                                                           "case_ids": list(set(tr_keys + current_tests))}
         if error:
             print('[{}] Failed to update testrun: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
@@ -264,8 +268,8 @@ class TestrailActions:
                                                                          self.testrail_data.testrun_name,
                                                                          testrun_id))
 
-    def update_testplan_entry(self, plan_id: int, entry_id: str, run_id: int, tr_keys: list,
-                              save_previous: bool = True):
+    def update_testplan_entry(self, plan_id: int, entry_id: str, run_id: int, tr_keys: list, suite_id: int,
+                              save_previous: bool = True) -> None:
         current_tests = []
 
         if save_previous:
@@ -282,6 +286,9 @@ class TestrailActions:
             cert_check=self.testrail_data.cert_check
         )
         error = self.testrail_data.client.get_error(response)
+        self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": entry_id,
+                                                           "testrun_id": run_id,
+                                                           "case_ids": list(set(tr_keys + current_tests))}
         if error:
             print('[{}] Failed to update testrun: "{}"'.format(TESTRAIL_PREFIX, error))
         else:

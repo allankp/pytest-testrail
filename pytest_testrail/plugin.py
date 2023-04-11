@@ -146,6 +146,7 @@ class PyTestRailPlugin(TestrailActions):
                 self.update_testplan_entry(plan_id=run_info['plan_id'], entry_id=entry_id,
                                            run_id=self.testrail_data.testrun_id,
                                            tr_keys=self.testrail_data.actual_suites_with_case_ids[run_info['suite_id']],
+                                           suite_id=run_info['suite_id'],
                                            save_previous=True)
             else:
                 self.update_testrun(testrun_id=self.testrail_data.testrun_id,
