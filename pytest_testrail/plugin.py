@@ -3,8 +3,8 @@ import pytest
 
 from pytest_testrail.TestrailModel import TestRailModel
 from pytest_testrail.testrail_actions import TestrailActions
-from pytest_testrail.vars import TESTRAIL_DEFECTS_PREFIX, TESTRAIL_PREFIX, TESTRAIL_SUITES_PREFIX
-from pytest_testrail.functions import get_testrail_keys, testrun_name, testplan_name, clean_test_ids, \
+from pytest_testrail.vars import TESTRAIL_DEFECTS_PREFIX, TESTRAIL_PREFIX
+from pytest_testrail.functions import get_testrail_keys, testrun_name, clean_test_ids, \
     get_test_outcome, clean_test_defects, is_xdist_worker, get_testrail_suite_ids, get_suite_by_case
 
 
@@ -117,7 +117,8 @@ class PyTestRailPlugin(TestrailActions):
         pytest_case_ids = [case_id for item in items_with_tr_keys for case_id in item[1]]
 
         # получили список всех тест-кейсов со всех тест-сьютов
-        suite_case_ids = [case for value in testrail_list_of_suites_and_cases for case in testrail_list_of_suites_and_cases[value]]
+        suite_case_ids = [case for value in testrail_list_of_suites_and_cases for case in
+                          testrail_list_of_suites_and_cases[value]]
 
         # получили список тест-кейсов которые нужно запустить
         self.testrail_data.tr_keys = [case for case in pytest_case_ids if case in suite_case_ids]
@@ -139,11 +140,26 @@ class PyTestRailPlugin(TestrailActions):
             if not self.testrail_data.actual_suites_with_case_ids[suite_id]:
                 print(f"[{TESTRAIL_PREFIX}] No testcases for suite {suite_id}! Testrun not created")
                 continue
-            if self.testrail_data.testplan_id:
+            if self.testrail_data.testrun_id:
+                run_info = self.get_run(run_id=self.testrail_data.testrun_id)
+                if run_info['plan_id']:
+                    entry_id = self.get_testplan_entry_id(plan_id=run_info['plan_id'],
+                                                          run_id=self.testrail_data.testrun_id
+                                                          )
+                    self.update_testplan_entry(plan_id=run_info['plan_id'], entry_id=entry_id,
+                                               run_id=self.testrail_data.testrun_id,
+                                               tr_keys=self.testrail_data.actual_suites_with_case_ids[
+                                                   suite_id if suite_id else self.testrail_data.suite_id],
+                                               save_previous=True)
+                else:
+                    self.update_testrun(testrun_id=self.testrail_data.testrun_id,
+                                        tr_keys=self.testrail_data.actual_suites_with_case_ids[
+                                            suite_id if suite_id else self.testrail_data.suite_id],
+                                        save_previous=True)
+            elif self.testrail_data.testplan_id:
                 self._create_test_plan_entry(suite_id=suite_id, test_suite_name=available_suite_ids.get(suite_id))
             else:
                 self._create_test_run(suite_id=suite_id, test_suite_name=available_suite_ids.get(suite_id))
-
         if self.testrail_data.skip_missing:
             for item, case_id in items_with_tr_keys:
                 if set(case_id).intersection(set(self.testrail_data.diff_case_ids)):
@@ -168,7 +184,8 @@ class PyTestRailPlugin(TestrailActions):
             testcase_ids = item.get_closest_marker(TESTRAIL_PREFIX).kwargs.get('ids')
             if rep.when == 'call' and testcase_ids:
                 for testcase_id in clean_test_ids(testcase_ids):
-                    suite_id = get_suite_by_case(case=testcase_id, suites=self.testrail_data.actual_suites_with_case_ids)
+                    suite_id = get_suite_by_case(case=testcase_id,
+                                                 suites=self.testrail_data.actual_suites_with_case_ids)
 
                     self.testrail_data.results.append(self.add_result(
                         testcase_id,

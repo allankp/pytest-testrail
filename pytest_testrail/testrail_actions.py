@@ -119,15 +119,11 @@ class TestrailActions:
                 if str(result['case_id']) in tests_list:
                     results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
                         result)
-            for run_id, result in results_by_run.items():
-                self._add_results(run_id, result)
-            # if testrail_data.testrun_id:
-            # self._add_results(self.testrail_data.testrun_id, results)
-            # elif self.testrail_data.testplan_id:
-            #     testruns = self.get_available_testruns(self.testrail_data.testplan_id)
-            #     print('[{}] Testruns to update: {}'.format(TESTRAIL_PREFIX, ', '.join([str(elt) for elt in testruns])))
-            #     for testrun_id in testruns:
-            #         self._add_results(testrun_id, results)
+            if self.testrail_data.testrun_id:
+                self._add_results(self.testrail_data.testrun_id, results_by_run.get(self.testrail_data.testrun_id))
+            else:
+                for run_id, result in results_by_run.items():
+                    self._add_results(run_id, result)
         else:
             print('[{}] No data published'.format(TESTRAIL_PREFIX))
 
@@ -252,6 +248,7 @@ class TestrailActions:
 
         data = {
             'case_ids': list(set(tr_keys + current_tests)),
+            'include_all': self.testrail_data.include_all
         }
 
         response = self.testrail_data.client.send_post(
@@ -276,6 +273,7 @@ class TestrailActions:
 
         data = {
             'case_ids': list(set(tr_keys + current_tests)),
+            'include_all': self.testrail_data.include_all
         }
 
         response = self.testrail_data.client.send_post(
@@ -396,6 +394,19 @@ class TestrailActions:
         error = self.testrail_data.client.get_error(response)
         if error:
             print(f'[{TESTRAIL_PREFIX}] Failed to retrieve testplan: "{error}"')
+        return response
+
+    def get_run(self, run_id) -> dict:
+        """
+        Return info
+        """
+        response = self.testrail_data.client.send_get(
+            GET_TESTRUN_URL.format(run_id),
+            cert_check=self.testrail_data.cert_check
+        )
+        error = self.testrail_data.client.get_error(response)
+        if error:
+            print(f'[{TESTRAIL_PREFIX}] Failed to retrieve testrun: "{error}"')
         return response
 
     def get_testplan_entry_id(self, plan_id, run_id):
