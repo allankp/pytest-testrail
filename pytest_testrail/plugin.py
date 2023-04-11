@@ -135,31 +135,32 @@ class PyTestRailPlugin(TestrailActions):
         if self.testrail_data.diff_case_ids:
             print(f"[{TESTRAIL_PREFIX}] In pytest run have testcases that not exist in suites\n"
                   f"[{TESTRAIL_PREFIX}] Diff: {self.testrail_data.diff_case_ids}")
-        # создаем тест-ран для каждого сьюта
-        for suite_id in self.testrail_data.actual_suites_with_case_ids.keys():
-            if not self.testrail_data.actual_suites_with_case_ids[suite_id]:
-                print(f"[{TESTRAIL_PREFIX}] No testcases for suite {suite_id}! Testrun not created")
-                continue
-            if self.testrail_data.testrun_id:
-                run_info = self.get_run(run_id=self.testrail_data.testrun_id)
-                if run_info['plan_id']:
-                    entry_id = self.get_testplan_entry_id(plan_id=run_info['plan_id'],
-                                                          run_id=self.testrail_data.testrun_id
-                                                          )
-                    self.update_testplan_entry(plan_id=run_info['plan_id'], entry_id=entry_id,
-                                               run_id=self.testrail_data.testrun_id,
-                                               tr_keys=self.testrail_data.actual_suites_with_case_ids[
-                                                   suite_id if suite_id else self.testrail_data.suite_id],
-                                               save_previous=True)
-                else:
-                    self.update_testrun(testrun_id=self.testrail_data.testrun_id,
-                                        tr_keys=self.testrail_data.actual_suites_with_case_ids[
-                                            suite_id if suite_id else self.testrail_data.suite_id],
-                                        save_previous=True)
-            elif self.testrail_data.testplan_id:
-                self._create_test_plan_entry(suite_id=suite_id, test_suite_name=available_suite_ids.get(suite_id))
+
+        if self.testrail_data.testrun_id:
+            # update specified test run
+            run_info = self.get_run(run_id=self.testrail_data.testrun_id)
+            if run_info['plan_id']:
+                entry_id = self.get_testplan_entry_id(plan_id=run_info['plan_id'],
+                                                      run_id=self.testrail_data.testrun_id
+                                                      )
+                self.update_testplan_entry(plan_id=run_info['plan_id'], entry_id=entry_id,
+                                           run_id=self.testrail_data.testrun_id,
+                                           tr_keys=self.testrail_data.actual_suites_with_case_ids[run_info['suite_id']],
+                                           save_previous=True)
             else:
-                self._create_test_run(suite_id=suite_id, test_suite_name=available_suite_ids.get(suite_id))
+                self.update_testrun(testrun_id=self.testrail_data.testrun_id,
+                                    tr_keys=self.testrail_data.actual_suites_with_case_ids[run_info['suite_id']],
+                                    save_previous=True)
+        else:
+            # create testrun for each suite
+            for suite_id in self.testrail_data.actual_suites_with_case_ids.keys():
+                if not self.testrail_data.actual_suites_with_case_ids[suite_id]:
+                    print(f"[{TESTRAIL_PREFIX}] No testcases for suite {suite_id}! Testrun not created")
+                    continue
+                if self.testrail_data.testplan_id:
+                    self._create_test_plan_entry(suite_id=suite_id, test_suite_name=available_suite_ids.get(suite_id))
+                else:
+                    self._create_test_run(suite_id=suite_id, test_suite_name=available_suite_ids.get(suite_id))
         if self.testrail_data.skip_missing:
             for item, case_id in items_with_tr_keys:
                 if set(case_id).intersection(set(self.testrail_data.diff_case_ids)):
