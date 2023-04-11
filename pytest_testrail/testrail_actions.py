@@ -122,7 +122,7 @@ class TestrailActions:
                         if int(result['suite_id']) == int(test_suite):
                             results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
                                 result)
-                self._add_results(self.testrail_data.testrun_id, results_by_run)
+                self._add_results(self.testrail_data.testrun_id, results_by_run.get(self.testrail_data.testrun_id))
             else:
                 for result in results:
                     if str(result['case_id']) in tests_list:
