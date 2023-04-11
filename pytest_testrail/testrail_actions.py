@@ -115,13 +115,19 @@ class TestrailActions:
                 print(f"[{TESTRAIL_PREFIX}] Testcases will be ignored: {self.testrail_data.diff_case_ids}")
 
             results_by_run = defaultdict(list)
-            for result in results:
-                if str(result['case_id']) in tests_list:
-                    results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
-                        result)
             if self.testrail_data.testrun_id:
-                self._add_results(self.testrail_data.testrun_id, results_by_run.get(self.testrail_data.testrun_id))
+                test_suite = list(self.testrail_data.plan_entry_storage.keys())[0]
+                for result in results:
+                    if str(result['case_id']) in tests_list:
+                        if int(result['suite_id']) == int(test_suite):
+                            results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
+                                result)
+                self._add_results(self.testrail_data.testrun_id, results_by_run)
             else:
+                for result in results:
+                    if str(result['case_id']) in tests_list:
+                        results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
+                            result)
                 for run_id, result in results_by_run.items():
                     self._add_results(run_id, result)
         else:
