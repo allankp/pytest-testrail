@@ -177,7 +177,6 @@ class TestrailActions:
             print('[{}] Failed to create testrun: "{}"'.format(TESTRAIL_PREFIX, error))
             return 0
         else:
-            # self.testrail_data.testrun_id = response['id']
             self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": None,
                                                                "testrun_id": response['id'],
                                                                "case_ids": tr_keys}
