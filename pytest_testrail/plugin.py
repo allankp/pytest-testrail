@@ -151,6 +151,7 @@ class PyTestRailPlugin(TestrailActions):
             else:
                 self.update_testrun(testrun_id=self.testrail_data.testrun_id,
                                     tr_keys=self.testrail_data.actual_suites_with_case_ids[run_info['suite_id']],
+                                    suite_id=run_info['suite_id'],
                                     save_previous=True)
         else:
             # create testrun for each suite
