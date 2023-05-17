@@ -176,11 +176,22 @@ class PyTestRailPlugin(TestrailActions):
 
         rep = outcome.get_result()
         defect_ids = None
+        test_parametrize = None
+        report_messages = []
+
         if 'callspec' in dir(item):
             test_parametrize = item.callspec.params
-        else:
-            test_parametrize = None
-        comment = rep.longreprtext if rep.longreprtext else rep.longrepr
+
+        if hasattr(rep, 'sections'):
+            for section in rep.sections:
+                report_messages.append(section[1])
+        if rep.longreprtext:
+            report_messages.append(f'longreprtext: {rep.longreprtext}')
+        if rep.longrepr:
+            report_messages.append(f'longrepr: {rep.longrepr}')
+
+        comment = '\n'.join(report_messages)
+
         if item.get_closest_marker(TESTRAIL_DEFECTS_PREFIX):
             defect_ids = item.get_closest_marker(TESTRAIL_DEFECTS_PREFIX).kwargs.get('defect_ids')
         if item.get_closest_marker(TESTRAIL_PREFIX):
