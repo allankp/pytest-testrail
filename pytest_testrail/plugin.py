@@ -186,7 +186,7 @@ class PyTestRailPlugin(TestrailActions):
             for section in rep.sections:
                 report_messages.append(section[1])
         if rep.longreprtext and rep.longreprtext.strip():
-            report_messages.append(f'{rep.longreprtext}')
+            report_messages.append(rep.longreprtext)
         if rep.skipped and hasattr(rep, 'wasxfail'):
             report_messages.append(f'\nXFail: {rep.wasxfail}')
         elif rep.skipped:
