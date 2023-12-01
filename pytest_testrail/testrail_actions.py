@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict
 from operator import itemgetter
 from pytest_testrail.TestrailModel import TestRailModel
@@ -67,6 +68,7 @@ class TestrailActions:
             print('[{}] Option "Include all testcases from test suite for test run" activated'.format(TESTRAIL_PREFIX))
 
         # Publish results
+        chunks = []
         data = {'results': []}
         for result in results:
             entry = {'status_id': result['status_id'], 'case_id': result['case_id'], 'defects': result['defects']}
@@ -93,6 +95,23 @@ class TestrailActions:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
                 entry['elapsed'] = str(duration) + 's'
             data['results'].append(entry)
+
+            # report data into chunks
+            if sys.getsizeof(data.__str__()) > 512 * 1024:
+                chunks.append({'results': data['results']})
+                data['results'] = []
+
+        chunks.append({'results': data['results']})
+
+        for chunk in chunks:
+            response = self.testrail_data.client.send_post(
+                ADD_RESULTS_URL.format(testrun_id),
+                chunk,
+                cert_check=self.testrail_data.cert_check
+            )
+            error = self.testrail_data.client.get_error(response)
+            if error:
+                print('[{}] Info: Testcases not published for following reason: "{}"'.format(TESTRAIL_PREFIX, error))
 
         response = self.testrail_data.client.send_post(
             ADD_RESULTS_URL.format(testrun_id),

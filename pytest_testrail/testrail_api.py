@@ -123,6 +123,8 @@ class APIClient:
             print("Too many requests: pause for {}s".format(pause))
             time.sleep(pause)
             return self.send_post(uri, data, **kwargs)
+        elif r.status_code == 413:
+            print("413 Request Entity Too Large")
         else:
             return r.json()
 
