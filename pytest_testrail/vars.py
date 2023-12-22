@@ -17,6 +17,7 @@ DT_FORMAT = '%d-%m-%Y %H:%M:%S'
 
 TESTRAIL_PREFIX = 'testrail'
 TESTRAIL_DEFECTS_PREFIX = 'testrail_defects'
+TESTRAIL_SUITES_PREFIX = "testrail_suites"
 ADD_RESULTS_URL = 'add_results_for_cases/{}'
 ADD_TESTRUN_URL = 'add_run/{}'
 ADD_TESTPLAN_ENTRY_URL = 'add_plan_entry/{}'
@@ -27,6 +28,7 @@ GET_TESTRUN_URL = 'get_run/{}'
 GET_TESTPLAN_URL = 'get_plan/{}'
 GET_TESTS_URL = 'get_tests/{}'
 GET_TESTCASES_URL = 'get_cases/{}&suite_id={}&limit=99999'
+GET_SUITES_URL = 'get_suites/{}'
 UPDATE_RUN_URL = 'update_run/{}'
 UPDATE_TESTPLAN_ENTRY = "/update_plan_entry/{}/{}"
 

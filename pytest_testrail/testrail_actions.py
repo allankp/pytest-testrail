@@ -1,16 +1,18 @@
+import sys
+from collections import defaultdict
 from operator import itemgetter
 from pytest_testrail.TestrailModel import TestRailModel
 from pytest_testrail.functions import get_case_list, filter_publish_results
 from pytest_testrail.vars import TESTRAIL_PREFIX, TESTRAIL_TEST_STATUS, COMMENT_SIZE_LIMIT, ADD_RESULTS_URL, \
     ADD_TESTRUN_URL, ADD_TESTPLAN_ENTRY_URL, UPDATE_RUN_URL, GET_TESTRUN_URL, CLOSE_TESTRUN_URL, CLOSE_TESTPLAN_URL, \
-    GET_TESTPLAN_URL, GET_TESTCASES_URL, GET_TESTS_URL, UPDATE_TESTPLAN_ENTRY, ADD_TESTPLAN_URL
+    GET_TESTPLAN_URL, GET_TESTCASES_URL, GET_TESTS_URL, UPDATE_TESTPLAN_ENTRY, ADD_TESTPLAN_URL, GET_SUITES_URL
 
 
 class TestrailActions:
     def __init__(self, testrail_data: TestRailModel):
         self.testrail_data = testrail_data
 
-    def add_result(self, test_id, status, comment='', defects=None, duration=0, test_parametrize=None):
+    def add_result(self, test_id, status, comment='', defects=None, duration=0, test_parametrize=None, suite_id=0):
         """
         Add a new result to results dict to be submitted at the end.
 
@@ -28,7 +30,8 @@ class TestrailActions:
             'comment': comment,
             'duration': duration,
             'defects': defects,
-            'test_parametrize': test_parametrize
+            'test_parametrize': test_parametrize,
+            "suite_id": suite_id
         }
         return data
 
@@ -38,8 +41,6 @@ class TestrailActions:
         :param testrun_id: Id of the testrun to feed
 
         """
-
-
         # unicode converter for compatibility of python 2 and 3
         try:
             converter = unicode
@@ -67,6 +68,7 @@ class TestrailActions:
             print('[{}] Option "Include all testcases from test suite for test run" activated'.format(TESTRAIL_PREFIX))
 
         # Publish results
+        chunks = []
         data = {'results': []}
         for result in results:
             entry = {'status_id': result['status_id'], 'case_id': result['case_id'], 'defects': result['defects']}
@@ -85,7 +87,7 @@ class TestrailActions:
                 entry['comment'] += u"# Pytest result: #\n"
                 entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
                 entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n',
-                                                                                                             '\n    ')  # noqa                                                                                               '\n    ')  # noqa
+                                                                                                             '\n    ')  # noqa
             elif comment == '':
                 entry['comment'] = self.testrail_data.custom_comment
             duration = result.get('duration')
@@ -93,6 +95,23 @@ class TestrailActions:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
                 entry['elapsed'] = str(duration) + 's'
             data['results'].append(entry)
+
+            # report data into chunks
+            if sys.getsizeof(data.__str__()) > 512 * 1024:
+                chunks.append({'results': data['results']})
+                data['results'] = []
+
+        chunks.append({'results': data['results']})
+
+        for chunk in chunks:
+            response = self.testrail_data.client.send_post(
+                ADD_RESULTS_URL.format(testrun_id),
+                chunk,
+                cert_check=self.testrail_data.cert_check
+            )
+            error = self.testrail_data.client.get_error(response)
+            if error:
+                print('[{}] Info: Testcases not published for following reason: "{}"'.format(TESTRAIL_PREFIX, error))
 
         response = self.testrail_data.client.send_post(
             ADD_RESULTS_URL.format(testrun_id),
@@ -107,28 +126,36 @@ class TestrailActions:
         print('[{}] Start publishing'.format(TESTRAIL_PREFIX))
 
         if results:
-            results, tests_list = filter_publish_results(results, self.diff_case_ids)
-
+            results, tests_list = filter_publish_results(results, self.testrail_data.diff_case_ids)
             print('[{}] Testcases to publish: {}'.format(TESTRAIL_PREFIX, ', '.join(set(tests_list))))
 
-            if self.diff_case_ids:
-                print(f"[{TESTRAIL_PREFIX}] Not found following testcases in Suite ID={self.testrail_data.suite_id}")
-                print(f"[{TESTRAIL_PREFIX}] Testcases will be ignored: {self.diff_case_ids}")
+            if self.testrail_data.diff_case_ids:
+                print(f"[{TESTRAIL_PREFIX}] Not found following testcases in suiteID={self.testrail_data.suite_id}")
+                print(f"[{TESTRAIL_PREFIX}] Testcases will be ignored: {self.testrail_data.diff_case_ids}")
 
-            if testrail_data.testrun_id:
-                self._add_results(self.testrail_data.testrun_id, results)
-            # elif self.testrail_data.testplan_id:
-            #     testruns = self.get_available_testruns(self.testrail_data.testplan_id)
-            #     print('[{}] Testruns to update: {}'.format(TESTRAIL_PREFIX, ', '.join([str(elt) for elt in testruns])))
-            #     for testrun_id in testruns:
-            #         self._add_results(testrun_id, results)
+            results_by_run = defaultdict(list)
+            if self.testrail_data.testrun_id:
+                test_suite = list(self.testrail_data.plan_entry_storage.keys())[0]
+                for result in results:
+                    if str(result['case_id']) in tests_list:
+                        if int(result['suite_id']) == int(test_suite):
+                            results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
+                                result)
+                self._add_results(self.testrail_data.testrun_id, results_by_run.get(self.testrail_data.testrun_id))
             else:
-                print('[{}] No data published'.format(TESTRAIL_PREFIX))
+                for result in results:
+                    if str(result['case_id']) in tests_list:
+                        results_by_run[self.testrail_data.plan_entry_storage[result['suite_id']]['testrun_id']].append(
+                            result)
+                for run_id, result in results_by_run.items():
+                    self._add_results(run_id, result)
+        else:
+            print('[{}] No data published'.format(TESTRAIL_PREFIX))
 
-            if self.testrail_data.close_on_complete and self.testrail_data.testrun_id:
-                self.close_test_run(self.testrail_data.testrun_id)
-            elif self.testrail_data.close_on_complete and self.testrail_data.testplan_id:
-                self.close_test_plan(self.testrail_data.testplan_id)
+        if self.testrail_data.close_on_complete and self.testrail_data.testrun_id:
+            self.close_test_run(self.testrail_data.testrun_id)
+        elif self.testrail_data.close_on_complete and self.testrail_data.testplan_id:
+            self.close_test_plan(self.testrail_data.testplan_id)
         print('[{}] End publishing'.format(TESTRAIL_PREFIX))
 
         if self.testrail_data.testplan_id:
@@ -138,7 +165,7 @@ class TestrailActions:
             )
         if self.testrail_data.testrun_id:
             print('[{}] Test Run ID: {}'.format(TESTRAIL_PREFIX, self.testrail_data.testrun_id))
-            print('[{}] Test Plan URL: {}/index.php?/runs/view/{}'.format(
+            print('[{}] Test Run URL: {}/index.php?/runs/view/{}'.format(
                 TESTRAIL_PREFIX, self.testrail_data.tr_url, self.testrail_data.testrun_id)
             )
 
@@ -156,7 +183,7 @@ class TestrailActions:
             'assignedto_id': assign_user_id,
             'include_all': include_all,
             'case_ids': tr_keys,
-            'milestone_id': milestone_id
+            'milestone_id': milestone_id,
         }
 
         response = self.testrail_data.client.send_post(
@@ -169,10 +196,13 @@ class TestrailActions:
             print('[{}] Failed to create testrun: "{}"'.format(TESTRAIL_PREFIX, error))
             return 0
         else:
-            self.testrail_data.testrun_id = response['id']
+            self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": None,
+                                                               "testrun_id": response['id'],
+                                                               "case_ids": tr_keys}
             print('[{}] New testrun created with name "{}" and ID={}'.format(TESTRAIL_PREFIX,
                                                                              testrun_name,
-                                                                             self.testrail_data.testrun_id))
+                                                                             self.testrail_data.plan_entry_storage[
+                                                                                 suite_id]["testrun_id"]))
             return self.testrail_data.testrun_id
 
     def create_plan_entry(self, suite_id, testrun_name, assign_user_id, plan_id, include_all, tr_keys, description=''):
@@ -195,15 +225,16 @@ class TestrailActions:
             print('[{}] Failed to create testplan entry: "{}"'.format(TESTRAIL_PREFIX, error))
             return 0
         else:
-            self.testrail_data.testplan_entry_id = response['id']
-            self.testrail_data.testrun_id = response['runs'][0]['id']
+            self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": response['id'],
+                                                               "testrun_id": response['runs'][0]['id'],
+                                                               "case_ids": tr_keys}
             print('[{}] New TestPlan entry created with name "{}" and ID={}, entry_id={}'
                   .format(TESTRAIL_PREFIX,
                           testrun_name,
-                          self.testrail_data.testrun_id,
-                          self.testrail_data.testplan_entry_id))
+                          self.testrail_data.plan_entry_storage[suite_id]["testrun_id"],
+                          self.testrail_data.plan_entry_storage[suite_id]["testplan_entry_id"]))
 
-            return self.testrail_data.testrun_id
+            return self.testrail_data.plan_entry_storage[suite_id]["testrun_id"]
 
     def create_plan(self, project_id, plan_name, milestone_id, description=''):
         data = {
@@ -228,11 +259,12 @@ class TestrailActions:
                                                                                self.testrail_data.testplan_id))
             return self.testrail_data.testplan_id
 
-    def update_testrun(self, testrun_id: int, tr_keys: list, save_previous: bool = True) -> None:
+    def update_testrun(self, testrun_id: int, tr_keys: list, suite_id: int, save_previous: bool = True) -> None:
         """
         Updates an existing test run
         :param testrun_id: testrun id
         :param tr_keys: collected testrail ids
+        :param suite_id:
         :param save_previous: collected testrail ids
         """
         current_tests = []
@@ -241,6 +273,7 @@ class TestrailActions:
 
         data = {
             'case_ids': list(set(tr_keys + current_tests)),
+            'include_all': self.testrail_data.include_all
         }
 
         response = self.testrail_data.client.send_post(
@@ -249,6 +282,9 @@ class TestrailActions:
             cert_check=self.testrail_data.cert_check
         )
         error = self.testrail_data.client.get_error(response)
+        self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": None,
+                                                           "testrun_id": testrun_id,
+                                                           "case_ids": list(set(tr_keys + current_tests))}
         if error:
             print('[{}] Failed to update testrun: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
@@ -256,8 +292,8 @@ class TestrailActions:
                                                                          self.testrail_data.testrun_name,
                                                                          testrun_id))
 
-    def update_testplan_entry(self, plan_id: int, entry_id: str, run_id: int, tr_keys: list, save_previous: bool = True):
-
+    def update_testplan_entry(self, plan_id: int, entry_id: str, run_id: int, tr_keys: list, suite_id: int,
+                              save_previous: bool = True) -> None:
         current_tests = []
 
         if save_previous:
@@ -265,6 +301,7 @@ class TestrailActions:
 
         data = {
             'case_ids': list(set(tr_keys + current_tests)),
+            'include_all': self.testrail_data.include_all
         }
 
         response = self.testrail_data.client.send_post(
@@ -273,12 +310,15 @@ class TestrailActions:
             cert_check=self.testrail_data.cert_check
         )
         error = self.testrail_data.client.get_error(response)
+        self.testrail_data.plan_entry_storage[suite_id] = {"testplan_entry_id": entry_id,
+                                                           "testrun_id": run_id,
+                                                           "case_ids": list(set(tr_keys + current_tests))}
         if error:
             print('[{}] Failed to update testrun: "{}"'.format(TESTRAIL_PREFIX, error))
         else:
             print('[{}] Testrun updated with name "{}" and ID={}, entry_id={}'.format(TESTRAIL_PREFIX,
                                                                                       self.testrail_data.testrun_name,
-                                                                                      self.testrail_data.testrun_id,
+                                                                                      run_id,
                                                                                       entry_id))
 
     def is_testrun_available(self):
@@ -332,16 +372,30 @@ class TestrailActions:
 
     def get_cases(self, project_id, suit_id):
         """
-       :return: the list of tests containing in a testrun.
-       """
+        :return: the list of tests containing in a testrun.
+        """
         response = self.testrail_data.client.send_get(
             GET_TESTCASES_URL.format(project_id, suit_id),
             cert_check=self.testrail_data.cert_check
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
-            return None
+            print(f'[{TESTRAIL_PREFIX}] Failed to get tests: "{error} for suite: {suit_id}"')
+            return []
+        return response
+
+    def get_suites(self, project_id):
+        """
+        :return: The list of suite_ids
+        """
+        response = self.testrail_data.client.send_get(
+            GET_SUITES_URL.format(project_id),
+            cert_check=self.testrail_data.cert_check
+        )
+        error = self.testrail_data.client.get_error(response)
+        if error:
+            print(f'[{TESTRAIL_PREFIX}] Failed to get suites: "{error} for project id: {project_id}"')
+            return []
         return response
 
     def get_tests(self, run_id):
@@ -355,7 +409,7 @@ class TestrailActions:
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to get tests: "{}"'.format(TESTRAIL_PREFIX, error))
+            print(f'[{TESTRAIL_PREFIX}] Failed to get tests: "{error}"')
             return []
         return response
 
@@ -370,7 +424,20 @@ class TestrailActions:
         )
         error = self.testrail_data.client.get_error(response)
         if error:
-            print('[{}] Failed to retrieve testplan: "{}"'.format(TESTRAIL_PREFIX, error))
+            print(f'[{TESTRAIL_PREFIX}] Failed to retrieve testplan: "{error}"')
+        return response
+
+    def get_run(self, run_id) -> dict:
+        """
+        Return info
+        """
+        response = self.testrail_data.client.send_get(
+            GET_TESTRUN_URL.format(run_id),
+            cert_check=self.testrail_data.cert_check
+        )
+        error = self.testrail_data.client.get_error(response)
+        if error:
+            print(f'[{TESTRAIL_PREFIX}] Failed to retrieve testrun: "{error}"')
         return response
 
     def get_testplan_entry_id(self, plan_id, run_id):

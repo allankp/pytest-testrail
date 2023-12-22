@@ -3,9 +3,10 @@ from datetime import datetime
 from freezegun import freeze_time
 from mock import call, create_autospec
 import pytest
-from pytest_testrail import plugin
-from pytest_testrail.plugin import PyTestRailPlugin, TESTRAIL_TEST_STATUS
+from pytest_testrail import vars, plugin
+from pytest_testrail.plugin import PyTestRailPlugin
 from pytest_testrail.testrail_api import APIClient
+from pytest_testrail.vars import TESTRAIL_TEST_STATUS
 
 pytest_plugins = "pytester"
 
@@ -79,15 +80,15 @@ def pytest_test_items(testdir):
 
 @freeze_time(FAKE_NOW)
 def test_testrun_name():
-    assert plugin.testrun_name() == 'Automated Run {}'.format(FAKE_NOW.strftime(plugin.DT_FORMAT))
+    assert plugin.testrun_name() == 'Automated Run {}'.format(FAKE_NOW.strftime(vars.DT_FORMAT))
 
 
 def test_failed_outcome(tr_plugin):
-    assert plugin.get_test_outcome('failed') == plugin.PYTEST_TO_TESTRAIL_STATUS['failed']
+    assert plugin.get_test_outcome('failed') == vars.PYTEST_TO_TESTRAIL_STATUS['failed']
 
 
 def test_successful_outcome(tr_plugin):
-    passed_outcome = plugin.PYTEST_TO_TESTRAIL_STATUS['passed']
+    passed_outcome = vars.PYTEST_TO_TESTRAIL_STATUS['passed']
     assert plugin.get_test_outcome('passed') == passed_outcome
 
 
@@ -220,7 +221,7 @@ def test_pytest_sessionfinish(api_client, tr_plugin):
             'comment': u'{}\n# Pytest result: #\n    An error'.format(CUSTOM_COMMENT)}
     ]}
 
-    api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(tr_plugin.testrun_id), expected_data,
+    api_client.send_post.assert_any_call(vars.ADD_RESULTS_URL.format(tr_plugin.testrun_id), expected_data,
                                          cert_check=True)
 
 
@@ -259,9 +260,9 @@ def test_pytest_sessionfinish_testplan(api_client, tr_plugin):
     ]}
     print(api_client.send_post.call_args_list)
 
-    api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(59, 1234),
+    api_client.send_post.assert_any_call(vars.ADD_RESULTS_URL.format(59, 1234),
                                          expected_data, cert_check=True)
-    api_client.send_post.assert_any_call(plugin.ADD_RESULTS_URL.format(61, 5678),
+    api_client.send_post.assert_any_call(vars.ADD_RESULTS_URL.format(61, 5678),
                                          expected_data, cert_check=True)
 
 
@@ -273,7 +274,7 @@ def test_create_test_run(api_client, tr_plugin, include_all):
     tr_plugin.create_test_run(ASSIGN_USER_ID, PROJECT_ID, SUITE_ID, include_all, expect_name, expected_tr_keys,
                               MILESTONE_ID, DESCRIPTION)
 
-    expected_uri = plugin.ADD_TESTRUN_URL.format(PROJECT_ID)
+    expected_uri = vars.ADD_TESTRUN_URL.format(PROJECT_ID)
     expected_data = {
         'suite_id': SUITE_ID,
         'name': expect_name,
@@ -338,7 +339,7 @@ def test_close_test_run(api_client, tr_plugin):
     tr_plugin.close_on_complete = True
     tr_plugin.pytest_sessionfinish(None, 0)
 
-    expected_uri = plugin.CLOSE_TESTRUN_URL.format(tr_plugin.testrun_id)
+    expected_uri = vars.CLOSE_TESTRUN_URL.format(tr_plugin.testrun_id)
     api_client.send_post.call_args_list[1] = call(expected_uri, {}, cert_check=True)
 
 
@@ -360,7 +361,7 @@ def test_close_test_plan(api_client, tr_plugin):
     api_client.send_get.return_value = TESTPLAN
     tr_plugin.pytest_sessionfinish(None, 0)
 
-    expected_uri = plugin.CLOSE_TESTPLAN_URL.format(tr_plugin.testplan_id)
+    expected_uri = vars.CLOSE_TESTPLAN_URL.format(tr_plugin.testplan_id)
     api_client.send_post.call_args_list[1] = call(expected_uri, {}, cert_check=True)
 
 
@@ -384,9 +385,9 @@ def test_dont_publish_blocked(api_client):
 
     my_plugin.pytest_sessionfinish(None, 0)
 
-    api_client.send_get.assert_called_once_with(plugin.GET_TESTS_URL.format(my_plugin.testrun_id),
+    api_client.send_get.assert_called_once_with(vars.GET_TESTS_URL.format(my_plugin.testrun_id),
                                                 cert_check=True)
-    expected_uri = plugin.ADD_RESULTS_URL.format(my_plugin.testrun_id)
+    expected_uri = vars.ADD_RESULTS_URL.format(my_plugin.testrun_id)
     expected_data = {
         'results': [
             {
@@ -395,8 +396,8 @@ def test_dont_publish_blocked(api_client):
                 'version': '1.0.0.0'
             }
         ]}
-    len(api_client.send_post.call_args_list) == 1
-    api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
+    assert len(api_client.send_post.call_args_list) == 1
+    assert api_client.send_post.call_args_list[0] == call(expected_uri, expected_data, cert_check=True)
 
 
 def test_skip_missing_only_one_test(api_client, pytest_test_items):
