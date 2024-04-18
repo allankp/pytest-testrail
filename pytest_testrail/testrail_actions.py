@@ -81,15 +81,13 @@ class TestrailActions:
                 entry['comment'] += u"# Test parametrize: #\n"
                 entry['comment'] += str(test_parametrize) + u'\n\n'
             if comment:
-                if self.testrail_data.custom_comment:
-                    entry['comment'] += self.testrail_data.custom_comment + '\n'
                 # Indent text to avoid string formatting by TestRail. Limit size of comment.
                 entry['comment'] += u"# Pytest result: #\n"
                 entry['comment'] += u'Log truncated\n...\n' if len(str(comment)) > COMMENT_SIZE_LIMIT else u''
                 entry['comment'] += u"    " + converter(str(comment), "utf-8")[-COMMENT_SIZE_LIMIT:].replace('\n',
                                                                                                              '\n    ')  # noqa
-            elif comment == '':
-                entry['comment'] = self.testrail_data.custom_comment
+            if self.testrail_data.custom_comment:
+                entry['comment'] += self.testrail_data.custom_comment + '\n'
             duration = result.get('duration')
             if duration:
                 duration = 1 if (duration < 1) else int(round(duration))  # TestRail API doesn't manage milliseconds
