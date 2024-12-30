@@ -80,6 +80,16 @@ def pytest_addoption(parser):
         help='Identifier of testplan, that appears in TestRail (config file: plan_id in TESTRUN section).\
               If provided, option "--tr-testrun-name" will be ignored')
     group.addoption(
+        '--tr-testplan-name',
+        action='store',
+        default=None,
+        help='Name given to testplan, that appears in TestRail (config file: name in TESTRUN section)')
+    group.addoption(
+        '--tr-testplan-description',
+        action='store',
+        default='Test Plan was created via AutoTest',
+        help='Name given to testplan, that appears in TestRail (config file: name in TESTRUN section)')
+    group.addoption(
         '--tr-version',
         action='store',
         default='',
@@ -124,6 +134,11 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    # Registration marks
+    config.addinivalue_line("markers", "testrail: pytestrail mark (example: @pytestrail")
+    config.addinivalue_line("markers", "testrail_defects: mark for defects")
+    config.addinivalue_line("markers", "testrail_suites: mark for test suite (example: @pytestrail.suite('S11111'))")
+
     if config.getoption('--testrail'):
         cfg_file_path = config.getoption('--tr-config')
         config_manager = ConfigManager(cfg_file_path, config)
@@ -136,6 +151,9 @@ def pytest_configure(config):
             PyTestRailPlugin(
                 client=client,
                 assign_user_id=config_manager.getoption('tr-testrun-assignedto-id', 'assignedto_id', 'TESTRUN'),
+                user_email=config_manager.getoption('tr-email', 'email', 'API'),
+                user_password=config_manager.getoption('tr-password', 'password', 'API'),
+                tr_url=config_manager.getoption('tr-url', 'url', 'API'),
                 project_id=config_manager.getoption('tr-testrun-project-id', 'project_id', 'TESTRUN'),
                 suite_id=config_manager.getoption('tr-testrun-suite-id', 'suite_id', 'TESTRUN'),
                 include_all=config_manager.getoption('tr-testrun-suite-include-all', 'include_all', 'TESTRUN',
@@ -144,6 +162,8 @@ def pytest_configure(config):
                                                     default=True),
                 tr_name=config_manager.getoption('tr-testrun-name', 'name', 'TESTRUN'),
                 tr_description=config_manager.getoption('tr-testrun-description', 'description', 'TESTRUN'),
+                testplan_name=config_manager.getoption('tr-testplan-name', 'name', 'TESTRUN'),
+                testplan_description=config_manager.getoption('tr-testplan-description', 'description', 'TESTRUN'),
                 run_id=config.getoption('--tr-run-id'),
                 plan_id=config_manager.getoption('tr-plan-id', 'plan_id', 'TESTRUN'),
                 version=config.getoption('--tr-version'),
@@ -151,7 +171,7 @@ def pytest_configure(config):
                 publish_blocked=config.getoption('--tr-dont-publish-blocked'),
                 skip_missing=config.getoption('--tr-skip-missing'),
                 milestone_id=config_manager.getoption('tr-milestone-id', 'milestone_id', 'TESTRUN'),
-                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE')
+                custom_comment=config_manager.getoption('tc-custom-comment', 'custom_comment', 'TESTCASE'),
             ),
             # Name of plugin instance (allow to be used by other plugins)
             name="pytest-testrail-instance"

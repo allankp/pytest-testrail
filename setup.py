@@ -10,7 +10,7 @@ setup(
     name='pytest-testrail',
     description='pytest plugin for creating TestRail runs and adding results',
     long_description=read_file('README.rst'),
-    version='2.9.0',
+    version='3.0.3',
     author='Allan Kilpatrick',
     author_email='allanklp@gmail.com',
     url='http://github.com/allankp/pytest-testrail/',
@@ -19,7 +19,7 @@ setup(
     ],
     package_dir={'pytest_testrail': 'pytest_testrail'},
     install_requires=[
-        'pytest>=3.6',
+        'pytest>=3.10',
         'requests>=2.20.0',
     ],
     include_package_data=True,
