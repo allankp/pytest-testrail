@@ -4,7 +4,6 @@ pytest-testrail
 ![](https://github.com/allankp/pytest-testrail/workflows/master/badge.svg)
 [![PyPI version](https://badge.fury.io/py/pytest-testrail.svg)](https://badge.fury.io/py/pytest-testrail)
 [![Downloads](https://pepy.tech/badge/pytest-testrail)](https://pepy.tech/project/pytest-testrail)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/83b960043527429a8310cced2d8defcb)](https://www.codacy.com/manual/allankp/pytest-testrail?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=allankp/pytest-testrail&amp;utm_campaign=Badge_Grade)
 
 This is a pytest plugin for creating/editing testplans or testruns based on pytest markers.
 The results of the collected tests will be updated against the testplan/testrun in TestRail.
