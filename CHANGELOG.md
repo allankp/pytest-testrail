@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.1.0 (2026-01-25)
+
+### Features
+
+- Switch to main as a default ([#173](https://github.com/allankp/pytest-testrail/pull/173),
+  [`b0451ba`](https://github.com/allankp/pytest-testrail/commit/b0451baddfe194294d8056e2a8c574f853540278))
+
+
 ## v3.0.3 (2026-01-25)
 
 ### Bug Fixes
