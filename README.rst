@@ -1,7 +1,7 @@
 pytest-testrail
 ===============
 
-|Build Status| |PyPI version| |Python versions|
+|PyPI version| |Python versions|
 
 This is a pytest plugin for creating/editing testplans or testruns based
 on pytest markers. The results of the collected tests will be updated
