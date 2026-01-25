@@ -27,7 +27,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv pip install python-semantic-release
+        run: uv pip install --system python-semantic-release
 
       - name: Configure git
         run: |
