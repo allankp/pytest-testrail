@@ -27,7 +27,9 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv pip install --system python-semantic-release
+        run: |
+          uv venv
+          uv pip install python-semantic-release
 
       - name: Configure git
         run: |
@@ -39,6 +41,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
+          source .venv/bin/activate
           OUTPUT=$(semantic-release version 2>&1) || true
           echo "$OUTPUT"
           if echo "$OUTPUT" | grep -q "No release will be made"; then
