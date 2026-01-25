@@ -27,32 +27,62 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: |
-          uv sync
-          uv pip install python-semantic-release
+        run: uv pip install python-semantic-release
 
       - name: Configure git
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Semantic Release
+      - name: Semantic Release (version bump, tag, changelog)
+        id: semrel
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          uv run semantic-release version --no-push --no-vcs-release
-          uv run semantic-release publish
+          OUTPUT=$(semantic-release version 2>&1) || true
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "No release will be made"; then
+            echo "released=false" >> $GITHUB_OUTPUT
+            echo "No version bump needed"
+          else
+            VERSION=$(grep '^version = ' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "released=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build package
-        run: uv build
-
-      - name: Push changes and tags
+        if: steps.semrel.outputs.released == 'true'
         run: |
-          git push origin master --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          uv sync
+          uv build
+
+      - name: Check if version exists on PyPI
+        if: steps.semrel.outputs.released == 'true'
+        id: check_pypi
+        run: |
+          VERSION=${{ steps.semrel.outputs.version }}
+          if curl -sf "https://pypi.org/pypi/pytest-testrail/$VERSION/json" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already exists on PyPI"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Publish to PyPI
+        if: steps.semrel.outputs.released == 'true' && steps.check_pypi.outputs.exists == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.semrel.outputs.released == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.semrel.outputs.version }}
+          name: v${{ steps.semrel.outputs.version }}
+          files: dist/*
+          generate_release_notes: true
+
+      - name: No release needed
+        if: steps.semrel.outputs.released == 'false'
+        run: echo "No conventional commits found that trigger a release"
