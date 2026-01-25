@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
-import pytest
 import time
 
-from pytest_testrail.plugin import testrail, pytestrail
+import pytest
+
+from pytest_testrail.plugin import pytestrail, testrail
 
 
 @testrail('C344', 'C366')
