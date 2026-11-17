@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
-from unittest.mock import MagicMock, create_autospec
+from unittest.mock import MagicMock, create_autospec, patch
 
 import pytest
 from freezegun import freeze_time
@@ -543,3 +543,22 @@ def test_get_tests_legacy_format(api_client: MagicMock, tr_plugin: PyTestRailPlu
     tests = tr_plugin.get_tests(10)
     assert len(tests) == 2
     assert tests[0]["case_id"] == 1234
+
+
+def test_get_paginated_uri_uses_ampersand() -> None:
+    """The base URL already contains '?' (index.php?/api/v2/), so pagination params must use '&'."""
+    client = APIClient("https://example.testrail.io", "user", "key")
+    pages = [
+        {
+            "size": 250,
+            "_links": {"next": "/api/v2/get_tests/15&limit=250&offset=250"},
+            "tests": [{"id": i} for i in range(250)],
+        },
+        {"size": 1, "_links": {"next": None}, "tests": [{"id": 250}]},
+    ]
+    with patch.object(client, "send_get", side_effect=pages) as send_get:
+        assert len(list(client.get_paginated("get_tests/15", "tests"))) == 251
+
+    uris = [c.args[0] for c in send_get.call_args_list]
+    assert uris == ["get_tests/15&limit=250&offset=0", "get_tests/15&limit=250&offset=250"]
+    assert client._build_url(uris[0]).count("?") == 1
