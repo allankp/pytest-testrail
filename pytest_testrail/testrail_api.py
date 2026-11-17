@@ -302,7 +302,7 @@ class APIClient:
             ...     print(test['id'])
         """
         offset = 0
-        separator = "&" if "?" in uri else "?"
+        separator = "&"  # _api_url already contains '?' (index.php?/api/v2/)
 
         while True:
             paginated_uri = f"{uri}{separator}limit={limit}&offset={offset}"
